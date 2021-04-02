@@ -29,4 +29,13 @@ body {
   color: #2c3e50;
   height: 100%;
 }
+.primary-btn{
+  padding: 6px 8px;
+  border-radius: 8px;
+  border:none;
+  background-color: var(--primary);
+}
+.primary-btn:hover{
+  cursor: pointer;
+}
 </style>

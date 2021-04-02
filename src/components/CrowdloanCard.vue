@@ -33,11 +33,27 @@
             1645.1565/10.0000 MKSM
         </span>
     </p>
+
+    <ConnectWallet style="margin-top:64px" width="240" v-if="isConnected" />
+    <div v-else>
+        <button class="action-btn primary-btn" v-show="projectStatus[chainId][projectId] === 'Active'">
+            Contribute
+        </button>
+        <button class="action-btn primary-btn" v-show="projectStatus[chainId][projectId] === 'Retired'">
+            Withdraw
+        </button>
+        <button class="action-btn primary-btn" disabled="true" v-show="projectStatus[chainId][projectId] === 'Completed'">
+            Withdraw
+        </button>
+
+    </div>
+
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
+import ConnectWallet from "./Wallet/ConnectWallet"
 export default {
   props: {
     chainId: {
@@ -50,8 +66,11 @@ export default {
       type: String,
     },
   },
+  components: {
+      ConnectWallet,
+  },
   computed: {
-    ...mapState(["projectStatus", 'projectName', 'communityName']),
+    ...mapState(["projectStatus", 'projectName', 'communityName', 'isConnected']),
 
     statusIcon() {
       switch (this.projectStatus[this.chainId] && this.projectStatus[this.chainId][this.projectId]) {
@@ -69,11 +88,12 @@ export default {
 
 <style lang="less" scoped>
 .card {
-  width: 320px;
-  height: 480px;
+  width: 300px;
+  height: 380px;
   border-radius: 8px;
   background-color: rgb(185, 246, 248);
   margin-bottom: 12px;
+  overflow: hidden;
   .status-container {
       display: flex;
       align-items: center;
@@ -94,7 +114,7 @@ export default {
       color: rgb(238, 157, 65);
   }
   .project-info-container{
-      padding: 0px 24px;
+      padding: 0px 12px;
       text-align: left;
       font-size: 14px;
       .name{
@@ -107,6 +127,12 @@ export default {
       .info{
           color: var(--primary-text);
       }
+  }
+  .action-btn{
+      margin-top: 64px;
+      width: 240px;
+      height: 36px;
+      
   }
 }
 </style>
