@@ -1,18 +1,84 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app">
+    <div id="account">
+      <AccountConnector/>
+    </div>
+    <div id="ad">
+      <p>
+        Advice  
+      </p>
+      
+    </div>
+    <div id="crowd-select-box">
+      <div class='crowd-select' @click="goto('/kusama')">
+        <p>
+          Kusama Crowdloan
+        </p>
+        
+      </div>
+      <div class="crowd-select" @click="goto('/polkadot')">
+        <p>
+          Polkadot Crowdloan
+        </p>
+        
+      </div>
+    </div>
   </div>
 </template>
 
-<script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
 
+<script>
+import AccountConnector from '../components/Wallet/AccountConnector'
 export default {
-  name: 'Home',
   components: {
-    HelloWorld
-  }
+    AccountConnector,
+  },
+  methods: {
+    goto(network) {
+      this.$router.push(network)
+    }
+  },
 }
 </script>
+
+
+<style lang="less">
+#account{
+  display: flex;
+  flex-direction: row-reverse;
+}
+#ad{
+  height: 240px;
+  background-color: aquamarine;
+  display: flex;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+  p{
+    text-align: center;
+    line-height: 100%;
+  }
+}
+#crowd-select-box{
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.crowd-select{
+  width: 360px;
+  height: 160px;
+  margin-top: 26%;
+  border-radius: 8px;
+  background-color: #c7ceb1;
+  p{
+    margin-top: 56px;
+    font-size: 20px;
+    font-weight: 500;
+  }
+}
+
+.crowd-select:hover{
+  cursor: pointer;
+}
+</style>
