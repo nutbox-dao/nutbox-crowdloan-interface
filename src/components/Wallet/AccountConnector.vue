@@ -12,7 +12,7 @@
 
 <script>
 import { mapState } from "vuex";
-import ConnectWallet from './ConnectWallet'
+import ConnectWallet from '../Buttons/ConnectWallet'
 export default {
   name: "AccountConnector",
   computed: {

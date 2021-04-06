@@ -36,7 +36,7 @@
 
     <ConnectWallet style="margin-top:64px" width="240" v-if="isConnected" />
     <div v-else>
-        <button class="action-btn primary-btn" v-show="projectStatus[chainId][projectId] === 'Active'">
+        <button class="action-btn primary-btn" v-show="projectStatus[chainId][projectId] === 'Active'" @click="showContribute=true" @hideContribute="showContribute=false">
             Contribute
         </button>
         <button class="action-btn primary-btn" v-show="projectStatus[chainId][projectId] === 'Retired'">
@@ -47,14 +47,21 @@
         </button>
 
     </div>
-
+    
+    <TipContribute v-if="showContribute"/>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
-import ConnectWallet from "./Wallet/ConnectWallet"
+import ConnectWallet from "./Buttons/ConnectWallet"
+import  TipContribute from "./TipBoxes/TipContribute"
 export default {
+    data() {
+        return {
+            showContribute: false
+        }
+    },
   props: {
     chainId: {
       type: String,
@@ -68,6 +75,7 @@ export default {
   },
   components: {
       ConnectWallet,
+      TipContribute
   },
   computed: {
     ...mapState(["projectStatus", 'projectName', 'communityName', 'isConnected']),
