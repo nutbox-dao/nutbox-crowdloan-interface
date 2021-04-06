@@ -13,6 +13,9 @@
         <input type="text" placeholder="Staking amount" />
         <span class="big"> KSM </span>
       </p>
+      <button class="primary-btn">
+          Contribute
+      </button>
     </div>
   </div>
 </template>

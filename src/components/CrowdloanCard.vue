@@ -36,10 +36,10 @@
 
     <ConnectWallet style="margin-top:64px" width="240" v-if="isConnected" />
     <div v-else>
-        <button class="action-btn primary-btn" v-show="projectStatus[chainId][projectId] === 'Active'" @click="showContribute=true" @hideContribute="showContribute=false">
+        <button class="action-btn primary-btn" v-show="projectStatus[chainId][projectId] === 'Active'" @click="showContribute=true">
             Contribute
         </button>
-        <button class="action-btn primary-btn" v-show="projectStatus[chainId][projectId] === 'Retired'">
+        <button class="action-btn primary-btn" v-show="projectStatus[chainId][projectId] === 'Retired'" @click="showWithdraw=true">
             Withdraw
         </button>
         <button class="action-btn primary-btn" disabled="true" v-show="projectStatus[chainId][projectId] === 'Completed'">
@@ -47,19 +47,22 @@
         </button>
 
     </div>
-    
-    <TipContribute v-if="showContribute"/>
+
+    <TipContribute v-if="showContribute" @hideContribute="showContribute=false"/>
+    <TipWithdraw v-if="showWithdraw" @hideWithdraw="showWithdraw=false"/>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
 import ConnectWallet from "./Buttons/ConnectWallet"
-import  TipContribute from "./TipBoxes/TipContribute"
+import TipContribute from "./TipBoxes/TipContribute"
+import TipWithdraw from "./TipBoxes/TipWithdraw"
 export default {
     data() {
         return {
-            showContribute: false
+            showContribute: false,
+            showWithdraw: false
         }
     },
   props: {
@@ -75,7 +78,8 @@ export default {
   },
   components: {
       ConnectWallet,
-      TipContribute
+      TipContribute,
+      TipWithdraw
   },
   computed: {
     ...mapState(["projectStatus", 'projectName', 'communityName', 'isConnected']),
