@@ -1,19 +1,60 @@
 <template>
-    <div>
-        <BackToHome title="Kusama Crowdloan"/>
+  <div>
+    <BackToHome title="Kusama Crowdloan" />
+    <div class="cards-container">
+      <CrowdloanCard :paraId="200" communityId="0" />
+      <CrowdloanCard :paraId="200" communityId="1" />
+      <CrowdloanCard :paraId="300" communityId="2" />
     </div>
+  </div>
 </template>
 
 <script>
-import BackToHome from '../../components/Buttons/BackToHome'
-    export default {
-        name: "Kusama",
-        components: {
-            BackToHome,
-        },
-    }
+import BackToHome from "../../components/Buttons/BackToHome";
+import CrowdloanCard from "../../components/CrowdloanCard";
+import { getFundInfo, subBlock } from "../../utils/polkadot";
+import { mapMutations } from "vuex"
+
+export default {
+  name: "Kusama",
+  components: {
+    BackToHome,
+    CrowdloanCard,
+  },
+  data() {
+    return {};
+  },
+  methods: {
+      ...mapMutations(['saveProjectStatus', 'saveProjectName', 'saveCommunityName']),
+  },
+  mounted() {
+    this.saveProjectName({ paraId: 200, name: "Plasma" });
+    this.saveProjectName({ paraId: 300, name: "Acala" });
+    this.saveProjectName({ paraId: 300, name: "Acala" });
+
+    this.saveCommunityName({ communityId: "0", name: "BML" });
+    this.saveCommunityName({ communityId: "1", name: "Nutbox" });
+    this.saveCommunityName({ communityId: "2", name: "Peanut" });
+  },
+  async created() {
+    this.$store.commit("saveSymbol", "ROCOCO");
+    const unsub = await subBlock();
+    this.$once("hook:beforeDestroy", () => {
+      unsub();
+    });
+
+    await getFundInfo(200);
+    await getFundInfo(300)
+  },
+};
 </script>
 
 <style lang="less" scoped>
-
+.cards-container {
+  padding: 24px 64px;
+  display: flex;
+  align-content: center;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
 </style>

@@ -29,7 +29,6 @@
 
 <script>
 import AccountConnector from '../components/Wallet/AccountConnector'
-import { getFund } from '../utils/polkadot'
 
 export default {
   components: {
@@ -39,9 +38,6 @@ export default {
     goto(network) {
       this.$router.push(network)
     }
-  },
-  async created () {
-    await getFund();
   },
 }
 </script>
