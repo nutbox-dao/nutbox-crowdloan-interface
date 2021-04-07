@@ -5,42 +5,43 @@
     </div>
     <div id="ad">
       <p>
-        Advice
+        Advice  
       </p>
-
+      
     </div>
     <div id="crowd-select-box">
-      <div class="row">
-        <div class='crowd-select col-md-6' @click="goto('/kusama')">
-          <p>
-            Kusama Crowdloan
-          </p>
-
-        </div>
-        <div class="crowd-select col-md-6" @click="goto('/polkadot')">
-          <p>
-            Polkadot Crowdloan
-          </p>
-
-        </div>
+      <div class='crowd-select' @click="goto('/kusama')">
+        <p>
+          Kusama Crowdloan
+        </p>
+        
+      </div>
+      <div class="crowd-select">
+        <p>
+          Polkadot Crowdloan
+        </p>
+        
       </div>
     </div>
   </div>
 </template>
 
+
 <script>
 import AccountConnector from '../components/Wallet/AccountConnector'
+
 export default {
   components: {
-    AccountConnector
+    AccountConnector,
   },
   methods: {
-    goto (network) {
+    goto(network) {
       this.$router.push(network)
     }
-  }
+  },
 }
 </script>
+
 
 <style lang="less">
 #account{
@@ -61,10 +62,8 @@ export default {
   }
 }
 #crowd-select-box{
-  //display: flex;
-  //justify-content: space-evenly;
-  max-width: 1200px;
-  margin: auto;
+  display: flex;
+  justify-content: space-evenly;
 }
 
 .crowd-select{
