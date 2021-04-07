@@ -16,7 +16,7 @@
         </p>
         
       </div>
-      <div class="crowd-select" @click="goto('/polkadot')">
+      <div class="crowd-select">
         <p>
           Polkadot Crowdloan
         </p>
