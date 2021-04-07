@@ -58,7 +58,7 @@ export const getFundInfo = async (paraId = 200) => {
 
   try {
     const unwrapedFund = (await api.query.crowdloan.funds(paraId)).unwrap();
-    console.log('fund', unwrapedFund.toHuman());
+    // console.log('fund', unwrapedFund.toHuman());
     const {
       deposit,
       cap,
@@ -80,7 +80,7 @@ export const getFundInfo = async (paraId = 200) => {
       amount: uni2Token(new BN(api.createType('(Balance, Vec<u8>)', v.unwrap())[0]), decimal).toString(),
       memo: api.createType('(Balance, Vec<u8>)', v.unwrap())[1].toHuman()
     }))
-    console.log('contri', contributions);
+    // console.log('contri', contributions);
 
     const currentSlot = 10
 
