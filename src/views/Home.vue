@@ -29,6 +29,7 @@
 
 <script>
 import AccountConnector from '../components/Wallet/AccountConnector'
+
 export default {
   components: {
     AccountConnector,
