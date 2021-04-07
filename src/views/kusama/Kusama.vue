@@ -1,10 +1,10 @@
 <template>
   <div>
     <BackToHome title="Kusama Crowdloan" />
-    <div class="cards-container">
-      <CrowdloanCard :paraId="200" communityId="0" />
-      <CrowdloanCard :paraId="200" communityId="1" />
-      <CrowdloanCard :paraId="300" communityId="2" />
+    <div class="cards-container row">
+      <div class="col-lg-4"><CrowdloanCard :paraId="200" communityId="0" /></div>
+      <div class="col-lg-4"><CrowdloanCard :paraId="200" communityId="1" /></div>
+      <div class="col-lg-4"><CrowdloanCard :paraId="300" communityId="2" /></div>
     </div>
   </div>
 </template>
@@ -51,10 +51,10 @@ export default {
 
 <style lang="less" scoped>
 .cards-container {
-  padding: 24px 64px;
-  display: flex;
-  align-content: center;
-  flex-wrap: wrap;
-  justify-content: space-evenly;
+  padding: 24px 0;
+  //display: flex;
+  //align-content: center;
+  //flex-wrap: wrap;
+  //justify-content: space-evenly;
 }
 </style>

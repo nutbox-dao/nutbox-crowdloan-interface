@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Kusama from '../views/kusama/Kusama'
 import Polkadot from '../views/polkadot/Polkadot'
+import User from '../views/user/Index'
 
 Vue.use(VueRouter)
 
@@ -21,6 +22,11 @@ const routes = [
     path: '/polkadot',
     name: 'Polkadot',
     component: Polkadot
+  },
+  {
+    path: '/user',
+    name: 'User',
+    component: User
   }
 ]
 

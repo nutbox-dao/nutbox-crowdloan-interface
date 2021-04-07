@@ -150,7 +150,7 @@ export default {
           }else if(secs >= this.timePeriod['DAY']){
             const day = date.getDay()
             const hour = date.getHours()
-            return day + 'days' + hour + 'hrs' 
+            return day + 'days' + hour + 'hrs'
           }else if (secs >= this.timePeriod['HOUR']){
             const hour = date.getHours()
             const min = date.getMinutes()
@@ -212,7 +212,7 @@ export default {
 
 <style lang="less" scoped>
 .card {
-  width: 300px;
+  width: 100%;
   height: 380px;
   border-radius: 8px;
   background-color: rgb(185, 246, 248);

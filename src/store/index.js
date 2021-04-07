@@ -7,7 +7,7 @@ export default new Vuex.Store({
   state: {
     api:{},
     symbol:'',
-    isConnected: false,
+    isConnected: true,
     account: "salfdjoji",
     projectStatus: {},
     projectFundInfo: {},
