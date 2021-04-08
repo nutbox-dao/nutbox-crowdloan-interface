@@ -83,8 +83,9 @@ export const getFundInfo = async (paraId = 200) => {
       memo: api.createType('(Balance, Vec<u8>)', v.unwrap())[1].toHuman()
     }))
     // console.log('contri', contributions);
-
-    const currentSlot = 10
+    const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
+    const leases = (await api.query.slots.leases(paraId)).toJSON()
+    const isWinner = leases.length > 0
 
     store.commit('saveProjectFundInfo', {
       paraId,
@@ -106,11 +107,18 @@ export const getFundInfo = async (paraId = 200) => {
         status: PARA_STATUS.RETIRED
       })
     } else {
-      if (currentSlot > lastSlot) {
-        store.commit('saveProjectStatus', {
-          paraId,
-          status: PARA_STATUS.COMPLETED
-        })
+      if (bestBlockNumber > end) {
+        if (isWinner) {
+          store.commit('saveProjectStatus', {
+            paraId,
+            status: PARA_STATUS.ACTIVE
+          })
+        } else {
+          store.commit('saveProjectStatus', {
+            paraId,
+            status: PARA_STATUS.COMPLETED
+          })
+        }
       } else {
         store.commit('saveProjectStatus', {
           paraId,
@@ -128,6 +136,7 @@ export const getFundInfo = async (paraId = 200) => {
   }
 }
 
+//  一个租赁周期
 export const getLeasePeriod = async () => {
   if (store.getters.leasePeriod > 0) {
     return store.getters.leasePeriod
@@ -151,12 +160,13 @@ export const getDecimal = async () => {
 // subscribe new block
 export const subBlock = async () => {
   const api = await getApi()
+
   return await api.rpc.chain.subscribeNewHeads((header) => {
-      try{
+      try {
         const number = header.number.toNumber()
         store.commit('saveCurrentBlockNum', number)
         console.log('number', number);
-      }catch (e){
+      } catch (e) {
 
       }
     }
