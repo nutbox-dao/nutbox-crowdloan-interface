@@ -10,6 +10,7 @@ import {
   blake2AsU8a,
   encodeAddress
 } from "@polkadot/util-crypto"
+import jsonrpc from '@polkadot/types/interfaces/jsonrpc';
 import BN from "bn.js"
 import {
   POLKADOT_WEB_SOCKET,
@@ -31,7 +32,8 @@ async function getApi() {
   }
   const wsProvider = new WsProvider(POLKADOT_CHAIN_WEB_SOCKET_MAP[store.state.symbol])
   const api = await ApiPromise.create({
-    provider: wsProvider
+    provider: wsProvider,
+    rpc: jsonrpc
   })
   store.commit('saveApi', api)
   return api
@@ -58,7 +60,7 @@ export const getFundInfo = async (paraId = 200) => {
 
   try {
     const unwrapedFund = (await api.query.crowdloan.funds(paraId)).unwrap();
-    // console.log('fund', unwrapedFund.toHuman());
+    console.log('fund', unwrapedFund.toHuman());
     const {
       deposit,
       cap,
