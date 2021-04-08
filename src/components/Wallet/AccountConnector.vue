@@ -1,6 +1,6 @@
 <template>
   <div id="account-connector">
-    <div v-show="isConnected">
+    <div v-show="isConnected" @click="pageRoute('/user')">
       <p>{{ account }}</p>
       <img src="../../static/images/account.png" alt="" />
     </div>
@@ -21,6 +21,11 @@ export default {
   components: {
       ConnectWallet,
   },
+  methods: {
+    pageRoute (url) {
+      this.$router.push(url)
+    }
+  }
 };
 </script>
 

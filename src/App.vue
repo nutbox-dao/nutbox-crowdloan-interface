@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" class="container">
     <router-view></router-view>
   </div>
 </template>
@@ -51,5 +51,9 @@ body {
 }
 .primary-btn:hover{
   cursor: pointer;
+}
+th, td{
+  white-space: nowrap;
+  word-break: keep-all;
 }
 </style>
