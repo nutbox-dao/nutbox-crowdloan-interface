@@ -101,31 +101,28 @@ export const getFundInfo = async (paraId = 200) => {
         funds: contributions
       }
     })
+    let status = ''
     if (retiring) {
-      store.commit('saveProjectStatus', {
-        paraId,
-        status: PARA_STATUS.RETIRED
-      })
+      if (bestBlockNumber > end) {
+        status = PARA_STATUS.COMPLETED
+      } else {
+        status = PARA_STATUS.RETIRED
+      }
     } else {
       if (bestBlockNumber > end) {
         if (isWinner) {
-          store.commit('saveProjectStatus', {
-            paraId,
-            status: PARA_STATUS.ACTIVE
-          })
+          status = PARA_STATUS.ACTIVE
         } else {
-          store.commit('saveProjectStatus', {
-            paraId,
-            status: PARA_STATUS.COMPLETED
-          })
+          status = PARA_STATUS.COMPLETED
         }
       } else {
-        store.commit('saveProjectStatus', {
-          paraId,
-          status: PARA_STATUS.ACTIVE
-        })
+        status = PARA_STATUS.ACTIVE
       }
     }
+    store.commit('saveProjectStatus', {
+      paraId,
+      status
+    })
   } catch (e) {
     console.error('error', e);
     // 未参与
