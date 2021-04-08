@@ -35,7 +35,7 @@
       </span>
     </p>
 
-    <ConnectWallet style="margin-top: 48px" width="240" v-if="isConnected" />
+    <ConnectWallet style="margin-top: 48px" width="90%" v-if="!isConnected" />
     <div v-else>
       <button
         class="action-btn primary-btn"
@@ -254,7 +254,7 @@ export default {
   }
   .action-btn {
     margin-top: 48px;
-    width: 240px;
+    width: 90%;
     height: 36px;
   }
 }

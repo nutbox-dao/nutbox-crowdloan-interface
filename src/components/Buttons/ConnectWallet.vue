@@ -11,21 +11,21 @@
         name: 'ConnectWallet',
         props: {
             width: {
-                type: Number,
-                default: 160
+                type: String,
+                default: '160px'
             },
             height: {
-                type: Number,
-                default: 38
+                type: String,
+                default: '38px'
             },
             radius: {
-                type: Number,
-                default: 8
+                type: String,
+                default: '8px'
             }
         },
         computed: {
             style() {
-                return "width:"+this.width+'px;' + 'height:' + this.height + 'px;' + 'border-radius:'+ this.radius + 'px;'
+                return "width:"+this.width+';' + 'height:' + this.height + ';' + 'border-radius:'+ this.radius + ';'
             }
         },
         methods: {

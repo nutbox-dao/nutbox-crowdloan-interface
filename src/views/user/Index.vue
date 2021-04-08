@@ -1,8 +1,6 @@
 <template>
   <div class="user-page container">
-    <div class="page-header">
-      <b-button @click="goBack">go back</b-button>
-    </div>
+    <BackToHome title="go back"/>
     <div class="page-content">
       <div class="tab">
         <span @click="activeId = 0" :class="{'active':activeId===0}">Contributions</span> |
@@ -19,11 +17,13 @@
 <script>
 import Contributions from '@/views/user/Contributions'
 import Dashboard from '@/views/user/Dashboard'
+import BackToHome from '@/components/Buttons/BackToHome'
 export default {
   name: 'Index',
   components: {
     Contributions,
-    Dashboard
+    Dashboard,
+    BackToHome
   },
   data () {
     return {
