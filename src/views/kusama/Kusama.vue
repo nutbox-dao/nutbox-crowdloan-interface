@@ -1,10 +1,13 @@
 <template>
-  <div>
-    <BackToHome title="Kusama Crowdloan" />
-    <div class="cards-container row">
-      <div class="col-lg-4"><CrowdloanCard :paraId="200" communityId="0" /></div>
-      <div class="col-lg-4"><CrowdloanCard :paraId="200" communityId="1" /></div>
-      <div class="col-lg-4"><CrowdloanCard :paraId="300" communityId="2" /></div>
+  <div class="k-page">
+    <div class="container">
+<!--      <BackToHome title="Kusama Crowdloan" />-->
+      <div class="bg-box"><div class="bg"></div></div>
+      <div class="cards-container row">
+        <div class="col-lg-4 col-md-6"><CrowdloanCard :paraId="200" communityId="0" /></div>
+        <div class="col-lg-4 col-md-6"><CrowdloanCard :paraId="200" communityId="1" /></div>
+        <div class="col-lg-4 col-md-6"><CrowdloanCard :paraId="300" communityId="2" /></div>
+      </div>
     </div>
   </div>
 </template>
@@ -50,11 +53,24 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.cards-container {
-  padding: 24px 0;
-  //display: flex;
-  //align-content: center;
-  //flex-wrap: wrap;
-  //justify-content: space-evenly;
+.k-page {
+  position: relative;
+  padding: 1rem;
+  background: rgba(246, 247, 249, 1);
+  .bg-box {
+    position: absolute;
+    left: 0;
+    right: 0;
+    .bg {
+      margin: auto;
+      width: 34rem;
+      height: 34rem;
+      background-image: linear-gradient(to bottom, rgba(166, 225, 249, 1), rgba(141, 231, 255, 0));
+      border-radius: 34rem;
+    }
+  }
+  .cards-container {
+    padding: 3rem 0;
+  }
 }
 </style>
