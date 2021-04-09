@@ -202,7 +202,12 @@ export const connect = (callback) => {
   if (store.state.apiState) return;
   store.commit('saveApiState', API_CONNECT_STATE.CONNECT_INIT)
 
-  const api = getApi()
+  const wsProvider = new WsProvider(POLKADOT_CHAIN_WEB_SOCKET_MAP[store.state.symbol])
+  const api = new ApiPromise({
+    provider: wsProvider,
+    rpc: jsonrpc
+  })
+  
   api.on('connected', () => {
     store.commit('saveApiState', API_CONNECT_STATE.CONNECT)
     api.isReady.then(() => {
@@ -220,34 +225,24 @@ export const connect = (callback) => {
     store.commit('saveApiState', API_CONNECT_STATE.CONNECT_ERROR)
   })
 }
-
 export const loadAccounts = async () => {
   try {
     await web3Enable('crowdloan')
     let allAccounts = await web3Accounts()
-    allAccounts = allAccounts.map(({
-      address,
-      meta
-    }) => ({
-      address,
-      meta: {
-        ...meta,
-        name: `${meta.name} (${meta.source})`
-      }
-    }))
+    console.log('accoutns', allAccounts);
 
-    store.commit('')
 
     keyring.loadAll({
-      idDevelopment: true
+      isDevelopment: true
     }, allAccounts)
 
+    store.commit('saveAllAccounts', allAccounts)
     const account = store.state.account || allAccounts[0]
     store.commit('saveAccount', account)
     // inject
-
+    await injectAccount(account)
   } catch (e) {
-
+    console.error('get all accounts fail:',e);
   }
 }
 
