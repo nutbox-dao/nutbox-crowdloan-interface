@@ -22,7 +22,7 @@
 <script>
 import BackToHome from "../../components/Buttons/BackToHome";
 import CrowdloanCard from "../../components/CrowdloanCard";
-import { getFundInfo, subBlock } from "../../utils/polkadot";
+import { getFundInfo, subBlock, NumberTo4BytesU8A } from "../../utils/polkadot";
 import { mapMutations, mapState } from "vuex";
 import { SURPORT_CHAINS, SURPORT_COMMUNITIES } from "../../config";
 
@@ -34,7 +34,7 @@ export default {
   },
   data() {
     return {
-      communitId: Object.keys(SURPORT_COMMUNITIES),
+      communitId: []
     };
   },
   computed: {
@@ -47,7 +47,9 @@ export default {
       "saveCommunityName",
     ]),
   },
-  mounted() {},
+  mounted() {
+    this.communitId = Object.keys(SURPORT_COMMUNITIES)
+  },
   async created() {
     this.$store.commit("saveSymbol", "ROCOCO");
     await subBlock();

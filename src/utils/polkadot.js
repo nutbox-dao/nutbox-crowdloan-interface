@@ -4,7 +4,11 @@ import {
 } from "@polkadot/api"
 import {
   u8aConcat,
-  u8aToHex
+  u8aToHex,
+  BN_MAX_INTEGER,
+  isChildClass,
+  numberToU8a,
+  hexToU8a
 } from "@polkadot/util"
 import {
   web3Accounts,
@@ -15,8 +19,13 @@ import keyring from '@polkadot/ui-keyring';
 
 import {
   blake2AsU8a,
-  encodeAddress
+  encodeAddress,
+  decodeAddress,
+  cryptoWaitReady
 } from "@polkadot/util-crypto"
+import {
+  Keyring
+} from "@polkadot/keyring"
 import jsonrpc from '@polkadot/types/interfaces/jsonrpc';
 import BN from "bn.js"
 import {
@@ -67,12 +76,16 @@ export const getFundInfo = async (paraId = [200]) => {
   const api = await getApi()
 
   try {
-    const unwrapedFunds = (await api.query.crowdloan.funds.multi(paraId)).unwrap();
-    console.log('fund', unwrapedFund.toHuman());
+    const unwrapedFunds = (await api.query.crowdloan.funds.multi(paraId));
+    console.log('fund', unwrapedFunds);
     const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
     const decimal = await getDecimal()
-    const funds = []
-    for (unwrapedFund of unwrapedFunds) {
+    let funds = []
+    for (let unwrapedFund of unwrapedFunds) {
+      unwrapedFund = unwrapedFund.toHuman()
+      if (!unwrapedFund){
+        continue
+      }
       const {
         deposit,
         cap,
@@ -84,9 +97,6 @@ export const getFundInfo = async (paraId = [200]) => {
         retiring,
         trieIndex
       } = unwrapedFund
-      if (!deposit) {
-        continue
-      }
       const childKey = createChildKey(trieIndex)
       const keys = await api.rpc.childstate.getKeys(childKey, '0x')
       const ss58keys = keys.map(k => encodeAddress(k))
@@ -140,7 +150,7 @@ export const getFundInfo = async (paraId = [200]) => {
       })
     }
     funds = funds.sort(f => f.statusIndex)
-    store.commit('saveProjectFundInfo', funds)
+    store.commit('saveProjectFundInfos', funds)
   } catch (e) {
     console.error('error', e);
   }
@@ -258,4 +268,38 @@ export const getBalance = async (account) => {
   const res = uni2Token(new BN(balance.free), decimal)
   store.commit('saveBalance', res.toNumber())
   return res.toNumber()
+}
+
+export function getNodeId(address) {
+  return decodeAddress(address).slice(0, 8);
+}
+
+function NumberTo4BytesU8A(number) {
+  let buf = new Uint8Array(4);
+  let tmp = numberToU8a(number);
+  if (tmp.length > 4) throw new Error('Unsupported size of number');
+  for (let i = tmp.length; i > 0; i--) {
+    buf[4 - i] = tmp[i - 1];
+  }
+  return buf;
+}
+
+/** memo {
+ *     chain: u8,           // 1 bytes chain id
+ *     parent: vec<u8, 8>,  // 8 bytes parent node id
+ *     child: vec<u8, 8>,   // 8 bytes child node id
+ *     height: u32,         // 4 bytes block height of contribute Tx
+ *     paraId: u32,         // 4 bytes parachain id
+ *     trieIndex: u32,      // 4 bytes of crowdloan fund trie index
+ *  }
+ */
+export function encodeMemo(memo) {
+  let buf = new Uint8Array(29);
+  buf[0] = memo.chain;
+  buf.set(memo.parent, 1);
+  buf.set(memo.child, 9);
+  buf.set(NumberTo4BytesU8A(memo.height), 17);
+  buf.set(NumberTo4BytesU8A(memo.paraId), 21);
+  buf.set(NumberTo4BytesU8A(memo.trieIndex), 25);
+  return '0x' + Buffer.from(buf).toString('hex');
 }
