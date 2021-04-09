@@ -42,14 +42,14 @@
       <button
         class="primary-btn"
         v-show="status === 'Active'"
-        @click="showContribute = true"
+        @click="$emit('showContributeModal')"
       >
         Contribute
       </button>
       <button
         class="primary-btn"
         v-show="status === 'Retired'"
-        @click="showWithdraw = true"
+        @click="$emit('showWithdrawModal')"
       >
         Withdraw
       </button>
@@ -60,14 +60,14 @@
       >
         Withdraw
       </button>
-      <button class="primary-btn">Other(test)</button>
+      <button class="primary-btn" @click="$emit('showContributeModal')">Other(test)</button>
     </div>
     <ConnectWallet v-else />
-    <TipContribute
-      v-if="showContribute"
-      @hideContribute="showContribute = false"
-    />
-    <TipWithdraw v-if="showWithdraw" @hideWithdraw="showWithdraw = false" />
+<!--    <TipContribute-->
+<!--      v-if="showContribute"-->
+<!--      @hideContribute="showContribute = false"-->
+<!--    />-->
+<!--    <TipWithdraw v-if="showWithdraw" @hideWithdraw="showWithdraw = false" />-->
   </div>
 </template>
 
@@ -81,7 +81,7 @@ import { BLOCK_SECOND, TIME_PERIOD } from '../constant'
 export default {
   data () {
     return {
-      showContribute: false,
+      showContribute: true,
       showWithdraw: false,
       tokenSymbol: TOKEN_SYMBOL,
       timePeriod: TIME_PERIOD
@@ -152,7 +152,7 @@ export default {
           const sec = MATH.floor(secs % this.timePeriod['MINUTES'])
           if (secs >= this.timePeriod['MONTH']){
             return month + 'mons' + day + 'days' + hour + 'hrs'
-          }else if(secs >= this.timePeriod['DAY']){   
+          }else if(secs >= this.timePeriod['DAY']){
             return day + 'days' + hour + 'hrs' + min + 'mins'
           }else if (secs >= this.timePeriod['HOUR']){
             return hour + 'hrs' + min + 'mins'

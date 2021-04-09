@@ -9,10 +9,6 @@
                    @click="selectMenu(0, '/', 'home')">
             </b-navbar-brand>
             <div class="mobile-menu flex-start-center">
-              <b-nav-item-dropdown :text="'EN'" right>
-                <b-dropdown-item v-for="(item,index) of langOptions" :key="index">{{item}}
-                </b-dropdown-item>
-              </b-nav-item-dropdown>
               <b-nav-item class="user-address flex-between-center">
                 <img src="~@/static/images/account.png" alt="">
               </b-nav-item>
@@ -34,14 +30,28 @@
               </div>
               <!-- Right aligned nav items -->
               <b-navbar-nav class="pc-menu">
-<!--                <b-nav-item-dropdown :text="'EN'" right>-->
-<!--                  <b-dropdown-item v-for="(item,index) of langOptions" :key="index">{{item}}-->
-<!--                  </b-dropdown-item>-->
-<!--                </b-nav-item-dropdown>-->
                 <b-nav-item class="user-address">
-                  <div v-if="isConnected" class="flex-between-center">
-                    <img src="~@/static/images/account.png" alt="">
-                    <span>{{ formatUserAddress(userAddress) }}</span>
+                  <div v-if="isConnected" class="p-2">
+                    <b-dropdown toggle-class="accounts-toggle" variant="text" right no-caret>
+                      <template #button-content>
+                        <div class="flex-between-center font18" @click="accountsPop=!accountsPop">
+                          <b-avatar class="mr-2" size="sm" text=""></b-avatar>
+                          <span>{{ formatUserAddress(userAddress) }}</span>
+                        </div>
+                      </template>
+                      <b-dropdown-item v-for="(item,index) of accountsOptions" :key="index">
+                        <template>
+                          <div class="flex-between-center">
+                            <b-avatar class="mr-2" size="sm" text="A"></b-avatar>
+                            <div class="account-info">
+                              <div class="font-bold">account name</div>
+                              <div>{{ formatUserAddress(item) }}</div>
+                            </div>
+                            <img class="ml-3" v-if="item===userAddress" src="~@/static/images/selected.png" alt="">
+                          </div>
+                        </template>
+                      </b-dropdown-item>
+                    </b-dropdown>
                   </div>
                   <ConnectWallet v-else/>
                 </b-nav-item>
@@ -78,7 +88,8 @@ export default {
         { id: 'kusama', url: '/kusama', label: 'Kusuma Crowdload' },
         { id: 'polkadot', url: '/polkadot', label: 'Polkadot Crowdload' }
       ],
-      langOptions: ['en', 'zh'],
+      accountsOptions: ['TEwJioeQZzaYxNUDpYMUx15zSxcCtJNmaz', 'NUDpYMUx15zSxcCtJNmazxxxxxxxxxxxxxx'],
+      accountsPop: false,
       activeNav: -1,
       menuIsExpand: false,
       userAddress: 'TEwJioeQZzaYxNUDpYMUx15zSxcCtJNmaz'
@@ -107,7 +118,7 @@ export default {
     },
     formatUserAddress (address) {
       if (address.length < 10) return address
-      const start = address.slice(0, 5)
+      const start = address.slice(0, 10)
       const end = address.slice(-5)
       return `${start}...${end}`
     },
@@ -217,9 +228,16 @@ body {
     border-bottom: 4px solid var(--primary-custom);
   }
   .dropdown-menu {
-    background: black;
+    border-radius: 1.2rem;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.02);
+    border: none;
+    margin-top: .5rem;
     .dropdown-item {
-      //color: white;
+      padding: .2rem .5rem;
+    }
+    .account-info {
+      flex: 1;
+      font-size: .7rem;
     }
     .dropdown-item:hover {
       background: transparent;
