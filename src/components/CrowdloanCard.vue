@@ -12,9 +12,9 @@
         <img class="icon1" src="~@/static/images/eth.svg" alt="">
       </div>
       <div class="title-text font20 font-bold">
-        <span>{{ communityNm}}</span>
+        <span>{{ SURPORT_COMMUNITIES[communitId] }}</span>
         <img src="~@/static/images/close.svg" alt="">
-        <span>{{ projectNm }}</span>
+        <span>{{ SURPORT_CHAINS[paraId] }}</span>
       </div>
     </div>
     <div class="h-line"></div>
@@ -76,7 +76,7 @@ import { mapState, mapGetters } from 'vuex'
 import ConnectWallet from './Buttons/ConnectWallet'
 import TipContribute from './TipBoxes/TipContribute'
 import TipWithdraw from './TipBoxes/TipWithdraw'
-import { TOKEN_SYMBOL } from '../config'
+import { TOKEN_SYMBOL, SURPORT_CHAINS, SURPORT_COMMUNITIES } from '../config'
 import { BLOCK_SECOND, TIME_PERIOD } from '../constant'
 export default {
   data () {
@@ -102,31 +102,22 @@ export default {
   },
   computed: {
     ...mapState([
-      'projectStatus',
       'projectName',
       'communityName',
       'isConnected',
-      'symbol'
+      'symbol',
+      'projectFundInfos'
     ]),
     ...mapGetters([
       'getProjectStatus',
-      'getProjectName',
-      'getCommunityName',
-      'getParaFund',
+      'getFundInfo',
       'currentBlockNum'
     ]),
-
-    communityNm () {
-      return this.getCommunityName(this.communityId)
-    },
-    projectNm () {
-      return this.getProjectName(this.paraId)
-    },
     status () {
       return this.getProjectStatus(this.paraId)
     },
     fundInfo () {
-      return this.getParaFund(this.paraId)
+      return this.getFundInfo(this.paraId)
     },
     leasePeriod () {
       try {

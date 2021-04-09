@@ -63,42 +63,71 @@ function createChildKey(trieIndex) {
   );
 }
 
-export const getFundInfo = async (paraId = 200) => {
+export const getFundInfo = async (paraId = [200]) => {
   const api = await getApi()
-  paraId = parseInt(paraId)
 
   try {
-    const unwrapedFund = (await api.query.crowdloan.funds(paraId)).unwrap();
+    const unwrapedFunds = (await api.query.crowdloan.funds.multi(paraId)).unwrap();
     console.log('fund', unwrapedFund.toHuman());
-    const {
-      deposit,
-      cap,
-      depositor,
-      end,
-      firstSlot,
-      lastSlot,
-      raised,
-      retiring,
-      trieIndex
-    } = unwrapedFund
-    const decimal = await getDecimal()
-    const childKey = createChildKey(trieIndex)
-    const keys = await api.rpc.childstate.getKeys(childKey, '0x')
-    const ss58keys = keys.map(k => encodeAddress(k))
-    const values = await Promise.all(keys.map(k => api.rpc.childstate.getStorage(childKey, k)))
-    const contributions = values.map((v, idx) => ({
-      contributor: ss58keys[idx],
-      amount: uni2Token(new BN(api.createType('(Balance, Vec<u8>)', v.unwrap())[0]), decimal).toString(),
-      memo: api.createType('(Balance, Vec<u8>)', v.unwrap())[1].toHuman()
-    }))
-    // console.log('contri', contributions);
     const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
-    const leases = (await api.query.slots.leases(paraId)).toJSON()
-    const isWinner = leases.length > 0
+    const decimal = await getDecimal()
+    const funds = []
+    for (unwrapedFund of unwrapedFunds) {
+      const {
+        deposit,
+        cap,
+        depositor,
+        end,
+        firstSlot,
+        lastSlot,
+        raised,
+        retiring,
+        trieIndex
+      } = unwrapedFund
+      if (!deposit) {
+        continue
+      }
+      const childKey = createChildKey(trieIndex)
+      const keys = await api.rpc.childstate.getKeys(childKey, '0x')
+      const ss58keys = keys.map(k => encodeAddress(k))
+      const values = await Promise.all(keys.map(k => api.rpc.childstate.getStorage(childKey, k)))
+      const contributions = values.map((v, idx) => ({
+        contributor: ss58keys[idx],
+        amount: uni2Token(new BN(api.createType('(Balance, Vec<u8>)', v.unwrap())[0]), decimal).toString(),
+        memo: api.createType('(Balance, Vec<u8>)', v.unwrap())[1].toHuman()
+      }))
+      // console.log('contri', contributions);
+      const leases = (await api.query.slots.leases(paraId)).toJSON()
+      const isWinner = leases.length > 0
 
-    store.commit('saveProjectFundInfo', {
-      paraId,
-      fundInfo: {
+      let status = ''
+      let statusIndex = 0
+      if (retiring) {
+        if (bestBlockNumber > end) {
+          status = PARA_STATUS.COMPLETED
+          statusIndex = 2
+        } else {
+          status = PARA_STATUS.RETIRED
+          statusIndex = 1
+        }
+      } else {
+        if (bestBlockNumber > end) {
+          if (isWinner) {
+            status = PARA_STATUS.ACTIVE
+            statusIndex = 0
+          } else {
+            status = PARA_STATUS.COMPLETED
+            statusIndex = 1
+          }
+        } else {
+          status = PARA_STATUS.ACTIVE
+          statusIndex = 0
+        }
+      }
+      funds.push({
+        paraId,
+        status,
+        statusIndex,
         deposit: uni2Token(new BN(deposit), decimal).toString(),
         cap: uni2Token(new BN(cap), decimal).toString(),
         depositor,
@@ -108,37 +137,12 @@ export const getFundInfo = async (paraId = 200) => {
         raised: uni2Token(new BN(raised), decimal).toString(),
         retiring,
         funds: contributions
-      }
-    })
-    let status = ''
-    if (retiring) {
-      if (bestBlockNumber > end) {
-        status = PARA_STATUS.COMPLETED
-      } else {
-        status = PARA_STATUS.RETIRED
-      }
-    } else {
-      if (bestBlockNumber > end) {
-        if (isWinner) {
-          status = PARA_STATUS.ACTIVE
-        } else {
-          status = PARA_STATUS.COMPLETED
-        }
-      } else {
-        status = PARA_STATUS.ACTIVE
-      }
+      })
     }
-    store.commit('saveProjectStatus', {
-      paraId,
-      status
-    })
+    funds = funds.sort(f => f.statusIndex)
+    store.commit('saveProjectFundInfo', funds)
   } catch (e) {
     console.error('error', e);
-    // 未参与
-    store.commit('saveProjectStatus', {
-      paraId,
-      status: PARA_STATUS.OTHER
-    })
   }
 }
 
@@ -225,7 +229,7 @@ export const loadAccounts = async () => {
     store.commit('')
 
     keyring.loadAll({
-        idDevelopment: true
+      idDevelopment: true
     }, allAccounts)
 
     const account = store.state.account || allAccounts[0]
@@ -238,17 +242,20 @@ export const loadAccounts = async () => {
 }
 
 export const injectAccount = async (account) => {
-    const injected = await web3FromSource(account.meta.source)
-    const api = await getApi()
-    api.setSigner(injected.signer)
-    return api
+  const injected = await web3FromSource(account.meta.source)
+  const api = await getApi()
+  api.setSigner(injected.signer)
+  return api
 }
 
 export const getBalance = async (account) => {
-    const api = getApi()
-    const { nonce, data: balance } = await api.query.system.account(account.address)
-    const decimal = await getDecimal()
-    const res = uni2Token(new BN(balance.free), decimal)
-    store.commit('saveBalance', res.toNumber())
-    return res.toNumber()
+  const api = getApi()
+  const {
+    nonce,
+    data: balance
+  } = await api.query.system.account(account.address)
+  const decimal = await getDecimal()
+  const res = uni2Token(new BN(balance.free), decimal)
+  store.commit('saveBalance', res.toNumber())
+  return res.toNumber()
 }

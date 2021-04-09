@@ -15,3 +15,12 @@ export const TOKEN_SYMBOL = {
     "KUSAMA": "KSM",
     "ROCOCO": "ROC"
   }
+
+export const SURPORT_CHAINS = {
+    200: 'Phala',
+    300: 'Acala'
+}
+
+export const SURPORT_COMMUNITIES = {
+    0: 'BML'
+}
