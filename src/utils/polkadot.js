@@ -7,6 +7,13 @@ import {
   u8aToHex
 } from "@polkadot/util"
 import {
+  web3Accounts,
+  web3Enable,
+  web3FromSource
+} from '@polkadot/extension-dapp'
+import keyring from '@polkadot/ui-keyring';
+
+import {
   blake2AsU8a,
   encodeAddress
 } from "@polkadot/util-crypto"
@@ -19,7 +26,9 @@ import {
   PARA_STATUS
 } from "../config"
 import store from "../store"
-
+import {
+  API_CONNECT_STATE
+} from '../constant'
 const POLKADOT_CHAIN_WEB_SOCKET_MAP = {
   'POLKADOT': POLKADOT_WEB_SOCKET,
   'KUSAMA': KUSAMA_WEB_SOCKEY,
@@ -157,16 +166,89 @@ export const getDecimal = async () => {
 // subscribe new block
 export const subBlock = async () => {
   const api = await getApi()
+  let subBlock = store.state.subBlock
+  try {
+    //   cancel last subscribe
+    subBlock()
+  } catch (e) {}
+  subBlock = await api.rpc.chain.subscribeNewHeads((header) => {
+    try {
+      const number = header.number.toNumber()
+      store.commit('saveCurrentBlockNum', number)
+      console.log('number', number);
+    } catch (e) {
 
-  return await api.rpc.chain.subscribeNewHeads((header) => {
-      try {
-        const number = header.number.toNumber()
-        store.commit('saveCurrentBlockNum', number)
-        console.log('number', number);
-      } catch (e) {
-
-      }
     }
+  })
+  store.commit('saveSubBlock', subBlock)
+}
 
-  )
+
+export const connect = (callback) => {
+  if (store.state.apiState) return;
+  store.commit('saveApiState', API_CONNECT_STATE.CONNECT_INIT)
+
+  const api = getApi()
+  api.on('connected', () => {
+    store.commit('saveApiState', API_CONNECT_STATE.CONNECT)
+    api.isReady.then(() => {
+      store.commit('saveApiState', API_CONNECT_STATE.CONNECT_SUCCESS)
+    })
+  })
+
+  api.on('ready', () => {
+    store.commit('saveApiState', API_CONNECT_STATE.CONNECT_SUCCESS)
+    if (callback) callback();
+  })
+
+  api.on('error', err => {
+    console.error('Connect error');
+    store.commit('saveApiState', API_CONNECT_STATE.CONNECT_ERROR)
+  })
+}
+
+export const loadAccounts = async () => {
+  try {
+    await web3Enable('crowdloan')
+    let allAccounts = await web3Accounts()
+    allAccounts = allAccounts.map(({
+      address,
+      meta
+    }) => ({
+      address,
+      meta: {
+        ...meta,
+        name: `${meta.name} (${meta.source})`
+      }
+    }))
+
+    store.commit('')
+
+    keyring.loadAll({
+        idDevelopment: true
+    }, allAccounts)
+
+    const account = store.state.account || allAccounts[0]
+    store.commit('saveAccount', account)
+    // inject
+
+  } catch (e) {
+
+  }
+}
+
+export const injectAccount = async (account) => {
+    const injected = await web3FromSource(account.meta.source)
+    const api = await getApi()
+    api.setSigner(injected.signer)
+    return api
+}
+
+export const getBalance = async (account) => {
+    const api = getApi()
+    const { nonce, data: balance } = await api.query.system.account(account.address)
+    const decimal = await getDecimal()
+    const res = uni2Token(new BN(balance.free), decimal)
+    store.commit('saveBalance', res.toNumber())
+    return res.toNumber()
 }

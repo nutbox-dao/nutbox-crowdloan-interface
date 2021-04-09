@@ -6,9 +6,13 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     api:{},
+    apiState:null,
     symbol:'',
+    subBlock:{},
     isConnected: true,
-    account: "salfdjoji",
+    account: null,
+    allAccounts: null,
+    balance:0,
     projectStatus: {},
     projectFundInfo: {},
     projectName: {},
@@ -21,6 +25,12 @@ export default new Vuex.Store({
     saveSymbol: (state, symbol) => {
       state.symbol = symbol
     },
+    saveSubBlock: (state, subBlock) => {
+      state.subBlock = subBlock
+    },
+    saveApiState: (state, apiState) => {
+      state.apiState = apiState
+    },
     saveApi: (state, api) => {
       state.api[state.symbol] = api
     },
@@ -29,6 +39,12 @@ export default new Vuex.Store({
     },
     saveAccount: (state, account) => {
       state.account = account
+    },
+    saveAllAccounts: (state, allAccounts) => {
+      state.allAccounts = allAccounts
+    },
+    saveBalance: (state, balance) => {
+      state.balance = balance
     },
     saveProjectStatus: (state, {
       paraId,

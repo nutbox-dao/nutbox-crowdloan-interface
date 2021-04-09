@@ -38,10 +38,7 @@ export default {
   },
   async created() {
     this.$store.commit("saveSymbol", "ROCOCO");
-    const unsub = await subBlock();
-    this.$once("hook:beforeDestroy", () => {
-      unsub();
-    });
+    await subBlock();
 
     await getFundInfo(200);
     await getFundInfo(300)

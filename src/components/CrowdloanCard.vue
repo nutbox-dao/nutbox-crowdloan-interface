@@ -141,23 +141,19 @@ export default {
         const end = parseInt(this.fundInfo.end);
         let diff = end - parseInt(this.currentBlockNum);
         if (diff > 0) {
-          const secs = diff * BLOCK_SECOND;
-          let date = new Date(secs*1000)
+          const secs = diff * BLOCK_SECOND + 3600;
+          const month = MATH.floor(secs / this.timePeriod['MONTH'])
+          const day = MATH.floor(secs % this.timePeriod['MONTH'] / this.timePeriod["DAY"])
+          const hour = MATH.floor(secs % this.timePeriod['DAY'] / this.timePeriod["HOUR"])
+          const min = MATH.floor(secs % this.timePeriod['HOUR'] / this.timePeriod["MINUTES"])
+          const sec = MATH.floor(secs % this.timePeriod['MINUTES'])
           if (secs >= this.timePeriod['MONTH']){
-            const month = date.getMonth() + 1
-            const day = date.getDay() % 30
-            return month + 'mons' + day + 'days'
-          }else if(secs >= this.timePeriod['DAY']){
-            const day = date.getDay()
-            const hour = date.getHours()
-            return day + 'days' + hour + 'hrs'
+            return month + 'mons' + day + 'days' + hour + 'hrs'
+          }else if(secs >= this.timePeriod['DAY']){   
+            return day + 'days' + hour + 'hrs' + min + 'mins'
           }else if (secs >= this.timePeriod['HOUR']){
-            const hour = date.getHours()
-            const min = date.getMinutes()
             return hour + 'hrs' + min + 'mins'
           }else {
-            const min = date.getMinutes()
-            const sec = date.getSeconds()
             return min + 'mins' + sec + 'sec'
           }
         }
