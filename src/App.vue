@@ -15,7 +15,6 @@
             </div>
             <div class="menu-btn">
               <img src="~@/static/images/menu-btn.svg" alt="">
-                <Identicon :size='32' theme='polkadot' :value="account && account.address"/>
               <b-navbar-toggle target="nav-collapse" @click="expandMenu"></b-navbar-toggle>
             </div>
 
@@ -36,7 +35,7 @@
                     <b-dropdown toggle-class="accounts-toggle" variant="text" right no-caret>
                       <template #button-content>
                         <div class="flex-between-center font18" @click="accountsPop=!accountsPop">
-                          <Identicon :size='24' theme='polkadot' v-if="account" :value="account.address"/>
+                          <Identicon :size='30' theme='polkadot' v-if="account" :value="account.address"/>
                           <b-avatar v-else class="mr-2" size="sm" text=""></b-avatar>
                           <span style="margin-left:8px">{{ formatUserAddress(account && account.meta.name) }}</span>
                         </div>
@@ -44,7 +43,7 @@
                       <b-dropdown-item v-for="(item,index) of (allAccounts ? allAccounts : [])" :key="index" @click="saveAccount(item)">
                         <template>
                           <div class="flex-between-center">
-                            <Identicon class="ident-icon" :size='28' theme='polkadot' :value="item.address"/>
+                            <Identicon class="ident-icon" :size='30' theme='polkadot' :value="item.address"/>
                             <div class="account-info">
                               <div class="font-bold">{{ item.meta.name }}</div>
                               <div>{{ formatUserAddress(item.address) }}</div>
