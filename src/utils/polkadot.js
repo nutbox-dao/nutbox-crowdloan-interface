@@ -5,10 +5,7 @@ import {
 import {
   u8aConcat,
   u8aToHex,
-  BN_MAX_INTEGER,
-  isChildClass,
   numberToU8a,
-  hexToU8a
 } from "@polkadot/util"
 import {
   web3Accounts,
@@ -23,9 +20,6 @@ import {
   decodeAddress,
   cryptoWaitReady
 } from "@polkadot/util-crypto"
-import {
-  Keyring
-} from "@polkadot/keyring"
 import jsonrpc from '@polkadot/types/interfaces/jsonrpc';
 import BN from "bn.js"
 import {
@@ -52,7 +46,7 @@ async function getApi() {
   const api = await ApiPromise.create({
     provider: wsProvider,
     rpc: jsonrpc,
-    types:{
+    types: {
       PalletId: 'Raw'
     }
   })
@@ -86,7 +80,7 @@ export const getFundInfo = async (paraId = [200]) => {
     let funds = []
     for (let unwrapedFund of unwrapedFunds) {
       unwrapedFund = unwrapedFund.toHuman()
-      if (!unwrapedFund){
+      if (!unwrapedFund) {
         continue
       }
       const {
@@ -209,11 +203,11 @@ export const connect = (callback) => {
   const api = new ApiPromise({
     provider: wsProvider,
     rpc: jsonrpc,
-    types:{
+    types: {
       PalletId: 'Raw'
     }
   })
-  
+
   api.on('connected', () => {
     store.commit('saveApiState', API_CONNECT_STATE.CONNECT)
     console.log('connecting');
@@ -238,6 +232,7 @@ export const loadAccounts = async () => {
     await web3Enable('crowdloan')
     let allAccounts = await web3Accounts()
 
+    await cryptoWaitReady();
     keyring.loadAll({
       isDevelopment: true
     }, allAccounts)
@@ -248,7 +243,7 @@ export const loadAccounts = async () => {
     // inject
     await injectAccount(account)
   } catch (e) {
-    console.error('get all accounts fail:',e);
+    console.error('get all accounts fail:', e);
   }
 }
 
@@ -303,4 +298,27 @@ export function encodeMemo(memo) {
   buf.set(NumberTo4BytesU8A(memo.paraId), 21);
   buf.set(NumberTo4BytesU8A(memo.trieIndex), 25);
   return '0x' + Buffer.from(buf).toString('hex');
+}
+
+export const withdraw = async (paraId) => {
+  const api = await getApi()
+  return new Promise(async (resolve, reject) => {
+    const from = store.state.account && store.state.account.address
+    if (!from) {
+      reject('no account')
+    }
+    const nonce = (await api.query.system.account(store.state.account.address)).nonce.toNumber()
+    const unsub = await api.tx.crowdloan.withdraw(from, paraId).signAndSend(sender, {
+      nonce: nonce++
+    }, (result) => {
+      if (result.status.isInBlock) {
+        console.log("Transaction included at blockHash ", result.status.asInBlock);
+      } else if (result.status.isFinalized) {
+        unsub()
+        resolve(result.status.asFinalized)
+      }
+    }).catch((err) => {
+      reject(err)
+    })
+  })
 }
