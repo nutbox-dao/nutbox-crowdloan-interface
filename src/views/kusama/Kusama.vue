@@ -89,7 +89,7 @@ export default {
     height: 90vw;
     background-image: linear-gradient(
       to bottom,
-      rgba(166, 225, 249, 1),
+      rgba(255, 219, 27, .7),
       rgba(141, 231, 255, 0)
     );
     background-repeat: repeat-x;

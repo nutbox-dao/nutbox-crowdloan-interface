@@ -2,6 +2,35 @@ th, td{
   white-space: nowrap;
   word-break: keep-all;
 }
+.table .table th, .table td {
+  border-color: rgba(246, 247, 249, 1) !important;
+}
+.table thead th {
+  border-bottom: 1px!important;
+}
+.c-tr {
+  border: 1px solid rgba(246, 247, 249, 1);
+  &:hover {
+    background: rgba(255, 219, 38, 0.05)!important;
+  }
+}
+.c-th {
+  background: rgba(246, 247, 249, 1);
+}
+.c-th {
+  border-left: 1px solid rgba(246, 247, 249, 1);
+  border-right: 2px solid rgba(246, 247, 249, 1);
+}
+.page-item .page-link {
+  border-color: rgba(246, 247, 249, 1) !important;
+}
+.page-item.active .page-link {
+  background: var(--primary-custom) !important;
+  color: rgba(36, 38, 41, 1)!important;
+}
+.page-item .page-link {
+  color: rgba(36, 38, 41, 1)!important;
+}
 .primary-btn {
   height: 2.4rem;
   width: 13.5rem;
@@ -99,6 +128,7 @@ th, td{
   text-align: left!important;
   left: 1.4rem !important;
   right: 1.4rem !important;
+  z-index: 20;
 }
 .custom-modal {
   .modal-content {
@@ -109,7 +139,10 @@ th, td{
     padding: 1.4rem;
   }
 }
-input {
+input, button {
+  outline: none;
+}
+[role="button"] {
   outline: none;
 }
 .dropdown {
@@ -131,6 +164,9 @@ input {
     display: none!important;
   }
   .mobile-address {
+    display: block !important;
+  }
+  .menu-btn {
     display: block !important;
   }
   .mobile-menu {

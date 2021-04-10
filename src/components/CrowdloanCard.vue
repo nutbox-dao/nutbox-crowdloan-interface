@@ -1,5 +1,5 @@
 <template>
-  <div class="card">
+  <div class="c-card">
     <div class="status-container">
       <img :src="statusIcon" alt="" />
 <!--      <span>-->
@@ -208,8 +208,8 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
-.card {
+<style lang="less">
+.c-card {
   width: 100%;
   border-radius: 1.4rem;
   margin-bottom: 12px;
@@ -218,6 +218,7 @@ export default {
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.02);
   position: relative;
   padding: 2.2rem 1.2rem;
+  background-color: white;
   .status-container {
     position: absolute;
     right: 0;

@@ -29,7 +29,7 @@
             <template>
               <div class="row">
                 <div class="col-md-7">
-                  <div class="font40 font-bold text-black">The Scalable, Multichain <br>
+                  <div class="font40 font-bold text-black" style="line-height: 2.2rem">The Scalable, Multichain <br>
                     Network for Radical Innovation.</div>
                   <p class="text-grey font14">Unprecedented interoperability and scalability for blockchain developers
                     who want to quickly push the limits of what’s possible.</p>
@@ -70,9 +70,9 @@ export default {
     return {
       bannerImg: [
         'https://picsum.photos/1024/480/?image=52',
-        'https://picsum.photos/1024/480/?image=54',
-        'https://picsum.photos/1024/480/?image=55',
-        'https://picsum.photos/1024/480/?image=56'
+        // 'https://picsum.photos/1024/480/?image=54',
+        // 'https://picsum.photos/1024/480/?image=55',
+        // 'https://picsum.photos/1024/480/?image=56'
       ]
     }
   },
@@ -86,28 +86,29 @@ export default {
 <style scoped lang="less">
 .home-page {
   position: absolute;
-  top: 3.6rem;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background-color: white;
   overflow: auto;
   margin-bottom: 2rem;
+  padding-top: 3.6rem;
   .bg {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 28rem;
+    height: 30rem;
     background-image: url("~@/static/images/bg.png");
-    background-size: auto 28rem;
+    background-size: auto 100%;
     background-repeat: no-repeat;
     background-position: center top;
   }
   .banner-box {
     height: 20rem;
     overflow: hidden;
-    padding: 2rem 0;
+    padding: 3rem 0;
     border-radius: 1.4rem;
   }
 }
