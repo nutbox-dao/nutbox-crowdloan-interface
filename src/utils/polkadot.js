@@ -201,7 +201,7 @@ export const subBlock = async () => {
 export const connect = (callback) => {
   if (store.state.apiState) return;
   store.commit('saveApiState', API_CONNECT_STATE.CONNECT_INIT)
-
+  console.log('network', POLKADOT_CHAIN_WEB_SOCKET_MAP[store.state.symbol]);
   const wsProvider = new WsProvider(POLKADOT_CHAIN_WEB_SOCKET_MAP[store.state.symbol])
   const api = new ApiPromise({
     provider: wsProvider,
@@ -210,6 +210,7 @@ export const connect = (callback) => {
   
   api.on('connected', () => {
     store.commit('saveApiState', API_CONNECT_STATE.CONNECT)
+    console.log('connecting');
     api.isReady.then(() => {
       store.commit('saveApiState', API_CONNECT_STATE.CONNECT_SUCCESS)
     })
@@ -217,6 +218,7 @@ export const connect = (callback) => {
 
   api.on('ready', () => {
     store.commit('saveApiState', API_CONNECT_STATE.CONNECT_SUCCESS)
+    console.log('connected');
     if (callback) callback();
   })
 
@@ -229,13 +231,11 @@ export const loadAccounts = async () => {
   try {
     await web3Enable('crowdloan')
     let allAccounts = await web3Accounts()
-    console.log('accoutns', allAccounts);
-
 
     keyring.loadAll({
       isDevelopment: true
     }, allAccounts)
-
+    console.log('accs:', allAccounts);
     store.commit('saveAllAccounts', allAccounts)
     const account = store.state.account || allAccounts[0]
     store.commit('saveAccount', account)

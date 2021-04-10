@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import Cookie from "vue-cookies"
 
 Vue.use(Vuex)
 
@@ -10,7 +11,7 @@ export default new Vuex.Store({
     symbol:'',
     subBlock:{},
     isConnected: true,
-    account: null,
+    account: Cookie.get('polkadot-account'),
     allAccounts: null,
     balance:0,
     projectFundInfos: [],
@@ -35,7 +36,8 @@ export default new Vuex.Store({
       state.isConnected = isConnected
     },
     saveAccount: (state, account) => {
-      state.account = account
+      state.account = account,
+      Cookie.set('polkadot-account', account)
     },
     saveAllAccounts: (state, allAccounts) => {
       state.allAccounts = allAccounts

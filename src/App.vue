@@ -9,16 +9,13 @@
                    @click="selectMenu(0, '/', 'home')">
             </b-navbar-brand>
             <div class="mobile-menu flex-start-center">
-              <b-nav-item-dropdown :text="'EN'" right>
-                <b-dropdown-item v-for="(item,index) of langOptions" :key="index">{{item}}
-                </b-dropdown-item>
-              </b-nav-item-dropdown>
               <b-nav-item class="user-address flex-between-center">
                 <img src="~@/static/images/account.png" alt="">
               </b-nav-item>
             </div>
             <div class="menu-btn">
               <img src="~@/static/images/menu-btn.svg" alt="">
+                <Identicon :size='32' theme='polkadot' :value="account && account.address"/>
               <b-navbar-toggle target="nav-collapse" @click="expandMenu"></b-navbar-toggle>
             </div>
 
@@ -30,18 +27,33 @@
                 </b-nav-item>
               </b-navbar-nav>
               <div class="mobile-address">
-                <p style="word-break: break-all">{{ userAddress}}</p>
+                <p style="word-break: break-all">{{ account && account.address}}</p>
               </div>
               <!-- Right aligned nav items -->
               <b-navbar-nav class="pc-menu">
-<!--                <b-nav-item-dropdown :text="'EN'" right>-->
-<!--                  <b-dropdown-item v-for="(item,index) of langOptions" :key="index">{{item}}-->
-<!--                  </b-dropdown-item>-->
-<!--                </b-nav-item-dropdown>-->
                 <b-nav-item class="user-address">
-                  <div v-if="isConnected" class="flex-between-center">
-                    <img src="~@/static/images/account.png" alt="">
-                    <span>{{ formatUserAddress(userAddress) }}</span>
+                  <div v-if="isConnected" class="p-2">
+                    <b-dropdown toggle-class="accounts-toggle" variant="text" right no-caret>
+                      <template #button-content>
+                        <div class="flex-between-center font18" @click="accountsPop=!accountsPop">
+                          <Identicon :size='24' theme='polkadot' v-if="account" :value="account.address"/>
+                          <b-avatar v-else class="mr-2" size="sm" text=""></b-avatar>
+                          <span>{{ formatUserAddress(account && account.address) }}</span>
+                        </div>
+                      </template>
+                      <b-dropdown-item v-for="(item,index) of (allAccounts ? allAccounts : [])" :key="index" @click="saveAccount(item)">
+                        <template>
+                          <div class="flex-between-center">
+                            <Identicon :size='28' theme='polkadot' :value="item.address"/>
+                            <div class="account-info">
+                              <div class="font-bold">{{ item.meta.name }}</div>
+                              <div>{{ formatUserAddress(item.address) }}</div>
+                            </div>
+                            <img class="ml-3" v-if="item.address===(account && account.address)" src="~@/static/images/selected.png" alt="">
+                          </div>
+                        </template>
+                      </b-dropdown-item>
+                    </b-dropdown>
                   </div>
                   <ConnectWallet v-else/>
                 </b-nav-item>
@@ -58,17 +70,22 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 import ConnectWallet from './components/Buttons/ConnectWallet'
+import Identicon from '@polkadot/vue-identicon'
+import { connect, loadAccounts } from './utils/polkadot'
 
 export default {
   name: 'App',
   components: {
-    ConnectWallet
+    ConnectWallet,
+    Identicon
   },
   computed: {
     ...mapState([
-      'isConnected'
+      'isConnected',
+      'allAccounts',
+      'account'
     ])
   },
   data () {
@@ -78,19 +95,24 @@ export default {
         { id: 'kusama', url: '/kusama', label: 'Kusuma Crowdload' },
         { id: 'polkadot', url: '/polkadot', label: 'Polkadot Crowdload' }
       ],
-      langOptions: ['en', 'zh'],
+      accountsOptions: ['TEwJioeQZzaYxNUDpYMUx15zSxcCtJNmaz', 'NUDpYMUx15zSxcCtJNmazxxxxxxxxxxxxxx'],
+      accountsPop: false,
       activeNav: -1,
       menuIsExpand: false,
-      userAddress: 'TEwJioeQZzaYxNUDpYMUx15zSxcCtJNmaz'
     }
   },
   mounted () {
+    this.$store.commit("saveSymbol", "POLKADOT");
+    connect(() => {
+      loadAccounts()
+    })
   },
   beforeDestroy () {
     clearInterval(this.timer)
     this.timer = null
   },
   methods: {
+    ...mapMutations(['saveAccount']),
     selectMenu (index, url, id) {
       this.activeNav = index
       this.$router.push(url)
@@ -106,8 +128,9 @@ export default {
       }
     },
     formatUserAddress (address) {
+      if (!address) return 'Loading Account'
       if (address.length < 10) return address
-      const start = address.slice(0, 5)
+      const start = address.slice(0, 10)
       const end = address.slice(-5)
       return `${start}...${end}`
     },
@@ -217,9 +240,17 @@ body {
     border-bottom: 4px solid var(--primary-custom);
   }
   .dropdown-menu {
-    background: black;
+    border-radius: 1.2rem;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.02);
+    border: none;
+    margin-top: .5rem;
     .dropdown-item {
-      //color: white;
+      padding: .2rem .5rem;
+    }
+    .account-info {
+      flex: 1;
+      font-size: .7rem;
+      margin-left: 6px;
     }
     .dropdown-item:hover {
       background: transparent;
