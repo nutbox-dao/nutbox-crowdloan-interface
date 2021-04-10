@@ -15,6 +15,7 @@
             </div>
             <div class="menu-btn">
               <img src="~@/static/images/menu-btn.svg" alt="">
+                <Identicon :size='32' theme='polkadot' :value="account && account.address"/>
               <b-navbar-toggle target="nav-collapse" @click="expandMenu"></b-navbar-toggle>
             </div>
 
@@ -26,7 +27,7 @@
                 </b-nav-item>
               </b-navbar-nav>
               <div class="mobile-address">
-                <p style="word-break: break-all">{{ userAddress}}</p>
+                <p style="word-break: break-all">{{ account && account.address}}</p>
               </div>
               <!-- Right aligned nav items -->
               <b-navbar-nav class="pc-menu">
@@ -35,19 +36,20 @@
                     <b-dropdown toggle-class="accounts-toggle" variant="text" right no-caret>
                       <template #button-content>
                         <div class="flex-between-center font18" @click="accountsPop=!accountsPop">
-                          <b-avatar class="mr-2" size="sm" text=""></b-avatar>
-                          <span>{{ formatUserAddress(userAddress) }}</span>
+                          <Identicon :size='24' theme='polkadot' v-if="account" :value="account.address"/>
+                          <b-avatar v-else class="mr-2" size="sm" text=""></b-avatar>
+                          <span>{{ formatUserAddress(account && account.address) }}</span>
                         </div>
                       </template>
-                      <b-dropdown-item v-for="(item,index) of accountsOptions" :key="index">
+                      <b-dropdown-item v-for="(item,index) of (allAccounts ? allAccounts : [])" :key="index" @click="saveAccount(item)">
                         <template>
                           <div class="flex-between-center">
-                            <b-avatar class="mr-2" size="sm" text="A"></b-avatar>
+                            <Identicon :size='28' theme='polkadot' :value="item.address"/>
                             <div class="account-info">
-                              <div class="font-bold">account name</div>
-                              <div>{{ formatUserAddress(item) }}</div>
+                              <div class="font-bold">{{ item.meta.name }}</div>
+                              <div>{{ formatUserAddress(item.address) }}</div>
                             </div>
-                            <img class="ml-3" v-if="item===userAddress" src="~@/static/images/selected.png" alt="">
+                            <img class="ml-3" v-if="item.address===(account && account.address)" src="~@/static/images/selected.png" alt="">
                           </div>
                         </template>
                       </b-dropdown-item>
@@ -68,17 +70,22 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 import ConnectWallet from './components/Buttons/ConnectWallet'
+import Identicon from '@polkadot/vue-identicon'
+import { connect, loadAccounts } from './utils/polkadot'
 
 export default {
   name: 'App',
   components: {
-    ConnectWallet
+    ConnectWallet,
+    Identicon
   },
   computed: {
     ...mapState([
-      'isConnected'
+      'isConnected',
+      'allAccounts',
+      'account'
     ])
   },
   data () {
@@ -92,16 +99,20 @@ export default {
       accountsPop: false,
       activeNav: -1,
       menuIsExpand: false,
-      userAddress: 'TEwJioeQZzaYxNUDpYMUx15zSxcCtJNmaz'
     }
   },
   mounted () {
+    this.$store.commit("saveSymbol", "POLKADOT");
+    connect(() => {
+      loadAccounts()
+    })
   },
   beforeDestroy () {
     clearInterval(this.timer)
     this.timer = null
   },
   methods: {
+    ...mapMutations(['saveAccount']),
     selectMenu (index, url, id) {
       this.activeNav = index
       this.$router.push(url)
@@ -117,6 +128,7 @@ export default {
       }
     },
     formatUserAddress (address) {
+      if (!address) return 'Loading Account'
       if (address.length < 10) return address
       const start = address.slice(0, 10)
       const end = address.slice(-5)
@@ -238,6 +250,7 @@ body {
     .account-info {
       flex: 1;
       font-size: .7rem;
+      margin-left: 6px;
     }
     .dropdown-item:hover {
       background: transparent;
