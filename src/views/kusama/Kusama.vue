@@ -1,27 +1,22 @@
 <template>
   <div class="k-page crowdloan-page">
-    <div class="container">
-      <!--      <BackToHome title="Kusama Crowdloan" />-->
-      <div class="bg-box"><div class="bg"></div></div>
-      <div class="cards-container row">
-        <div v-for="para of projectFundInfos" :key="para">
-          <div class="col-lg-4 col-md-6">
-            <CrowdloanCard
-              :paraId="para.paraId"
-              :communityId="community"
-              v-for="community of communitId"
-              :key="community"
-            />
+    <div class="bg" v-if="Object.keys(projectFundInfos).length>0"></div>
+    <div class="empty-bg" v-else>
+      <img src="~@/static/images/empty-data.png" alt="">
+      <p>No ongoing auction</p>
+    </div>
+    <div class="cards-container">
+      <div class="container">
+        <div class="row">
+          <div v-for="para of projectFundInfos" :key="para">
+            <div class="col-lg-4 col-md-6" v-for="community of communitId"
+                 :key="community">
+              <CrowdloanCard :paraId="para.paraId" :communityId="community"/>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <b-modal v-model="contributeModal" modal-class="custom-modal" centered hide-header hide-footer no-close-on-backdrop>
-      <TipContribute @hideContribute="contributeModal = false"/>
-    </b-modal>
-    <b-modal v-model="withdrawModal" modal-class="custom-modal" centered hide-header hide-footer no-close-on-backdrop>
-      <TipWithdraw @hideWithdraw="withdrawModal = false" />
-    </b-modal>
   </div>
 </template>
 
@@ -78,30 +73,43 @@ export default {
 
 <style lang="less">
 .crowdloan-page {
-  position: relative;
-  padding: 1rem;
+  height: 100%;
   background: rgba(246, 247, 249, 1);
-
-  .bg-box {
+  overflow: hidden;
+  position: relative;
+  .bg {
     position: absolute;
-    left: 0;
-    right: 0;
-
-    .bg {
-      margin: auto;
-      width: 34rem;
-      height: 34rem;
-      background-image: linear-gradient(
-        to bottom,
-        rgba(166, 225, 249, 1),
-        rgba(141, 231, 255, 0)
-      );
-      border-radius: 34rem;
+    left: 50%;
+    top: 2rem;
+    transform: translateX(-50%);
+    margin: auto;
+    max-width: 34rem;
+    max-height: 34rem;
+    width: 90vw;
+    height: 90vw;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(166, 225, 249, 1),
+      rgba(141, 231, 255, 0)
+    );
+    background-repeat: repeat-x;
+    border-radius: 34rem;
+    background-position: center top;
+  }
+  .empty-bg {
+    position: relative;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    img {
+      height: 7rem;
     }
   }
-
   .cards-container {
-    padding: 3rem 0;
+    height: 100%;
+    overflow: auto;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
   }
 }
 </style>

@@ -1,8 +1,5 @@
 <template>
   <div class="home-page">
-<!--    <div id="account">-->
-<!--      <AccountConnector/>-->
-<!--    </div>-->
     <div class="bg"></div>
     <div class="container">
       <div class="banner-box">
@@ -11,7 +8,7 @@
           :interval="3000"
           indicators
           img-height="20rem"
-          background="RGBA(246, 247, 249, 1)"
+          background="RGBA(246, 247, 249, 0)"
           style="text-shadow: 1px 1px 2px #333;"
         >
 <!--          <b-carousel-slide v-for="(item, index) of bannerImg" :key="index"-->
@@ -45,14 +42,14 @@
       <div class="row">
         <div class="col-md-6">
           <div class='crowd-select card-1' @click="goto('/kusama')">
-            <img src="https://nutbox.io/img/logo.b363fe37.svg" alt="">
+            <img src="~@/static/images/kusama-logo.png" alt="">
             <div class="font28 font-bold mt-2 mb-4">Kusuma Crowdload</div>
             <button class="primary-btn">Enter</button>
           </div>
         </div>
         <div class="col-md-6">
           <div class="crowd-select card-2">
-            <img src="https://nutbox.io/img/logo.b363fe37.svg" alt="">
+            <img src="~@/static/images/polkadot-logo.png" alt="">
             <div class="font28 font-bold mt-2 mb-4">Polkadot Crowdload</div>
             <button class="primary-btn">Enter</button>
           </div>
@@ -94,17 +91,18 @@ export default {
   right: 0;
   bottom: 0;
   background-color: white;
+  overflow: auto;
+  margin-bottom: 2rem;
   .bg {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    bottom: 30%;
-    background-color: RGBA(246, 247, 249, 1);
-    border-bottom-left-radius: 10%;
-    border-bottom-right-radius: 10%;
-  }
-  .container {
+    height: 28rem;
+    background-image: url("~@/static/images/bg.png");
+    background-size: auto 28rem;
+    background-repeat: no-repeat;
+    background-position: center top;
   }
   .banner-box {
     height: 20rem;
@@ -135,7 +133,10 @@ export default {
     border-bottom: 4px solid #E61C84;
   }
   img {
-    height: 3rem;
+    height: 3.2rem;
+    width: 3.2rem;
+    border-radius: 3.2rem;
+    margin: 0 auto;
   }
 }
 .crowd-select:hover{
