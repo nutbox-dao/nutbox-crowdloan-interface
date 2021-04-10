@@ -68,6 +68,12 @@
 <!--      @hideContribute="showContribute = false"-->
 <!--    />-->
 <!--    <TipWithdraw v-if="showWithdraw" @hideWithdraw="showWithdraw = false" />-->
+    <b-modal v-model="showContribute" modal-class="custom-modal" centered hide-header hide-footer no-close-on-backdrop>
+      <TipContribute @hideContribute="showContribute = false"/>
+    </b-modal>
+    <b-modal v-model="showWithdraw" modal-class="custom-modal" centered hide-header hide-footer no-close-on-backdrop>
+      <TipWithdraw @hideWithdraw="showWithdraw = false" />
+    </b-modal>
   </div>
 </template>
 
