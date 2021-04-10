@@ -51,7 +51,10 @@ async function getApi() {
   const wsProvider = new WsProvider(POLKADOT_CHAIN_WEB_SOCKET_MAP[store.state.symbol])
   const api = await ApiPromise.create({
     provider: wsProvider,
-    rpc: jsonrpc
+    rpc: jsonrpc,
+    types:{
+      PalletId: 'Raw'
+    }
   })
   store.commit('saveApi', api)
   return api
@@ -205,7 +208,10 @@ export const connect = (callback) => {
   const wsProvider = new WsProvider(POLKADOT_CHAIN_WEB_SOCKET_MAP[store.state.symbol])
   const api = new ApiPromise({
     provider: wsProvider,
-    rpc: jsonrpc
+    rpc: jsonrpc,
+    types:{
+      PalletId: 'Raw'
+    }
   })
   
   api.on('connected', () => {

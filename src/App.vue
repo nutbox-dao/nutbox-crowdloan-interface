@@ -102,7 +102,7 @@ export default {
     }
   },
   mounted () {
-    this.$store.commit("saveSymbol", "POLKADOT");
+    this.$store.commit("saveSymbol", "KUSAMA");
     connect(() => {
       loadAccounts()
     })
