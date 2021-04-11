@@ -71,18 +71,27 @@ function createChildKey(trieIndex) {
 
 export const getFundInfo = async (paraId = [200]) => {
   const api = await getApi()
-
+  paraId = paraId.map(p => parseInt(p))
+  console.log('paraids', paraId);
   try {
     const unwrapedFunds = (await api.query.crowdloan.funds.multi(paraId));
     console.log('fund', unwrapedFunds);
+    const a = unwrapedFunds[0]
+    console.log('a', a);
+    const c = paraId[0]
+    console.log('c', c);
+    const b = (await api.query.crowdloan.funds(1001));
+    console.log('b', b.unwrap())
     const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
     const decimal = await getDecimal()
     let funds = []
-    for (let unwrapedFund of unwrapedFunds) {
-      unwrapedFund = unwrapedFund.toHuman()
-      if (!unwrapedFund) {
+    for (let fund of unwrapedFunds || []) {
+      if (!fund) {
+        console.log('no info');
         continue
       }
+      unwrapedFund = fund.unwrap()
+      console.log('unwrapedFund', unwrapedFund);
       const {
         deposit,
         cap,
@@ -93,8 +102,8 @@ export const getFundInfo = async (paraId = [200]) => {
         raised,
         retiring,
         trieIndex
-      } = unwrapedFund
-      const childKey = createChildKey(trieIndex)
+      } = unwrapedFund.toJSON()
+      const childKey = createChildKey(unwrapedFund.trieIndex)
       const keys = await api.rpc.childstate.getKeys(childKey, '0x')
       const ss58keys = keys.map(k => encodeAddress(k))
       const values = await Promise.all(keys.map(k => api.rpc.childstate.getStorage(childKey, k)))
@@ -143,6 +152,7 @@ export const getFundInfo = async (paraId = [200]) => {
         lastSlot: new BN(lastSlot),
         raised: uni2Token(new BN(raised), decimal).toString(),
         retiring,
+        trieIndex,
         funds: contributions
       })
     }
@@ -182,6 +192,7 @@ export const subBlock = async () => {
     //   cancel last subscribe
     subBlock()
   } catch (e) {}
+  console.log('sub block');
   subBlock = await api.rpc.chain.subscribeNewHeads((header) => {
     try {
       const number = header.number.toNumber()
@@ -196,7 +207,10 @@ export const subBlock = async () => {
 
 
 export const connect = (callback) => {
-  if (store.state.apiState) return;
+  if (store.state.apiState) {
+    if (callback) callback();
+    return;
+  }
   store.commit('saveApiState', API_CONNECT_STATE.CONNECT_INIT)
   console.log('network', POLKADOT_CHAIN_WEB_SOCKET_MAP[store.state.symbol]);
   const wsProvider = new WsProvider(POLKADOT_CHAIN_WEB_SOCKET_MAP[store.state.symbol])
@@ -219,7 +233,7 @@ export const connect = (callback) => {
   api.on('ready', () => {
     store.commit('saveApiState', API_CONNECT_STATE.CONNECT_SUCCESS)
     console.log('connected');
-    if (callback) callback();
+    loadAccounts()
   })
 
   api.on('error', err => {

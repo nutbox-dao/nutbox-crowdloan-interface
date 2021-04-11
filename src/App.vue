@@ -119,10 +119,10 @@ export default {
   },
   mounted () {
     this.setActiveMenu()
-    this.$store.commit('saveSymbol', 'POLKADOT')
-    connect(() => {
-      loadAccounts()
-    })
+  },
+  async created () {
+    this.$store.commit('saveSymbol', 'ROCOCO')
+    await connect();
   },
   beforeDestroy () {
     clearInterval(this.timer)

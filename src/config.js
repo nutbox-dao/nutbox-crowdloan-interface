@@ -17,8 +17,9 @@ export const TOKEN_SYMBOL = {
   }
 
 export const SURPORT_CHAINS = {
-    112: 'Phala',
-    113: 'Acala'
+    1004: 'Phala',
+    1001: 'Acala',
+    1002:'Nutbox'
 }
 
 export const SURPORT_COMMUNITIES = {

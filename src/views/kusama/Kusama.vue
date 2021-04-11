@@ -61,12 +61,9 @@ export default {
   },
   async created() {
     this.$store.commit("saveSymbol", "ROCOCO");
-    connect(async () => {
-      loadAccounts();
       await subBlock();
       const chains = Object.keys(SURPORT_CHAINS);
       await getFundInfo(chains);
-    });
   },
 }
 </script>
