@@ -76,21 +76,17 @@ export const getFundInfo = async (paraId = [200]) => {
   try {
     const unwrapedFunds = (await api.query.crowdloan.funds.multi(paraId));
     console.log('fund', unwrapedFunds);
-    const a = unwrapedFunds[0]
-    console.log('a', a);
-    const c = paraId[0]
-    console.log('c', c);
-    const b = (await api.query.crowdloan.funds(1001));
-    console.log('b', b.unwrap())
     const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
     const decimal = await getDecimal()
     let funds = []
-    for (let fund of unwrapedFunds || []) {
+    for (let i = 0; i < unwrapedFunds.length; i++) {
+      const fund = unwrapedFunds[i]
+      const pId = paraId[i]
       if (!fund) {
         console.log('no info');
         continue
       }
-      unwrapedFund = fund.unwrap()
+      const unwrapedFund = fund.unwrap()
       console.log('unwrapedFund', unwrapedFund);
       const {
         deposit,
@@ -102,8 +98,8 @@ export const getFundInfo = async (paraId = [200]) => {
         raised,
         retiring,
         trieIndex
-      } = unwrapedFund.toJSON()
-      const childKey = createChildKey(unwrapedFund.trieIndex)
+      } = unwrapedFund
+      const childKey = createChildKey(trieIndex)
       const keys = await api.rpc.childstate.getKeys(childKey, '0x')
       const ss58keys = keys.map(k => encodeAddress(k))
       const values = await Promise.all(keys.map(k => api.rpc.childstate.getStorage(childKey, k)))
@@ -112,8 +108,8 @@ export const getFundInfo = async (paraId = [200]) => {
         amount: uni2Token(new BN(api.createType('(Balance, Vec<u8>)', v.unwrap())[0]), decimal).toString(),
         memo: api.createType('(Balance, Vec<u8>)', v.unwrap())[1].toHuman()
       }))
-      // console.log('contri', contributions);
-      const leases = (await api.query.slots.leases(paraId)).toJSON()
+      console.log('contri', contributions);
+      const leases = (await api.query.slots.leases(pId)).toJSON()
       const isWinner = leases.length > 0
 
       let status = ''
@@ -141,7 +137,7 @@ export const getFundInfo = async (paraId = [200]) => {
         }
       }
       funds.push({
-        paraId,
+        paraId: pId,
         status,
         statusIndex,
         deposit: uni2Token(new BN(deposit), decimal).toString(),
@@ -157,6 +153,7 @@ export const getFundInfo = async (paraId = [200]) => {
       })
     }
     funds = funds.sort(f => f.statusIndex)
+    console.log('funds', funds);
     store.commit('saveProjectFundInfos', funds)
   } catch (e) {
     console.error('error', e);

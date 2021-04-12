@@ -1,6 +1,6 @@
 <template>
   <div class="k-page crowdloan-page">
-    <div class="bg" v-if="Object.keys(projectFundInfos).length>0"></div>
+    <div class="bg" v-if="funds.length > 0"></div>
     <div class="empty-bg" v-else>
       <img src="~@/static/images/empty-data.png" alt="">
       <p>No ongoing auction</p>
@@ -8,7 +8,7 @@
     <div class="cards-container">
       <div class="container">
         <div class="row">
-          <div v-for="para of projectFundInfos" :key="para">
+          <div v-for="para of funds" :key="para">
             <div class="col-lg-4 col-md-6" v-for="community of communitId"
                  :key="community">
               <CrowdloanCard :paraId="para.paraId" :communityId="community"/>
@@ -29,7 +29,7 @@ import {
   loadAccounts,
   connect,
 } from "../../utils/polkadot";
-import { mapMutations, mapState } from "vuex";
+import { mapMutations, mapState, mapGetters } from "vuex";
 import { SURPORT_CHAINS, SURPORT_COMMUNITIES } from "../../config";
 import TipContribute from '../../components/TipBoxes/TipContribute'
 import TipWithdraw from '../../components/TipBoxes/TipWithdraw'
@@ -47,9 +47,14 @@ export default {
     };
   },
   computed: {
-    ...mapState(["projectFundInfos"]),
+    ...mapState(["projectFundInfos",'symbol']),
+    funds (){
+      const fundInfos = this.getFundInfos()
+      return fundInfos || []
+    }
   },
   methods: {
+    ...mapGetters(['getFundInfos']),
     ...mapMutations([
       "saveProjectStatus",
       "saveProjectName",

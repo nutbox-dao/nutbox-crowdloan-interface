@@ -50,7 +50,7 @@ export default new Vuex.Store({
         state.projectFundInfos[state.symbol] = {}
       }
       state.projectFundInfos[state.symbol] = funds
-      state.projectFundInfos = JSON.parse(JSON.stringify(state.projectFundInfos))
+      // state.projectFundInfos = JSON.parse(JSON.stringify(state.projectFundInfos))
     },
     saveCurrentBlockNum: (state, blockNum) => {
       state.currentBlockNum[state.symbol] = blockNum
@@ -78,6 +78,9 @@ export default new Vuex.Store({
         return funds[0]
       }
       return null
+    },
+    getFundInfos: state => {
+      return state.projectFundInfos[state.symbol]
     },
     getProjectStatus: (state, getters) => (paraId) => {
       const fund = getters.getFundInfo(paraId)
