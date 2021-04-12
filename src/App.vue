@@ -6,7 +6,7 @@
           <b-navbar toggleable="lg">
             <b-navbar-brand>
               <img src="~@/static/images/logo.png" alt="" class="logo-brand"
-                   @click="selectMenu(0, '/')">
+                   @click="selectMenu('home', '/')">
             </b-navbar-brand>
             <div class="mobile-menu">
               <div v-b-toggle.sidebar-backdrop>
@@ -368,6 +368,7 @@ body {
     }
     .v-menu-item {
       padding: .8rem;
+      white-space: nowrap;
     }
   }
 }

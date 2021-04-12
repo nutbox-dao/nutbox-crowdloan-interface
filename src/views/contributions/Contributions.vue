@@ -89,6 +89,11 @@ export default {
   border-radius: 1.4rem;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.02);
   border: none;
+  .card-body {
+    padding: 0;
+    margin: 1rem;
+    overflow: auto;
+  }
 }
 .Active {
   color: rgba(80, 191, 0, 1);
