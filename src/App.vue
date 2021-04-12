@@ -67,14 +67,16 @@
                       </b-dropdown-item>
                       <b-dropdown-divider v-if="Object.keys(allAccounts || []).length>0"></b-dropdown-divider>
                       <b-dropdown-item>
-                        <div class="flex-start-center" @click="selectMenu(-1, '/contributions')">
-                          <b-avatar square size="sm" class="mr-2" style="opacity: .2">·</b-avatar>
+                        <div class="flex-start-center" @click="selectMenu('contributions', '/contributions')">
+                          <!-- <b-avatar square size="sm" class="mr-2" style="opacity: .2">·</b-avatar> -->
+                          <img class="menu-icon" :src="contributionsIcon" alt="">
                           <span class="menu-text">Contributions</span>
                         </div>
                       </b-dropdown-item>
                       <b-dropdown-item>
-                        <div class="flex-start-center" @click="selectMenu(-1, '/dashboard')">
-                          <b-avatar square size="sm" class="mr-2" style="opacity: .2">·</b-avatar>
+                        <div class="flex-start-center" @click="selectMenu('dashboard', '/dashboard')">
+                          <!-- <b-avatar square size="sm" class="mr-2" style="opacity: .2">·</b-avatar> -->
+                          <img class="menu-icon" :src="dashboardIcon" alt="">
                           <span class="menu-text">Dashboard</span>
                         </div>
                       </b-dropdown-item>
@@ -121,6 +123,12 @@ export default {
       return this.menuOptions.filter(item => {
         return item.v
       })
+    },
+    contributionsIcon () {
+      return this.activeNav === 'contributions' ? require('./static/images/contributions_selected.png') : require('./static/images/contributions.png')
+    },
+    dashboardIcon (){
+      return this.activeNav === 'dashboard' ? require('./static/images/dashboard_selected.png') : require('./static/images/dashboard.png')
     }
   },
   data () {
@@ -144,10 +152,11 @@ export default {
   },
   mounted () {
     this.setActiveMenu()
+    loadAccounts()
   },
   async created () {
     this.$store.commit('saveSymbol', 'ROCOCO')
-    await connect();
+    // await connect();
   },
   beforeDestroy () {
     clearInterval(this.timer)
@@ -184,7 +193,7 @@ export default {
         autoHideDelay: 5000,
         variant: 'danger'
       })
-    }
+    },
   }
 }
 </script>
@@ -312,6 +321,10 @@ body {
     }
     .dropdown-item:hover {
       background: transparent;
+    }
+    .menu-icon{
+      width: 28px;
+      height: 28px;
     }
     .menu-text {
       padding: .4rem 0;

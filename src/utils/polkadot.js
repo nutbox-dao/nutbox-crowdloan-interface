@@ -39,9 +39,9 @@ const POLKADOT_CHAIN_WEB_SOCKET_MAP = {
 }
 
 async function getApi() {
-  if (store.state.api[store.state.symbol]) {
-    return store.state.api[store.state.symbol]
-  }
+  // if (store.state.api[store.state.symbol]) {
+  //   return store.state.api[store.state.symbol]
+  // }
   const wsProvider = new WsProvider(POLKADOT_CHAIN_WEB_SOCKET_MAP[store.state.symbol])
   const api = await ApiPromise.create({
     provider: wsProvider,
@@ -50,7 +50,8 @@ async function getApi() {
       PalletId: 'Raw'
     }
   })
-  store.commit('saveApi', api)
+  // console.log('api', api);
+  // store.commit('saveApi', api)
   return api
 }
 
@@ -72,10 +73,9 @@ function createChildKey(trieIndex) {
 export const getFundInfo = async (paraId = [200]) => {
   const api = await getApi()
   paraId = paraId.map(p => parseInt(p))
-  console.log('paraids', paraId);
   try {
     const unwrapedFunds = (await api.query.crowdloan.funds.multi(paraId));
-    console.log('fund', unwrapedFunds);
+    // console.log('fund', unwrapedFunds);
     const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
     const decimal = await getDecimal()
     let funds = []
@@ -87,7 +87,7 @@ export const getFundInfo = async (paraId = [200]) => {
         continue
       }
       const unwrapedFund = fund.unwrap()
-      console.log('unwrapedFund', unwrapedFund);
+      // console.log('unwrapedFund', unwrapedFund);
       const {
         deposit,
         cap,
@@ -108,32 +108,26 @@ export const getFundInfo = async (paraId = [200]) => {
         amount: uni2Token(new BN(api.createType('(Balance, Vec<u8>)', v.unwrap())[0]), decimal).toString(),
         memo: api.createType('(Balance, Vec<u8>)', v.unwrap())[1].toHuman()
       }))
-      console.log('contri', contributions);
+      // console.log('contri', contributions);
+      const leasePeriod = await getLeasePeriod()
+      const currentPeriod = Math.floor(bestBlockNumber / leasePeriod)
       const leases = (await api.query.slots.leases(pId)).toJSON()
       const isWinner = leases.length > 0
+      const isCapped = raised >= cap
+      const isEnded = bestBlockNumber > end
 
       let status = ''
       let statusIndex = 0
-      if (retiring) {
-        if (bestBlockNumber > end) {
-          status = PARA_STATUS.COMPLETED
-          statusIndex = 2
-        } else {
+      if (retiring.toHuman()) {
           status = PARA_STATUS.RETIRED
           statusIndex = 1
-        }
       } else {
-        if (bestBlockNumber > end) {
-          if (isWinner) {
-            status = PARA_STATUS.ACTIVE
-            statusIndex = 0
-          } else {
-            status = PARA_STATUS.COMPLETED
-            statusIndex = 1
-          }
-        } else {
+        if (!(isCapped || isEnded || isWinner) && currentPeriod <= firstSlot){
           status = PARA_STATUS.ACTIVE
           statusIndex = 0
+        }else{
+          status = PARA_STATUS.COMPLETED
+          statusIndex = 2
         }
       }
       funds.push({
@@ -183,18 +177,19 @@ export const getDecimal = async () => {
 
 // subscribe new block
 export const subBlock = async () => {
+  console.log('sub block');
   const api = await getApi()
   let subBlock = store.state.subBlock
   try {
     //   cancel last subscribe
     subBlock()
   } catch (e) {}
-  console.log('sub block');
+  // console.log('sub block');
   subBlock = await api.rpc.chain.subscribeNewHeads((header) => {
     try {
       const number = header.number.toNumber()
-      store.commit('saveCurrentBlockNum', number)
       console.log('number', number);
+      store.commit('saveCurrentBlockNum', number)
     } catch (e) {
 
     }
@@ -227,10 +222,10 @@ export const connect = (callback) => {
     })
   })
 
-  api.on('ready', () => {
+  api.on('ready', async() => {
     store.commit('saveApiState', API_CONNECT_STATE.CONNECT_SUCCESS)
     console.log('connected');
-    loadAccounts()
+    await loadAccounts()
   })
 
   api.on('error', err => {
@@ -242,14 +237,16 @@ export const loadAccounts = async () => {
   try {
     await web3Enable('crowdloan')
     let allAccounts = await web3Accounts()
-
     await cryptoWaitReady();
     keyring.loadAll({
       isDevelopment: true
     }, allAccounts)
     console.log('accs:', allAccounts);
+    account = allAccounts.map(a => ({
+      ...a
+    }))
     store.commit('saveAllAccounts', allAccounts)
-    const account = store.state.account || allAccounts[0]
+    let account = store.state.account || allAccounts[0]
     store.commit('saveAccount', account)
     // inject
     await injectAccount(account)

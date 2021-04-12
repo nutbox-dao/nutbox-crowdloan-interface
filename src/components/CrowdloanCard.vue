@@ -103,7 +103,6 @@ export default {
       showContribute: false,
       showWithdraw: false,
       tokenSymbol: TOKEN_SYMBOL,
-      timePeriod: TIME_PERIOD,
       surportChains: SURPORT_CHAINS,
       surportCommunities: SURPORT_COMMUNITIES,
     };
@@ -131,6 +130,7 @@ export default {
     ]),
     ...mapGetters(["getProjectStatus", "getFundInfo", "currentBlockNum"]),
     status() {
+      console.log('status',this.getProjectStatus(this.paraId));
       return this.getProjectStatus(this.paraId);
     },
     fundInfo() {
@@ -151,25 +151,25 @@ export default {
       try {
         const end = parseInt(this.fundInfo.end);
         const diff = end - parseInt(this.currentBlockNum);
-        console.log("diff", diff, end, this.currentBlockNum);
+        const timePeriod = TIME_PERIOD
         if (diff > 0) {
           const secs = diff * BLOCK_SECOND;
-          const month = MATH.floor(secs / this.timePeriod["MONTH"]);
-          const day = MATH.floor(
-            (secs % this.timePeriod["MONTH"]) / this.timePeriod["DAY"]
+          const month = Math.floor(secs / timePeriod["MONTH"]);
+          const day = Math.floor(
+            (secs % timePeriod["MONTH"]) / timePeriod["DAY"]
           );
-          const hour = MATH.floor(
-            (secs % this.timePeriod["DAY"]) / this.timePeriod["HOUR"]
+          const hour = Math.floor(
+            (secs % timePeriod["DAY"]) / timePeriod["HOUR"]
           );
-          const min = MATH.floor(
-            (secs % this.timePeriod["HOUR"]) / this.timePeriod["MINUTES"]
+          const min = Math.floor(
+            (secs % timePeriod["HOUR"]) / timePeriod["MINUTES"]
           );
-          const sec = MATH.floor(secs % this.timePeriod["MINUTES"]);
-          if (secs >= this.timePeriod["MONTH"]) {
+          const sec = Math.floor(secs % timePeriod["MINUTES"]);
+          if (secs >= timePeriod["MONTH"]) {
             return month + "mons" + day + "days" + hour + "hrs";
-          } else if (secs >= this.timePeriod["DAY"]) {
+          } else if (secs >= timePeriod["DAY"]) {
             return day + "days" + hour + "hrs" + min + "mins";
-          } else if (secs >= this.timePeriod["HOUR"]) {
+          } else if (secs >= timePeriod["HOUR"]) {
             return hour + "hrs" + min + "mins";
           } else {
             return min + "mins" + sec + "sec";
@@ -177,18 +177,14 @@ export default {
         }
         return "Completed";
       } catch (e) {
+        console.error('err', e);
         return "";
       }
     },
     fund() {
       try {
-        const raised = parseFloat(this.fundInfo.raised).toFixed(4);
-        let cap = parseFloat(this.fundInfo.cap).toFixed(4);
-        if (cap >= 1e9) {
-          cap = (cap / 1e9).toFixed(4) + "B";
-        } else if (cap >= 1e6) {
-          cap = (cap / 1e6).toFixed(4) + "M";
-        }
+        const raised = this.convertUni(this.fundInfo.raised)
+        const cap = this.convertUni(this.fundInfo.cap)
         return raised + "/" + cap + this.tokenSymbol[this.symbol];
       } catch (e) {
         return "";
@@ -219,6 +215,23 @@ export default {
         default:
           return require("../static/images/card-completed.svg");
       }
+    },
+  },
+  methods: {
+    convertUni(uni) {
+      let res = parseFloat(uni).toFixed(4);
+      if (uni >= 1e18) {
+        res = (uni / 1e18).toFixed(4) + "E";
+      } else if (uni >= 1e15) {
+        res = (uni / 1e15).toFixed(4) + "P";
+      } else if (uni >= 1e12) {
+        res = (uni / 1e12).toFixed(4) + "T";
+      } else if (uni >= 1e9) {
+        res = (uni / 1e9).toFixed(4) + "B";
+      } else if (uni >= 1e6) {
+        res = (uni / 1e6).toFixed(4) + "M";
+      }
+      return res;
     },
   },
 };

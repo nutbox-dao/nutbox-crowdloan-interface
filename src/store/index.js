@@ -12,7 +12,7 @@ export default new Vuex.Store({
     subBlock:{},
     isConnected: true,
     account: Cookie.get('polkadot-account'),
-    allAccounts: null,
+    allAccounts: [],
     balance:0,
     projectFundInfos: [],
     currentBlockNum: {},
@@ -50,6 +50,11 @@ export default new Vuex.Store({
         state.projectFundInfos[state.symbol] = {}
       }
       state.projectFundInfos[state.symbol] = funds
+      let fundInfos = {}
+      for (const key of Object.keys(state.projectFundInfos)){
+        fundInfos[key] = state.projectFundInfos[key]
+      }
+      state.projectFundInfos = fundInfos
       // state.projectFundInfos = JSON.parse(JSON.stringify(state.projectFundInfos))
     },
     saveCurrentBlockNum: (state, blockNum) => {

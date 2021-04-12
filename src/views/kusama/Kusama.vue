@@ -2,16 +2,19 @@
   <div class="k-page crowdloan-page">
     <div class="bg" v-if="funds.length > 0"></div>
     <div class="empty-bg" v-else>
-      <img src="~@/static/images/empty-data.png" alt="">
+      <img src="~@/static/images/empty-data.png" alt="" />
       <p>No ongoing auction</p>
     </div>
     <div class="cards-container">
       <div class="container">
         <div class="row">
-          <div v-for="para of funds" :key="para">
-            <div class="col-lg-4 col-md-6" v-for="communitId of communitIds"
-                 :key="communitId">
-              <CrowdloanCard :paraId="para.paraId" :communityId="communitId"/>
+          <div v-for="para of funds" :key="para.paraId">
+            <div
+              class="col-lg-4 col-md-6"
+              v-for="communitId of communitIds"
+              :key="communitId"
+            >
+              <CrowdloanCard :paraId="para.paraId" :communityId="communitId" />
             </div>
           </div>
         </div>
@@ -31,15 +34,15 @@ import {
 } from "../../utils/polkadot";
 import { mapMutations, mapState, mapGetters } from "vuex";
 import { SURPORT_CHAINS, SURPORT_COMMUNITIES } from "../../config";
-import TipContribute from '../../components/TipBoxes/TipContribute'
-import TipWithdraw from '../../components/TipBoxes/TipWithdraw'
+import TipContribute from "../../components/TipBoxes/TipContribute";
+import TipWithdraw from "../../components/TipBoxes/TipWithdraw";
 
 export default {
-  name: 'Kusama',
+  name: "Kusama",
   components: {
     CrowdloanCard,
     TipContribute,
-    TipWithdraw
+    TipWithdraw,
   },
   data() {
     return {
@@ -47,30 +50,31 @@ export default {
     };
   },
   computed: {
-    ...mapState(["projectFundInfos",'symbol']),
-    funds (){
-      const fundInfos = this.getFundInfos()
-      return fundInfos || []
-    }
+    ...mapState(["projectFundInfos", "symbol"]),
+    funds() {
+      const fundInfos = this.getFundInfos();
+      console.log("fundInfos:", fundInfos);
+      return fundInfos || [];
+    },
   },
   methods: {
-    ...mapGetters(['getFundInfos']),
+    ...mapGetters(["getFundInfos"]),
     ...mapMutations([
       "saveProjectStatus",
       "saveProjectName",
       "saveCommunityName",
     ]),
   },
-  mounted() {
+  async mounted() {
     this.communitIds = Object.keys(SURPORT_COMMUNITIES);
+    subBlock();
+    const chains = Object.keys(SURPORT_CHAINS);
+    await getFundInfo(chains);
   },
-  async created() {
+  created() {
     this.$store.commit("saveSymbol", "ROCOCO");
-      await subBlock();
-      const chains = Object.keys(SURPORT_CHAINS);
-      await getFundInfo(chains);
   },
-}
+};
 </script>
 
 <style lang="less">
@@ -91,7 +95,7 @@ export default {
     height: 90vw;
     background-image: linear-gradient(
       to bottom,
-      rgba(255, 219, 27, .7),
+      rgba(255, 219, 27, 0.7),
       rgba(141, 231, 255, 0)
     );
     background-repeat: repeat-x;
