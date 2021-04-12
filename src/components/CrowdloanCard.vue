@@ -42,14 +42,14 @@
       <button
         class="primary-btn"
         v-show="status === 'Active'"
-        @click="$emit('showContributeModal')"
+        @click="showContribute=true"
       >
         Contribute
       </button>
       <button
         class="primary-btn"
         v-show="status === 'Retired'"
-        @click="$emit('showWithdrawModal')"
+        @click="showWithdraw=true"
       >
         Withdraw
       </button>
@@ -58,7 +58,7 @@
         disabled
         v-show="status === 'Completed'"
       >
-        Withdraw
+        Completed
       </button>
     </div>
     <ConnectWallet v-else />
@@ -130,7 +130,6 @@ export default {
     ]),
     ...mapGetters(["getProjectStatus", "getFundInfo", "currentBlockNum"]),
     status() {
-      console.log('status',this.getProjectStatus(this.paraId));
       return this.getProjectStatus(this.paraId);
     },
     fundInfo() {

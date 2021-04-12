@@ -59,10 +59,9 @@ export default {
     };
   },
   computed: {
-    ...mapState(["projectFundInfos", "symbol", "loadingFunds"]),
+    ...mapState(["projectFundInfos", "symbol", "loadingFunds", 'balance']),
     funds() {
       const fundInfos = this.getFundInfos();
-      console.log("fundInfos:", fundInfos);
       return fundInfos || [];
     },
   },

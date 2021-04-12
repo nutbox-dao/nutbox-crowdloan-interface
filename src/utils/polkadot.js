@@ -84,7 +84,6 @@ export const getFundInfo = async (paraId = [200]) => {
       const fund = unwrapedFunds[i]
       const pId = paraId[i]
       if (!fund) {
-        console.log('no info');
         continue
       }
       const unwrapedFund = fund.unwrap()
@@ -180,7 +179,6 @@ export const getDecimal = async () => {
 
 // subscribe new block
 export const subBlock = async () => {
-  console.log('sub block');
   const api = await getApi()
   let subBlock = store.state.subBlock
   try {
@@ -251,6 +249,7 @@ export const loadAccounts = async () => {
     store.commit('saveAllAccounts', allAccounts)
     let account = store.state.account || allAccounts[0]
     store.commit('saveAccount', account)
+    getBalance(account)
     // inject
     await injectAccount(account)
   } catch (e) {
@@ -266,13 +265,16 @@ export const injectAccount = async (account) => {
 }
 
 export const getBalance = async (account) => {
-  const api = getApi()
+  const api = await getApi()
+  console.log('api', api);
   const {
     nonce,
     data: balance
   } = await api.query.system.account(account.address)
+  console.log('data', balance);
   const decimal = await getDecimal()
   const res = uni2Token(new BN(balance.free), decimal)
+  console.log('banlance', res.toNumber());
   store.commit('saveBalance', res.toNumber())
   return res.toNumber()
 }
