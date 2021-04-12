@@ -116,7 +116,7 @@ export const getFundInfo = async (paraId = [200]) => {
       const currentPeriod = Math.floor(bestBlockNumber / leasePeriod)
       const leases = (await api.query.slots.leases(pId)).toJSON()
       const isWinner = leases.length > 0
-      const isCapped = raised >= cap
+      const isCapped = (new BN(raised)).gte(new BN(cap))
       const isEnded = bestBlockNumber > end
 
       let status = ''
