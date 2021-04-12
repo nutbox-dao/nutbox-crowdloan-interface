@@ -112,7 +112,7 @@ export default {
       type: Number,
     },
     communityId: {
-      type: Number,
+      type: String,
     },
   },
   components: {

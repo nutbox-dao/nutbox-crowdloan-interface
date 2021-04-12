@@ -16,11 +16,17 @@ export const TOKEN_SYMBOL = {
     "ROCOCO": "ROC"
   }
 
+export const CHAIN_ID = {
+    "POLKADOT": 0,
+    "KUSAMA": 1,
+    "ROCOCO": 2
+}
+
 export const SURPORT_CHAINS = {
     200: 'Phala',
     300: 'Acala',
 }
 
 export const SURPORT_COMMUNITIES = {
-    0: 'BML'
+    '0': 'BML'
 }

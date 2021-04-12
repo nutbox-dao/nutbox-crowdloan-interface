@@ -73,9 +73,9 @@ export default {
     ]),
   },
   async mounted() {
-    this.communitIds = Object.keys(SURPORT_COMMUNITIES).map(c => parseInt(c));
+    this.communitIds = Object.keys(SURPORT_COMMUNITIES);
     subBlock();
-    const chains = Object.keys(SURPORT_CHAINS).map(c => parseInt(c));
+    const chains = Object.keys(SURPORT_CHAINS);
     await getFundInfo(chains);
   },
   created() {

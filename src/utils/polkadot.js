@@ -26,7 +26,8 @@ import {
   POLKADOT_WEB_SOCKET,
   KUSAMA_WEB_SOCKEY,
   ROCOCO_WEB_SOCKET,
-  PARA_STATUS
+  PARA_STATUS,
+  CHAIN_ID
 } from "../config"
 import store from "../store"
 import {
@@ -121,13 +122,13 @@ export const getFundInfo = async (paraId = [200]) => {
       let status = ''
       let statusIndex = 0
       if (retiring.toHuman()) {
-          status = PARA_STATUS.RETIRED
-          statusIndex = 1
+        status = PARA_STATUS.RETIRED
+        statusIndex = 1
       } else {
-        if (!(isCapped || isEnded || isWinner) && currentPeriod <= firstSlot){
+        if (!(isCapped || isEnded || isWinner) && currentPeriod <= firstSlot) {
           status = PARA_STATUS.ACTIVE
           statusIndex = 0
-        }else{
+        } else {
           status = PARA_STATUS.COMPLETED
           statusIndex = 2
         }
@@ -153,7 +154,7 @@ export const getFundInfo = async (paraId = [200]) => {
     store.commit('saveProjectFundInfos', funds)
   } catch (e) {
     console.error('error', e);
-  }finally {
+  } finally {
     store.commit('saveLoadingFunds', false)
   }
 }
@@ -225,7 +226,7 @@ export const connect = (callback) => {
     })
   })
 
-  api.on('ready', async() => {
+  api.on('ready', async () => {
     store.commit('saveApiState', API_CONNECT_STATE.CONNECT_SUCCESS)
     console.log('connected');
     await loadAccounts()
@@ -319,9 +320,9 @@ export const withdraw = async (paraId) => {
     if (!from) {
       reject('no account')
     }
-    const nonce = (await api.query.system.account(store.state.account.address)).nonce.toNumber()
-    const unsub = await api.tx.crowdloan.withdraw(from, paraId).signAndSend(sender, {
-      nonce: nonce++
+    const nonce = (await api.query.system.account(from)).nonce.toNumber()
+    const unsub = await api.tx.crowdloan.withdraw(from, paraId).signAndSend(from, {
+      nonce
     }, (result) => {
       if (result.status.isInBlock) {
         console.log("Transaction included at blockHash ", result.status.asInBlock);
@@ -336,8 +337,32 @@ export const withdraw = async (paraId) => {
 }
 
 
-export const contribute = async (memo) => {
-
+export const contribute = async (paraId, amount, communityId, childId, trieIndex) => {
+  return new Promise(async (resolve, reject) => {
+    const from = store.state.account && store.state.account.address
+    if (!from) {
+      reject('no account')
+    }
+    const api = await injectAccount(store.state.account)
+    const decimal = await getDecimal()
+    paraId = api.createType('Compact<u32>', paraId)
+    amount = api.createType('Compact<BalanceOf>', new BN(amount).mul(new BN(10).pow(decimal)))
+    const nonce = (await api.query.system.account(from)).nonce.toNumber()
+    console.log('amount', amount.toNumber());
+    const unsub = await api.tx.crowdloan.contribute(paraId, amount, null).signAndSend(from, {
+      nonce
+    }, (result) => {
+      if (result.status.isInBlock) {
+        console.log("Transaction included at blockHash ", result.status.asInBlock.toJSON());
+      } else if (result.status.isFinalized) {
+        console.log('contribute result:', result.toJSON());
+        unsub()
+        resolve(result.status.asFinalized)
+      }
+    }).catch(err => {
+      reject(err)
+    })
+  })
 }
 
 export const addMemo = async (memo) => {
