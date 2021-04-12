@@ -1,20 +1,29 @@
 <template>
   <div class="k-page crowdloan-page">
-    <div class="bg" v-if="funds.length > 0"></div>
-    <div class="empty-bg" v-else>
-      <img src="~@/static/images/empty-data.png" alt="" />
-      <p>No ongoing auction</p>
+    <div class="loading-bg" v-if="loadingFunds">
+      <img src="~@/static/images/loading.gif" alt="" />
+      <p class="font16">Loading, please wait</p>
     </div>
-    <div class="cards-container">
-      <div class="container">
-        <div class="row">
-          <div v-for="para of funds" :key="para.paraId">
-            <div
-              class="col-lg-4 col-md-6"
-              v-for="communitId of communitIds"
-              :key="communitId"
-            >
-              <CrowdloanCard :paraId="para.paraId" :communityId="communitId" />
+    <div v-else>
+      <div class="bg" v-if="funds.length > 0"></div>
+      <div class="empty-bg" v-else>
+        <img src="~@/static/images/empty-data.png" alt="" />
+        <p>No ongoing auction</p>
+      </div>
+      <div class="cards-container">
+        <div class="container">
+          <div class="row">
+            <div v-for="para of funds" :key="para.paraId">
+              <div
+                class="col-lg-4 col-md-6"
+                v-for="communitId of communitIds"
+                :key="communitId"
+              >
+                <CrowdloanCard
+                  :paraId="para.paraId"
+                  :communityId="communitId"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -50,7 +59,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(["projectFundInfos", "symbol"]),
+    ...mapState(["projectFundInfos", "symbol", "loadingFunds"]),
     funds() {
       const fundInfos = this.getFundInfos();
       console.log("fundInfos:", fundInfos);
@@ -109,6 +118,22 @@ export default {
     transform: translate(-50%, -50%);
     img {
       height: 7rem;
+    }
+  }
+  .loading-bg {
+    display: flex;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    img {
+      margin-top: 12rem;
+    }
+    p {
+      margin-top: 1rem;
+      font-weight: 400;
+      color: #bdbfc2;
+      line-height: 22px;
     }
   }
   .cards-container {

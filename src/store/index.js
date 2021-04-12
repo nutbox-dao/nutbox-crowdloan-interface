@@ -11,6 +11,7 @@ export default new Vuex.Store({
     symbol:'',
     subBlock:{},
     isConnected: true,
+    loadingFunds: true,
     account: Cookie.get('polkadot-account'),
     allAccounts: [],
     balance:0,
@@ -28,6 +29,9 @@ export default new Vuex.Store({
     },
     saveApiState: (state, apiState) => {
       state.apiState = apiState
+    },
+    saveLoadingFunds: (state, loadingFunds) => {
+      state.loadingFunds = loadingFunds
     },
     saveApi: (state, api) => {
       state.api[state.symbol] = api

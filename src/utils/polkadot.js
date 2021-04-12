@@ -74,6 +74,7 @@ export const getFundInfo = async (paraId = [200]) => {
   const api = await getApi()
   paraId = paraId.map(p => parseInt(p))
   try {
+    store.commit('saveLoadingFunds', true)
     const unwrapedFunds = (await api.query.crowdloan.funds.multi(paraId));
     // console.log('fund', unwrapedFunds);
     const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
@@ -151,6 +152,8 @@ export const getFundInfo = async (paraId = [200]) => {
     store.commit('saveProjectFundInfos', funds)
   } catch (e) {
     console.error('error', e);
+  }finally {
+    store.commit('saveLoadingFunds', false)
   }
 }
 
