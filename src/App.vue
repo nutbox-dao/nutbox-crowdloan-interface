@@ -368,6 +368,7 @@ body {
     }
     .v-menu-item {
       padding: .8rem;
+      white-space: nowrap;
     }
   }
 }
