@@ -9,9 +9,9 @@
       <div class="container">
         <div class="row">
           <div v-for="para of funds" :key="para">
-            <div class="col-lg-4 col-md-6" v-for="community of communitId"
-                 :key="community">
-              <CrowdloanCard :paraId="para.paraId" :communityId="community"/>
+            <div class="col-lg-4 col-md-6" v-for="communitId of communitIds"
+                 :key="communitId">
+              <CrowdloanCard :paraId="para.paraId" :communityId="communitId"/>
             </div>
           </div>
         </div>
@@ -43,7 +43,7 @@ export default {
   },
   data() {
     return {
-      communitId: [],
+      communitIds: [],
     };
   },
   computed: {
@@ -62,7 +62,7 @@ export default {
     ]),
   },
   mounted() {
-    this.communitId = Object.keys(SURPORT_COMMUNITIES);
+    this.communitIds = Object.keys(SURPORT_COMMUNITIES);
   },
   async created() {
     this.$store.commit("saveSymbol", "ROCOCO");
@@ -91,7 +91,7 @@ export default {
     height: 90vw;
     background-image: linear-gradient(
       to bottom,
-      rgba(166, 225, 249, 1),
+      rgba(255, 219, 27, .7),
       rgba(141, 231, 255, 0)
     );
     background-repeat: repeat-x;

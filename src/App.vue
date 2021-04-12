@@ -8,21 +8,34 @@
               <img src="~@/static/images/logo.png" alt="" class="logo-brand"
                    @click="selectMenu(0, '/')">
             </b-navbar-brand>
-            <div class="mobile-menu flex-start-center">
-              <b-nav-item class="user-address flex-between-center">
-                <img src="~@/static/images/account.png" alt="">
-              </b-nav-item>
+            <div class="mobile-menu">
+              <div v-b-toggle.sidebar-backdrop>
+                <img src="~@/static/images/menu-btn.svg" alt="">
+              </div>
+              <b-sidebar id="sidebar-backdrop" right no-header ref="sidebar"
+                         width="60%" sidebar-class="menu-sidebar"
+                         backdrop-variant="dark" backdrop z-index="100">
+                <div class="close-btn">
+                  <img v-b-toggle.sidebar-backdrop.close src="~@/static/images/close.svg" alt="">
+                </div>
+                <div class="v-menu">
+                  <div class="v-menu-item flex-start-center">
+                    <img src="~@/static/images/logo.png" alt="" class="logo-brand"
+                         @click="selectMenu(0, '/')">
+                  </div>
+                  <div class="v-menu-item flex-start-center" v-for="item of vMenuOptions" :key="item.id"
+                       @click="selectMenu(item.id, item.url)">
+                    <div class="v-menu-line" :class="item.id === activeNav?'active':''"></div>
+                    <span class="font-bold">{{item.label}}</span>
+                  </div>
+                </div>
+              </b-sidebar>
             </div>
-            <div class="menu-btn">
-              <img src="~@/static/images/menu-btn.svg" alt="">
-              <b-navbar-toggle target="nav-collapse" @click="expandMenu"></b-navbar-toggle>
-            </div>
-
             <b-collapse id="nav-collapse" is-nav>
               <b-navbar-nav class="mr-auto">
-                <b-nav-item v-for="(item,index) of menuOptions" :key="item.id"
-                            href="javascript:void(0)" :class="activeNav === index? 'active':''"
-                            @click="selectMenu(index, item.url)">{{ item.label }}
+                <b-nav-item v-for="item of hMenuOptions" :key="item.id"
+                            href="javascript:void(0)" :class="activeNav === item.id? 'active':''"
+                            @click="selectMenu(item.id, item.url)">{{ item.label }}
                 </b-nav-item>
               </b-navbar-nav>
               <div class="mobile-address">
@@ -98,17 +111,29 @@ export default {
       'isConnected',
       'allAccounts',
       'account'
-    ])
+    ]),
+    hMenuOptions () {
+      return this.menuOptions.filter(item => {
+        return item.h
+      })
+    },
+    vMenuOptions () {
+      return this.menuOptions.filter(item => {
+        return item.v
+      })
+    }
   },
   data () {
     return {
       menuOptions: [
-        { id: 'home', url: '/', label: 'Home' },
-        { id: 'kusama', url: '/kusama', label: 'Kusuma Crowdloan' },
-        { id: 'polkadot', url: '/polkadot', label: 'Polkadot Crowdloan' }
+        { id: 'home', url: '/', label: 'Home', h: true, v: false },
+        { id: 'kusama', url: '/kusama', label: 'Kusuma Crowdloan', h: true, v: true },
+        { id: 'polkadot', url: '/polkadot', label: 'Polkadot Crowdloan', h: true, v: true },
+        { id: 'contributions', url: '/contributions', label: 'Contributions', h: false, v: true },
+        { id: 'dashboard', url: '/dashboard', label: 'Dashboard', h: false, v: true }
       ],
       accountsPop: false,
-      activeNav: -1,
+      activeNav: 'home',
       menuIsExpand: false
     }
   },
@@ -133,25 +158,18 @@ export default {
     setActiveMenu () {
       for (let index = 0; index < this.menuOptions.length; index++) {
         if (this.menuOptions[index].url === this.$route.path) {
-          this.activeNav = index
+          this.activeNav = this.menuOptions[index].id
           break
         }
       }
     },
-    selectMenu (index, url) {
-      if (index === 2) return;
-      this.activeNav = index
-      this.$router.push(url)
-    },
-    expandMenu () {
-      this.menuIsExpand = !this.menuIsExpand
-      if (this.menuIsExpand) {
-        document.querySelector('.page-header').classList.add('header-expand')
-      } else {
-        setTimeout(() => {
-          document.querySelector('.page-header').classList.remove('header-expand')
-        }, 200)
+    selectMenu (id, url) {
+      if (id === this.activeNav || id === 'polkadot') {
+        this.$refs.sidebar.hide()
+        return
       }
+      this.activeNav = id
+      this.$router.push(url)
     },
     formatUserAddress (address) {
       if (!address) return 'Loading Account'
@@ -193,7 +211,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: #242629;
   height: 100%;
 }
 #app {
@@ -219,10 +237,13 @@ body {
   user-select: none;
 }
 .page-header {
+  position: fixed;
+  width: 100%;
   background: white;
-  //box-shadow: 0 10px 10px rgba(0, 0, 0, 0.04) ;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.04) ;
   border-bottom-left-radius: 1.2rem;
   border-bottom-right-radius: 1.2rem;
+  z-index: 10;
   .navbar-expand-lg {
     background: transparent;
   }
@@ -246,6 +267,7 @@ body {
   .navbar-brand {
     display: flex;
     align-items: center;
+    min-height: 58px;
   }
   .logo-brand {
     height: 2.8rem;
@@ -309,9 +331,32 @@ body {
       margin-right: 10px;
     }
   }
+  .menu-sidebar {
+    padding: 1rem;
+    max-width: 320px;
+    .close-btn {
+      text-align: right;
+      img {
+        width: 2rem;
+      }
+    }
+    .v-menu-line {
+      width: 4px;
+      height: 20px;
+      background-color: rgba(0,0,0,.05);
+      margin-right: 10px;
+      &.active {
+        background-color: var(--primary-custom);
+      }
+    }
+    .v-menu-item {
+      padding: .8rem;
+    }
+  }
 }
 .page-content {
   flex: 1;
   overflow: hidden;
+  z-index: 1;
 }
 </style>
