@@ -4,7 +4,7 @@
       <img src="~@/static/images/loading.gif" alt="" />
       <p class="font16">Loading, please wait</p>
     </div>
-    <div v-else>
+    <template v-else>
       <div class="bg" v-if="funds.length > 0"></div>
       <div class="empty-bg" v-else>
         <img src="~@/static/images/empty-data.png" alt="" />
@@ -13,9 +13,8 @@
       <div class="cards-container">
         <div class="container">
           <div class="row">
-            <div v-for="para of funds" :key="para.paraId">
+            <div class="col-lg-4 col-md-6" v-for="para of funds" :key="para.paraId">
               <div
-                class="col-lg-4 col-md-6"
                 v-for="communitId of communitIds"
                 :key="communitId"
               >
@@ -28,7 +27,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -94,7 +93,7 @@ export default {
   .bg {
     position: absolute;
     left: 50%;
-    top: 2rem;
+    top: 4.6rem;
     transform: translateX(-50%);
     margin: auto;
     max-width: 34rem;
@@ -138,7 +137,7 @@ export default {
   .cards-container {
     height: 100%;
     overflow: auto;
-    padding-top: 3rem;
+    padding-top: 6.6rem;
     padding-bottom: 3rem;
   }
 }

@@ -122,7 +122,7 @@ export default {
   height: 16rem;
   margin-top: 40px;
   border-radius: 1.4rem;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
   background-color: white;
   display: flex;
   flex-direction: column;

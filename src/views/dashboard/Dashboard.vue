@@ -71,7 +71,7 @@ export default {
   background: rgba(246, 247, 249, 1);
   overflow: scroll;
   position: relative;
-  padding-top: 3.6rem;
+  padding-top: 4.6rem;
 }
 .table-card {
   border-radius: 1.4rem;
