@@ -53,7 +53,7 @@
                           <span style="margin-left:8px">{{ formatUserAddress(account && account.meta.name) }}</span>
                         </div>
                       </template>
-                      <b-dropdown-item v-for="(item,index) of (allAccounts ? allAccounts : [])" :key="index" @click="saveAccount(item)">
+                      <b-dropdown-item v-for="(item,index) of (allAccounts ? allAccounts : [])" :key="index" @click="changeAccount(item)">
                         <template>
                           <div class="flex-between-center">
                             <Identicon class="ident-icon" :size='30' theme='polkadot' :value="item.address"/>
@@ -100,7 +100,7 @@
 import { mapState, mapMutations } from 'vuex'
 import ConnectWallet from './components/Buttons/ConnectWallet'
 import Identicon from '@polkadot/vue-identicon'
-import { connect, loadAccounts } from './utils/polkadot'
+import { getBalance, loadAccounts } from './utils/polkadot'
 
 export default {
   name: 'App',
@@ -194,6 +194,10 @@ export default {
         variant: 'danger'
       })
     },
+    changeAccount (acc) {
+      this.saveAccount(acc)
+      getBalance(acc)
+    }
   }
 }
 </script>

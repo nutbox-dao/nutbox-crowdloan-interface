@@ -38,10 +38,13 @@ const POLKADOT_CHAIN_WEB_SOCKET_MAP = {
   'ROCOCO': ROCOCO_WEB_SOCKET
 }
 
+let _api = {}
+
 async function getApi() {
-  // if (store.state.api[store.state.symbol]) {
-  //   return store.state.api[store.state.symbol]
-  // }
+  if (_api && _api[store.state.symbol]) {
+    console.log('has api');
+    return _api[store.state.symbol]
+  }
   const wsProvider = new WsProvider(POLKADOT_CHAIN_WEB_SOCKET_MAP[store.state.symbol])
   const api = await ApiPromise.create({
     provider: wsProvider,
@@ -50,8 +53,7 @@ async function getApi() {
       PalletId: 'Raw'
     }
   })
-  // console.log('api', api);
-  // store.commit('saveApi', api)
+  _api[store.state.symbol] = api
   return api
 }
 
@@ -266,15 +268,12 @@ export const injectAccount = async (account) => {
 
 export const getBalance = async (account) => {
   const api = await getApi()
-  console.log('api', api);
   const {
     nonce,
     data: balance
   } = await api.query.system.account(account.address)
-  console.log('data', balance);
   const decimal = await getDecimal()
   const res = uni2Token(new BN(balance.free), decimal)
-  console.log('banlance', res.toNumber());
   store.commit('saveBalance', res.toNumber())
   return res.toNumber()
 }
@@ -334,4 +333,13 @@ export const withdraw = async (paraId) => {
       reject(err)
     })
   })
+}
+
+
+export const contribute = async (memo) => {
+
+}
+
+export const addMemo = async (memo) => {
+
 }

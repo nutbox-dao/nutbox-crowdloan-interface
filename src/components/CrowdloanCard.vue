@@ -75,7 +75,7 @@
       hide-footer
       no-close-on-backdrop
     >
-      <TipContribute @hideContribute="showContribute = false" />
+      <TipContribute :communityId="communityId" :paraId="paraId" @hideContribute="showContribute = false" />
     </b-modal>
     <b-modal
       v-model="showWithdraw"
@@ -112,7 +112,7 @@ export default {
       type: Number,
     },
     communityId: {
-      type: String,
+      type: Number,
     },
   },
   components: {

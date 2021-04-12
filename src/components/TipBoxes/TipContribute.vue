@@ -3,14 +3,14 @@
     <img class="close-btn" src="~@/static/images/close.svg" alt="" @click="hide">
     <div class="tip-contribute">
       <div class="text-center mb-4 font20">
-        Contribute to<span class="big"> PLASM </span>crowdloan <br>
-        fund in<span class="big"> Kusuma </span>network
+        Contribute to<span class="big"> {{paraName}} </span>crowdloan <br>
+        fund in<span class="big"> {{symbol}} </span>network
       </div>
       <div class="input-group-box">
         <div class="label">Amount</div>
         <div class="flex-between-center">
           <input type="number" v-model="inputAmount" placeholder="Staking amount">
-          <span>KSM</span>
+          <span>{{ paraTokenSymbol }}</span>
         </div>
       </div>
       <div class="input-group-box">
@@ -28,10 +28,32 @@
 </template>
 
 <script>
+import { mapState, mapGetters } from "vuex";
+import {TOKEN_SYMBOL, SURPORT_CHAINS, SURPORT_COMMUNITIES} from "../../config"
+import { BLOCK_SECOND, TIME_PERIOD } from "../../constant";
+import { contribute } from "../../utils/polkadot"
+
 export default {
   data() {
     return {
-      inputAmount: ''
+      inputAmount: '',
+    }
+  },
+  props: {
+    communityId: {
+      type: Number
+    },
+    paraId: {
+      type: Number
+    },
+  },
+  computed: {
+    ...mapState(['symbol']),
+    paraName() {
+      return SURPORT_CHAINS[this.paraId]
+    },
+    paraTokenSymbol() {
+      return TOKEN_SYMBOL[this.symbol]
     }
   },
   methods: {
