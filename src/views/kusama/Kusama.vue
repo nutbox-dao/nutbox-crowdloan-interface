@@ -36,9 +36,7 @@ import CrowdloanCard from "../../components/CrowdloanCard";
 import {
   getFundInfo,
   subBlock,
-  NumberTo4BytesU8A,
-  loadAccounts,
-  connect,
+  contribute
 } from "../../utils/polkadot";
 import { mapMutations, mapState, mapGetters } from "vuex";
 import { SURPORT_CHAINS, SURPORT_COMMUNITIES } from "../../config";

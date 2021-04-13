@@ -249,6 +249,9 @@ body {
   -ms-user-select: none;
   user-select: none;
 }
+.spinner-grow {
+  margin-right: 8px;
+}
 .page-header {
   position: fixed;
   width: 100%;

@@ -6,6 +6,8 @@ import {
   u8aConcat,
   u8aToHex,
   numberToU8a,
+  isHex,
+  hexToU8a
 } from "@polkadot/util"
 import {
   web3Accounts,
@@ -27,12 +29,14 @@ import {
   KUSAMA_WEB_SOCKEY,
   ROCOCO_WEB_SOCKET,
   PARA_STATUS,
-  CHAIN_ID
+  CHAIN_ID,
+  SURPORT_CHAINS
 } from "../config"
 import store from "../store"
 import {
   API_CONNECT_STATE
 } from '../constant'
+
 const POLKADOT_CHAIN_WEB_SOCKET_MAP = {
   'POLKADOT': POLKADOT_WEB_SOCKET,
   'KUSAMA': KUSAMA_WEB_SOCKEY,
@@ -73,11 +77,11 @@ function createChildKey(trieIndex) {
   );
 }
 
-export const getFundInfo = async (paraId = [200]) => {
+export const getFundInfo = async (paraId = [200], needUpdate=true) => {
   const api = await getApi()
   paraId = paraId.map(p => parseInt(p))
   try {
-    store.commit('saveLoadingFunds', true)
+    if (needUpdate) store.commit('saveLoadingFunds', true)
     const unwrapedFunds = (await api.query.crowdloan.funds.multi(paraId));
     // console.log('fund', unwrapedFunds);
     const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
@@ -86,7 +90,7 @@ export const getFundInfo = async (paraId = [200]) => {
     for (let i = 0; i < unwrapedFunds.length; i++) {
       const fund = unwrapedFunds[i]
       const pId = paraId[i]
-      if (!fund) {
+      if (!fund.toJSON()) {
         continue
       }
       const unwrapedFund = fund.unwrap()
@@ -138,12 +142,12 @@ export const getFundInfo = async (paraId = [200]) => {
         status,
         statusIndex,
         deposit: uni2Token(new BN(deposit), decimal).toString(),
-        cap: uni2Token(new BN(cap), decimal).toString(),
+        cap: uni2Token(new BN(cap), decimal),
         depositor,
         end: new BN(end),
         firstSlot: new BN(firstSlot),
         lastSlot: new BN(lastSlot),
-        raised: uni2Token(new BN(raised), decimal).toString(),
+        raised: uni2Token(new BN(raised), decimal),
         retiring,
         trieIndex,
         funds: contributions
@@ -237,6 +241,20 @@ export const connect = (callback) => {
     store.commit('saveApiState', API_CONNECT_STATE.CONNECT_ERROR)
   })
 }
+
+export const validAddress = (address) => {
+  try {
+    encodeAddress(
+      isHex(address) ?
+      hexToU8a(address) :
+      decodeAddress(address)
+    );
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
 export const loadAccounts = async () => {
   try {
     await web3Enable('crowdloan')
@@ -269,14 +287,17 @@ export const injectAccount = async (account) => {
 
 export const getBalance = async (account) => {
   const api = await getApi()
-  const {
-    nonce,
-    data: balance
-  } = await api.query.system.account(account.address)
+  // cancel last
+  let subBalance = store.state.subBalance
   const decimal = await getDecimal()
-  const res = uni2Token(new BN(balance.free), decimal)
-  store.commit('saveBalance', res.toNumber())
-  return res.toNumber()
+  try{
+    subBalance()
+  }catch(e){}
+  
+  subBalance = await api.query.system.account(store.state.account.address, ({ data: { free: currentFree}, nonce: currentNonce }) => {
+    store.commit('saveBalance', uni2Token(new BN(currentFree), decimal))
+  })
+  store.commit('saveSubBalance', subBalance)
 }
 
 export function getNodeId(address) {
@@ -286,9 +307,10 @@ export function getNodeId(address) {
 function NumberTo4BytesU8A(number) {
   let buf = new Uint8Array(4);
   let tmp = numberToU8a(number);
-  if (tmp.length > 4) throw new Error('Unsupported size of number');
-  for (let i = tmp.length; i > 0; i--) {
-    buf[4 - i] = tmp[i - 1];
+  const tmpLength = tmp.length
+  if (tmpLength > 4) throw new Error('Unsupported size of number');
+  for(let i = tmpLength; i > 0; i--) {
+      buf[4-i] = tmp[tmpLength - i];
   }
   return buf;
 }
@@ -313,9 +335,21 @@ export function encodeMemo(memo) {
   return '0x' + Buffer.from(buf).toString('hex');
 }
 
-export const withdraw = async (paraId) => {
-  const api = await getApi()
+function decodeMemo(hex) {
+  let buf = hexToU8a(hex);
+  return {
+      chain: buf[0],
+      parent: buf.slice(1, 9),
+      child: buf.slice(9, 17),
+      height: parseInt(u8aToHex(buf.slice(17, 21))),
+      paraId: parseInt(u8aToHex(buf.slice(21, 25))),
+      trieIndex: parseInt(u8aToHex(buf.slice(25, 29)))
+  }
+}
+
+export const withdraw = async (paraId, toast) => {
   return new Promise(async (resolve, reject) => {
+    const api = await injectAccount(store.state.account)
     const from = store.state.account && store.state.account.address
     if (!from) {
       reject('no account')
@@ -324,11 +358,26 @@ export const withdraw = async (paraId) => {
     const unsub = await api.tx.crowdloan.withdraw(from, paraId).signAndSend(from, {
       nonce
     }, (result) => {
-      if (result.status.isInBlock) {
-        console.log("Transaction included at blockHash ", result.status.asInBlock);
-      } else if (result.status.isFinalized) {
+      let contriHash = ''
+      const status = result.status
+      if (status.isBroadcast){
+        toast("Transaction Is Broadcasting.", {
+          title: 'Info',
+          autoHideDelay: 8000,
+          variant: 'warning'
+        })
+      } else if (status.isInBlock) {
+        console.log("Transaction included at blockHash.", result, status.asInBlock.toJSON());
+        contriHash = result.status.asInBlock.toJSON()
+        toast("Transaction In Block!", {
+          title: 'Info',
+          autoHideDelay: 12000,
+          variant: 'warning'
+        })
+      } else if (status.isFinalized) {
         unsub()
-        resolve(result.status.asFinalized)
+        // 上传daemon
+        resolve(status.asFinalized)
       }
     }).catch((err) => {
       reject(err)
@@ -337,7 +386,7 @@ export const withdraw = async (paraId) => {
 }
 
 
-export const contribute = async (paraId, amount, communityId, childId, trieIndex) => {
+export const contribute = async (paraId, amount, communityId, childId, trieIndex, toast) => {
   return new Promise(async (resolve, reject) => {
     const from = store.state.account && store.state.account.address
     if (!from) {
@@ -348,16 +397,38 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
     paraId = api.createType('Compact<u32>', paraId)
     amount = api.createType('Compact<BalanceOf>', new BN(amount).mul(new BN(10).pow(decimal)))
     const nonce = (await api.query.system.account(from)).nonce.toNumber()
-    console.log('amount', amount.toNumber());
-    const unsub = await api.tx.crowdloan.contribute(paraId, amount, null).signAndSend(from, {
+    const unsubContribution = await api.tx.crowdloan.contribute(paraId, amount, null).signAndSend(from, {
       nonce
     }, (result) => {
-      if (result.status.isInBlock) {
-        console.log("Transaction included at blockHash ", result.status.asInBlock.toJSON());
-      } else if (result.status.isFinalized) {
-        console.log('contribute result:', result.toJSON());
-        unsub()
-        resolve(result.status.asFinalized)
+      let contriHash = ''
+      const status = result.status
+      try {
+        console.log(1111, status.asBroadcast.toJSON());
+      } catch (e) {}
+      if (status.isBroadcast) {
+        toast("Transaction Is Broadcasting.", {
+          title: 'Info',
+          autoHideDelay: 8000,
+          variant: 'warning'
+        })
+      }else if (status.isInBlock) {
+        console.log("Transaction included at blockHash.", result, status.asInBlock.toJSON());
+        contriHash = result.status.asInBlock.toJSON()
+        toast("Transaction In Block!", {
+          title: 'Info',
+          autoHideDelay: 12000,
+          variant: 'warning'
+        })
+      } else if (status.isFinalized) {
+        console.log('contribute result:', result);
+        unsubContribution()
+        // 更新数据
+        const chains = Object.keys(SURPORT_CHAINS);
+        getFundInfo(chains, false);
+        // 上传daemon
+        // 添加memo
+        addMemo(communityId, childId, paraId, trieIndex)
+        resolve(status.isFinalized)
       }
     }).catch(err => {
       reject(err)
@@ -365,6 +436,31 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
   })
 }
 
-export const addMemo = async (memo) => {
+export const addMemo = async (parent, child, paraId, trieIndex) => {
+  const from = store.state.account.address
+  const api = await injectAccount(store.state.account)
+  const chain = CHAIN_ID[store.state.symbol]
+  const height = store.getters.currentBlockNum
+  const memo = {
+    chain,
+    parent: getNodeId(parent),
+    child: getNodeId(child),
+    height: parseInt(height),
+    paraId: parseInt(paraId),
+    trieIndex: parseInt(trieIndex)
+  }
+  
+  const nonce = (await api.query.system.account(from)).nonce.toNumber()
+  const encodememo = encodeMemo(memo)
+  const unsub = await api.tx.crowdloan.addMemo(paraId, encodememo).signAndSend(from, {
+    nonce
+  }, (res) => {
+    if (res.status.isInBlock){
+      console.log(
+        'hash', res.status.asInBlock.toJSON()
+      );
+    }
+    if (res.status.isFinalized) unsub()
+  })
 
 }

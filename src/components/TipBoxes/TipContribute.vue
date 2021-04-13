@@ -33,51 +33,159 @@
           <span class="text-grey" style="opacity: 0.4">(optional)</span>
         </div>
       </div>
-      <button class="primary-btn" @click="confirm">Confirm & Sign</button>
+      <button class="primary-btn" @click="confirm" :disabled="isComtribution">
+        <b-spinner small type="grow" v-show="isComtribution"></b-spinner>Confirm
+        & Sign
+      </button>
     </div>
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import {TOKEN_SYMBOL, SURPORT_CHAINS, SURPORT_COMMUNITIES } from "../../config"
-import { BLOCK_SECOND, TIME_PERIOD } from "../../constant";
-import { contribute } from "../../utils/polkadot"
+import {
+  TOKEN_SYMBOL,
+  SURPORT_CHAINS,
+} from "../../config";
+import { contribute, validAddress } from "../../utils/polkadot";
+import BN from "bn.js";
 
 export default {
   data() {
     return {
-      inputAmount: '',
-      inputNonimator: '',
+      inputAmount: "",
+      inputNonimator: "",
       paraName: SURPORT_CHAINS[this.paraId],
-      paraTokenSymbol: TOKEN_SYMBOL[this.symbol]
-    }
+      paraTokenSymbol: TOKEN_SYMBOL[this.symbol],
+      isComtribution: false,
+    };
   },
   props: {
     communityId: {
-      type: String
+      type: String,
     },
     paraId: {
-      type: Number
+      type: Number,
     },
   },
   computed: {
-    ...mapState(['symbol']),
+    ...mapState(["symbol", "balance"]),
+    ...mapGetters(["getFundInfo"]),
   },
   methods: {
-    hide () {
-      this.$emit('hideContribute')
+    hide() {
+      if (this.isComtribution) return;
+      this.$emit("hideContribute");
+    },
+    checkInput() {
+      const reg = /^\d+(\.\d+)?$/;
+      const res = reg.test(this.inputAmount);
+      if (!res) {
+        this.$bvToast.toast("Input error!", {
+          title: "Tips",
+          autoHideDelay: 5000,
+          variant: "warning", // info success danger
+        });
+        return false;
+      }
+
+      if (
+        this.inputNonimator &&
+        this.inputNonimator.length > 0 &&
+        !validAddress(this.inputNonimator)
+      ) {
+        this.$bvToast.toast("Wrong Nominator Address", {
+          title: "Tips",
+          autoHideDelay: 5000,
+          variant: "warning", // info success danger
+        });
+        return false;
+      }
+
+      const amount = parseFloat(this.inputAmount);
+
+      if (amount < 1) {
+        this.$bvToast.toast(
+          "Input is less than the minimum allowed contribution of 1.0000",
+          {
+            title: "Tips",
+            autoHideDelay: 5000,
+            variant: "warning",
+          }
+        );
+        return;
+      }
+
+      // below cap
+      const fund = this.getFundInfo(this.paraId);
+      const raised = fund.raised;
+      const cap = fund.cap;
+      const gap = cap.sub(raised);
+      console.log('gao', gap.toNumber(), amount);
+
+      if (gap.lt(new BN(amount))) {
+        this.$bvToast.toast("Out of cap", {
+          title: "Tips",
+          autoHideDelay: 5000,
+          variant: "warning", // info success danger
+        });
+        return false;
+      }
+
+      if (this.balance.lte(new BN(amount))) {
+        this.$bvToast.toast("Insufficient Balance", {
+          title: "Tips",
+          autoHideDelay: 5000,
+          variant: "warning", // info success danger
+        });
+        return false;
+      }
+      return true;
     },
     async confirm() {
-      const res = await contribute(this.paraId, this.inputAmount)
-      if (res) {
-        console.log('res', res);
-      }else{
-
+      if (!this.checkInput()) {
+        return;
       }
-    }
-  }
-}
+      try {
+        this.isComtribution = true;
+        const trieIndex = this.getFundInfo(this.paraId).trieIndex;
+        const res = await contribute(
+          this.paraId,
+          parseFloat(this.inputAmount),
+          this.communityId,
+          this.inputNonimator,
+          trieIndex,
+          (info, param) => {
+            this.$bvToast.toast(info, param);
+          }
+        );
+        if (res) {
+          console.log("res", res);
+          // this.$emit('hideContribute')
+          this.$bvToast.toast("Contribution Success!", {
+            title: 'Info',
+            autoHideDelay: 5000,
+            variant: 'success'
+          })
+        } else {
+          this.$bvToast.toast('Contribute Failed!', {
+            title: 'Failed',
+            variant: "danger"
+          })
+        }
+      } catch (e) {
+        console.log('eee', e);
+        this.$bvToast.toast(e.message, {
+          title: "Error",
+          autoHideDelay: 5000,
+          variant: "danger",
+        });
+      } finally {
+        this.isComtribution = false;
+      }
+    },
+  },
+};
 </script>
 
 <style lang="less">
