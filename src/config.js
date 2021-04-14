@@ -22,11 +22,15 @@ export const CHAIN_ID = {
   "ROCOCO": 2
 }
 
-export const SURPORT_CHAINS = {
-    POLKADOT:{},
-    KUSAMA:{
+export const CHAIN_NAME = {
+  POLKADOT: "Pokaldot",
+  KUSAMA: "Kusama",
+  ROCOCO: "Rococo"
+}
 
-    },
+export const SURPORT_CHAINS = {
+  POLKADOT: {},
+  KUSAMA: {},
   ROCOCO: {
     200: 'Phala',
     300: 'Acala',

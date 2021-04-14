@@ -14,7 +14,7 @@
       <button
         class="primary-btn"
         @click="withdrawClick"
-        :disabled="contributed === 0"
+        :disabled="isWithdraw"
       >
       <b-spinner small type="grow" v-show="isWithdraw"></b-spinner>
         Confirm & Sign
@@ -66,6 +66,14 @@ export default {
       this.$emit("hideWithdraw");
     },
     async withdrawClick() {
+      console.log(this.contributed);
+      if (this.contributed <= 0){
+        this.$bvToast.toast('No Need To Withdraw', {
+          title: "Info",
+          variant: 'info'
+        })
+        return
+      }
       try {
         this.isWithdraw = true
         const res = await withdraw(this.paraId, (info, param) => {
@@ -73,7 +81,7 @@ export default {
         });
         if (res) {
           this.$bvToast.toast("Withdraw Success!", {
-            title: "Info",
+            title: "Success",
             autoHideDelay: 5000,
             variant: "success",
           });

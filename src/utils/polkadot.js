@@ -33,7 +33,9 @@ import {
 } from "../config"
 import store from "../store"
 import {
-  API_CONNECT_STATE
+  API_CONNECT_STATE,
+  BID_PERIOD,
+  RETIRING_PERIOD
 } from '../constant'
 
 const POLKADOT_CHAIN_WEB_SOCKET_MAP = {
@@ -86,7 +88,6 @@ export const getFundInfo = async (paraId = [200], needUpdate = true) => {
   try {
     if (needUpdate) store.commit('saveLoadingFunds', true)
     unsubFund = (await api.query.crowdloan.funds.multi(paraId, async (unwrapedFunds) => {
-      // console.log('fund', unwrapedFunds);
       const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
       const decimal = await getDecimal()
       let funds = []
@@ -106,7 +107,6 @@ export const getFundInfo = async (paraId = [200], needUpdate = true) => {
           firstSlot,
           lastSlot,
           raised,
-          retiring,
           trieIndex
         } = unwrapedFund
         const childKey = createChildKey(trieIndex)
@@ -119,6 +119,9 @@ export const getFundInfo = async (paraId = [200], needUpdate = true) => {
           memo: api.createType('(Balance, Vec<u8>)', v.unwrap())[1].toHuman()
         }))
         // console.log('contri', contributions);
+        const retiringPeriod = [parseInt(end), parseInt(end) + RETIRING_PERIOD[store.state.symbol]]
+        const retiring = bestBlockNumber >= retiringPeriod[0] && bestBlockNumber <= retiringPeriod[1]
+        console.log({retiringPeriod, retiring});
         const leasePeriod = await getLeasePeriod()
         const currentPeriod = Math.floor(bestBlockNumber / leasePeriod)
         const leases = (await api.query.slots.leases(pId)).toJSON()
@@ -128,7 +131,7 @@ export const getFundInfo = async (paraId = [200], needUpdate = true) => {
 
         let status = ''
         let statusIndex = 0
-        if (retiring.toHuman()) {
+        if (retiring) {
           status = PARA_STATUS.RETIRED
           statusIndex = 1
         } else {
@@ -144,7 +147,7 @@ export const getFundInfo = async (paraId = [200], needUpdate = true) => {
           paraId: pId,
           status,
           statusIndex,
-          deposit: uni2Token(new BN(deposit), decimal).toString(),
+          deposit: uni2Token(new BN(deposit), decimal),
           cap: uni2Token(new BN(cap), decimal),
           depositor,
           end: new BN(end),
@@ -162,7 +165,6 @@ export const getFundInfo = async (paraId = [200], needUpdate = true) => {
     }));
   } catch (e) {
     console.error('error', e);
-  } finally {
     store.commit('saveLoadingFunds', false)
   }
 }
@@ -366,15 +368,22 @@ export const withdraw = async (paraId, toast) => {
     const nonce = (await api.query.system.account(from)).nonce.toNumber()
     const unsub = await api.tx.crowdloan.withdraw(from, paraId).signAndSend(from, {
       nonce
-    }, ({status, dispatchError }) => {
+    }, ({
+      status,
+      dispatchError
+    }) => {
       let contriHash = ''
-      if (status.isInBlock || status.isFinalized){
+      if (status.isInBlock || status.isFinalized) {
         if (dispatchError) {
           let errMsg = ''
           if (dispatchError.isModule) {
             // for module errors, we have the section indexed, lookup
             const decoded = api.registry.findMetaError(dispatchError.asModule);
-            const { documentation, name, section } = decoded;
+            const {
+              documentation,
+              name,
+              section
+            } = decoded;
             errMsg = `${section}.${name}: ${documentation.join(' ')}`
             console.log(`${section}.${name}: ${documentation.join(' ')}`);
           } else {
@@ -429,15 +438,22 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
     const nonce = (await api.query.system.account(from)).nonce.toNumber()
     const unsubContribution = await api.tx.crowdloan.contribute(paraId, amount, null).signAndSend(from, {
       nonce
-    }, ({ status, dispatchError }) => {
+    }, ({
+      status,
+      dispatchError
+    }) => {
       let contriHash = ''
-      if (status.isInBlock || status.isFinalized){
+      if (status.isInBlock || status.isFinalized) {
         if (dispatchError) {
           let errMsg = ''
           if (dispatchError.isModule) {
             // for module errors, we have the section indexed, lookup
             const decoded = api.registry.findMetaError(dispatchError.asModule);
-            const { documentation, name, section } = decoded;
+            const {
+              documentation,
+              name,
+              section
+            } = decoded;
             errMsg = `${section}.${name}: ${documentation.join(' ')}`
             console.log(`${section}.${name}: ${documentation.join(' ')}`);
           } else {
