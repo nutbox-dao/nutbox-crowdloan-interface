@@ -30,7 +30,6 @@ import {
   ROCOCO_WEB_SOCKET,
   PARA_STATUS,
   CHAIN_ID,
-  SURPORT_CHAINS
 } from "../config"
 import store from "../store"
 import {
@@ -47,7 +46,6 @@ let _api = {}
 
 async function getApi() {
   if (_api && _api[store.state.symbol]) {
-    console.log('has api');
     return _api[store.state.symbol]
   }
   const wsProvider = new WsProvider(POLKADOT_CHAIN_WEB_SOCKET_MAP[store.state.symbol])
@@ -77,85 +75,91 @@ function createChildKey(trieIndex) {
   );
 }
 
-export const getFundInfo = async (paraId = [200], needUpdate=true) => {
+export const getFundInfo = async (paraId = [200], needUpdate = true) => {
+  // cancel last 
+  let unsubFund = store.state.subFund
+  try {
+    unsubFund()
+  } catch (e) {}
   const api = await getApi()
   paraId = paraId.map(p => parseInt(p))
   try {
     if (needUpdate) store.commit('saveLoadingFunds', true)
-    const unwrapedFunds = (await api.query.crowdloan.funds.multi(paraId));
-    // console.log('fund', unwrapedFunds);
-    const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
-    const decimal = await getDecimal()
-    let funds = []
-    for (let i = 0; i < unwrapedFunds.length; i++) {
-      const fund = unwrapedFunds[i]
-      const pId = paraId[i]
-      if (!fund.toJSON()) {
-        continue
-      }
-      const unwrapedFund = fund.unwrap()
-      // console.log('unwrapedFund', unwrapedFund);
-      const {
-        deposit,
-        cap,
-        depositor,
-        end,
-        firstSlot,
-        lastSlot,
-        raised,
-        retiring,
-        trieIndex
-      } = unwrapedFund
-      const childKey = createChildKey(trieIndex)
-      const keys = await api.rpc.childstate.getKeys(childKey, '0x')
-      const ss58keys = keys.map(k => encodeAddress(k))
-      const values = await Promise.all(keys.map(k => api.rpc.childstate.getStorage(childKey, k)))
-      const contributions = values.map((v, idx) => ({
-        contributor: ss58keys[idx],
-        amount: uni2Token(new BN(api.createType('(Balance, Vec<u8>)', v.unwrap())[0]), decimal).toString(),
-        memo: api.createType('(Balance, Vec<u8>)', v.unwrap())[1].toHuman()
-      }))
-      // console.log('contri', contributions);
-      const leasePeriod = await getLeasePeriod()
-      const currentPeriod = Math.floor(bestBlockNumber / leasePeriod)
-      const leases = (await api.query.slots.leases(pId)).toJSON()
-      const isWinner = leases.length > 0
-      const isCapped = (new BN(raised)).gte(new BN(cap))
-      const isEnded = bestBlockNumber > end
-
-      let status = ''
-      let statusIndex = 0
-      if (retiring.toHuman()) {
-        status = PARA_STATUS.RETIRED
-        statusIndex = 1
-      } else {
-        if (!(isCapped || isEnded || isWinner) && currentPeriod <= firstSlot) {
-          status = PARA_STATUS.ACTIVE
-          statusIndex = 0
-        } else {
-          status = PARA_STATUS.COMPLETED
-          statusIndex = 2
+    unsubFund = (await api.query.crowdloan.funds.multi(paraId, async (unwrapedFunds) => {
+      // console.log('fund', unwrapedFunds);
+      const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
+      const decimal = await getDecimal()
+      let funds = []
+      for (let i = 0; i < unwrapedFunds.length; i++) {
+        const fund = unwrapedFunds[i]
+        const pId = paraId[i]
+        if (!fund.toJSON()) {
+          continue
         }
+        const unwrapedFund = fund.unwrap()
+        // console.log('unwrapedFund', unwrapedFund);
+        const {
+          deposit,
+          cap,
+          depositor,
+          end,
+          firstSlot,
+          lastSlot,
+          raised,
+          retiring,
+          trieIndex
+        } = unwrapedFund
+        const childKey = createChildKey(trieIndex)
+        const keys = await api.rpc.childstate.getKeys(childKey, '0x')
+        const ss58keys = keys.map(k => encodeAddress(k))
+        const values = await Promise.all(keys.map(k => api.rpc.childstate.getStorage(childKey, k)))
+        const contributions = values.map((v, idx) => ({
+          contributor: ss58keys[idx],
+          amount: uni2Token(new BN(api.createType('(Balance, Vec<u8>)', v.unwrap())[0]), decimal),
+          memo: api.createType('(Balance, Vec<u8>)', v.unwrap())[1].toHuman()
+        }))
+        // console.log('contri', contributions);
+        const leasePeriod = await getLeasePeriod()
+        const currentPeriod = Math.floor(bestBlockNumber / leasePeriod)
+        const leases = (await api.query.slots.leases(pId)).toJSON()
+        const isWinner = leases.length > 0
+        const isCapped = (new BN(raised)).gte(new BN(cap))
+        const isEnded = bestBlockNumber > end
+
+        let status = ''
+        let statusIndex = 0
+        if (retiring.toHuman()) {
+          status = PARA_STATUS.RETIRED
+          statusIndex = 1
+        } else {
+          if (!(isCapped || isEnded || isWinner) && currentPeriod <= firstSlot) {
+            status = PARA_STATUS.ACTIVE
+            statusIndex = 0
+          } else {
+            status = PARA_STATUS.COMPLETED
+            statusIndex = 2
+          }
+        }
+        funds.push({
+          paraId: pId,
+          status,
+          statusIndex,
+          deposit: uni2Token(new BN(deposit), decimal).toString(),
+          cap: uni2Token(new BN(cap), decimal),
+          depositor,
+          end: new BN(end),
+          firstSlot: new BN(firstSlot),
+          lastSlot: new BN(lastSlot),
+          raised: uni2Token(new BN(raised), decimal),
+          retiring,
+          trieIndex,
+          funds: contributions
+        })
       }
-      funds.push({
-        paraId: pId,
-        status,
-        statusIndex,
-        deposit: uni2Token(new BN(deposit), decimal).toString(),
-        cap: uni2Token(new BN(cap), decimal),
-        depositor,
-        end: new BN(end),
-        firstSlot: new BN(firstSlot),
-        lastSlot: new BN(lastSlot),
-        raised: uni2Token(new BN(raised), decimal),
-        retiring,
-        trieIndex,
-        funds: contributions
-      })
-    }
-    funds = funds.sort(f => f.statusIndex)
-    console.log('funds', funds);
-    store.commit('saveProjectFundInfos', funds)
+      funds = funds.sort(f => f.statusIndex)
+      store.commit('saveProjectFundInfos', funds)
+      store.commit('saveLoadingFunds', false)
+    }));
   } catch (e) {
     console.error('error', e);
   } finally {
@@ -290,11 +294,16 @@ export const getBalance = async (account) => {
   // cancel last
   let subBalance = store.state.subBalance
   const decimal = await getDecimal()
-  try{
+  try {
     subBalance()
-  }catch(e){}
-  
-  subBalance = await api.query.system.account(store.state.account.address, ({ data: { free: currentFree}, nonce: currentNonce }) => {
+  } catch (e) {}
+
+  subBalance = await api.query.system.account(store.state.account.address, ({
+    data: {
+      free: currentFree
+    },
+    nonce: currentNonce
+  }) => {
     store.commit('saveBalance', uni2Token(new BN(currentFree), decimal))
   })
   store.commit('saveSubBalance', subBalance)
@@ -309,8 +318,8 @@ function NumberTo4BytesU8A(number) {
   let tmp = numberToU8a(number);
   const tmpLength = tmp.length
   if (tmpLength > 4) throw new Error('Unsupported size of number');
-  for(let i = tmpLength; i > 0; i--) {
-      buf[4-i] = tmp[tmpLength - i];
+  for (let i = tmpLength; i > 0; i--) {
+    buf[4 - i] = tmp[tmpLength - i];
   }
   return buf;
 }
@@ -338,12 +347,12 @@ export function encodeMemo(memo) {
 function decodeMemo(hex) {
   let buf = hexToU8a(hex);
   return {
-      chain: buf[0],
-      parent: buf.slice(1, 9),
-      child: buf.slice(9, 17),
-      height: parseInt(u8aToHex(buf.slice(17, 21))),
-      paraId: parseInt(u8aToHex(buf.slice(21, 25))),
-      trieIndex: parseInt(u8aToHex(buf.slice(25, 29)))
+    chain: buf[0],
+    parent: buf.slice(1, 9),
+    child: buf.slice(9, 17),
+    height: parseInt(u8aToHex(buf.slice(17, 21))),
+    paraId: parseInt(u8aToHex(buf.slice(21, 25))),
+    trieIndex: parseInt(u8aToHex(buf.slice(25, 29)))
   }
 }
 
@@ -357,18 +366,39 @@ export const withdraw = async (paraId, toast) => {
     const nonce = (await api.query.system.account(from)).nonce.toNumber()
     const unsub = await api.tx.crowdloan.withdraw(from, paraId).signAndSend(from, {
       nonce
-    }, (result) => {
+    }, ({status, dispatchError }) => {
       let contriHash = ''
-      const status = result.status
-      if (status.isBroadcast){
+      if (status.isInBlock || status.isFinalized){
+        if (dispatchError) {
+          let errMsg = ''
+          if (dispatchError.isModule) {
+            // for module errors, we have the section indexed, lookup
+            const decoded = api.registry.findMetaError(dispatchError.asModule);
+            const { documentation, name, section } = decoded;
+            errMsg = `${section}.${name}: ${documentation.join(' ')}`
+            console.log(`${section}.${name}: ${documentation.join(' ')}`);
+          } else {
+            // Other, CannotLookup, BadOrigin, no extra info
+            console.log(dispatchError.toString());
+            errMsg = dispatchError.toString()
+          }
+          toast(errMsg, {
+            title: 'Error',
+            variant: 'danger'
+          })
+          unsub()
+          resolve(false)
+        }
+      }
+      if (status.isBroadcast) {
         toast("Transaction Is Broadcasting.", {
           title: 'Info',
           autoHideDelay: 8000,
           variant: 'warning'
         })
       } else if (status.isInBlock) {
-        console.log("Transaction included at blockHash.", result, status.asInBlock.toJSON());
-        contriHash = result.status.asInBlock.toJSON()
+        console.log("Transaction included at blockHash.", status.asInBlock.toJSON());
+        contriHash = status.asInBlock.toJSON()
         toast("Transaction In Block!", {
           title: 'Info',
           autoHideDelay: 12000,
@@ -399,35 +429,48 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
     const nonce = (await api.query.system.account(from)).nonce.toNumber()
     const unsubContribution = await api.tx.crowdloan.contribute(paraId, amount, null).signAndSend(from, {
       nonce
-    }, (result) => {
+    }, ({ status, dispatchError }) => {
       let contriHash = ''
-      const status = result.status
-      try {
-        console.log(1111, status.asBroadcast.toJSON());
-      } catch (e) {}
+      if (status.isInBlock || status.isFinalized){
+        if (dispatchError) {
+          let errMsg = ''
+          if (dispatchError.isModule) {
+            // for module errors, we have the section indexed, lookup
+            const decoded = api.registry.findMetaError(dispatchError.asModule);
+            const { documentation, name, section } = decoded;
+            errMsg = `${section}.${name}: ${documentation.join(' ')}`
+            console.log(`${section}.${name}: ${documentation.join(' ')}`);
+          } else {
+            // Other, CannotLookup, BadOrigin, no extra info
+            console.log(dispatchError.toString());
+            errMsg = dispatchError.toString()
+          }
+          toast(errMsg, {
+            title: 'Error',
+            variant: 'danger'
+          })
+          unsubContribution()
+          resolve(false)
+        }
+      }
       if (status.isBroadcast) {
         toast("Transaction Is Broadcasting.", {
           title: 'Info',
           autoHideDelay: 8000,
           variant: 'warning'
         })
-      }else if (status.isInBlock) {
-        console.log("Transaction included at blockHash.", result, status.asInBlock.toJSON());
-        contriHash = result.status.asInBlock.toJSON()
+      } else if (status.isInBlock) {
+        console.log("Transaction included at blockHash.", status.asInBlock.toJSON());
+        contriHash = status.asInBlock.toJSON()
         toast("Transaction In Block!", {
           title: 'Info',
           autoHideDelay: 12000,
           variant: 'warning'
         })
       } else if (status.isFinalized) {
-        console.log('contribute result:', result);
         unsubContribution()
-        // 更新数据
-        const chains = Object.keys(SURPORT_CHAINS);
-        getFundInfo(chains, false);
-        // 上传daemon
         // 添加memo
-        addMemo(communityId, childId, paraId, trieIndex)
+        addMemo(communityId, childId, paraId, trieIndex, contriHash)
         resolve(status.isFinalized)
       }
     }).catch(err => {
@@ -436,11 +479,13 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
   })
 }
 
-export const addMemo = async (parent, child, paraId, trieIndex) => {
+export const addMemo = async (parent, child, paraId, trieIndex, contriHash) => {
   const from = store.state.account.address
   const api = await injectAccount(store.state.account)
   const chain = CHAIN_ID[store.state.symbol]
-  const height = store.getters.currentBlockNum
+  const signedBlock = await api.rpc.chain.getBlock(contriHash)
+  console.log('contribution block num', signedBlock.block.header.number.toNumber());
+  const height = signedBlock.block.header.number.toNumber()
   const memo = {
     chain,
     parent: getNodeId(parent),
@@ -449,16 +494,18 @@ export const addMemo = async (parent, child, paraId, trieIndex) => {
     paraId: parseInt(paraId),
     trieIndex: parseInt(trieIndex)
   }
-  
+
   const nonce = (await api.query.system.account(from)).nonce.toNumber()
   const encodememo = encodeMemo(memo)
   const unsub = await api.tx.crowdloan.addMemo(paraId, encodememo).signAndSend(from, {
     nonce
   }, (res) => {
-    if (res.status.isInBlock){
+    if (res.status.isInBlock) {
       console.log(
         'hash', res.status.asInBlock.toJSON()
       );
+      // upload to daemon
+
     }
     if (res.status.isFinalized) unsub()
   })

@@ -55,7 +55,7 @@ export default {
     return {
       inputAmount: "",
       inputNonimator: "",
-      paraName: SURPORT_CHAINS[this.paraId],
+      paraName: SURPORT_CHAINS[this.symbol][this.paraId],
       paraTokenSymbol: TOKEN_SYMBOL[this.symbol],
       isComtribution: false,
     };
@@ -100,6 +100,8 @@ export default {
           variant: "warning", // info success danger
         });
         return false;
+      }else{
+        this.inputNonimator = this.communityId
       }
 
       const amount = parseFloat(this.inputAmount);
@@ -166,11 +168,6 @@ export default {
             title: 'Info',
             autoHideDelay: 5000,
             variant: 'success'
-          })
-        } else {
-          this.$bvToast.toast('Contribute Failed!', {
-            title: 'Failed',
-            variant: "danger"
           })
         }
       } catch (e) {

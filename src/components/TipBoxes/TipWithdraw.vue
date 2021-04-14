@@ -1,10 +1,22 @@
 <template>
   <div class="tip-modal">
-    <img class="close-btn" src="~@/static/images/close.svg" alt="" @click="hide">
+    <img
+      class="close-btn"
+      src="~@/static/images/close.svg"
+      alt=""
+      @click="hide"
+    />
     <div class="tip-contribute">
       <div class="text-center font20">You Would Withdraw</div>
-      <div class="tip-withdraw mt-3 mb-1">12345.2323 KSM</div>
-      <button class="primary-btn" @click="hide">
+      <div class="tip-withdraw mt-3 mb-1">
+        {{ contributed + " " + tokenSymbol }}
+      </div>
+      <button
+        class="primary-btn"
+        @click="withdrawClick"
+        :disabled="contributed === 0"
+      >
+      <b-spinner small type="grow" v-show="isWithdraw"></b-spinner>
         Confirm & Sign
       </button>
     </div>
@@ -12,13 +24,72 @@
 </template>
 
 <script>
+import { mapState, mapGetters } from "vuex";
+import { TOKEN_SYMBOL } from "../../config";
+import { withdraw } from "../../utils/polkadot";
+import BN from "bn.js";
+
 export default {
-  methods: {
-    hide () {
-      this.$emit('hideWithdraw')
-    }
+  props: {
+    paraId: {
+      type: Number,
+    },
   },
-}
+  data() {
+    return {
+      isWithdraw: false
+    };
+  },
+  computed: {
+    ...mapState(["symbol", "balance", "account"]),
+    ...mapGetters(["getFundInfo"]),
+    contributed() {
+      const fund = this.getFundInfo(this.paraId);
+      console.log("fund", fund);
+      console.log(
+        "funded",
+        fund.funds.filter((c) => c.contributor === this.account.address)
+      );
+
+      const contributions = fund.funds
+        .filter((c) => c.contributor === this.account.address)
+        .reduce((total, c) => total.add(c.amount), new BN(0));
+      return parseFloat(contributions.toNumber()).toFixed(4);
+    },
+    tokenSymbol() {
+      return TOKEN_SYMBOL[this.symbol];
+    },
+  },
+  methods: {
+    hide() {
+      if (this.isWithdraw) return;
+      this.$emit("hideWithdraw");
+    },
+    async withdrawClick() {
+      try {
+        this.isWithdraw = true
+        const res = await withdraw(this.paraId, (info, param) => {
+          this.$bvToast.toast(info, param);
+        });
+        if (res) {
+          this.$bvToast.toast("Withdraw Success!", {
+            title: "Info",
+            autoHideDelay: 5000,
+            variant: "success",
+          });
+        } else {
+        }
+      } catch (e) {
+        this.$bvToast.toast(e.message, {
+          title: "Error",
+          variant: "danger",
+        });
+      } finally{
+        this.isWithdraw = false
+      }
+    },
+  },
+};
 </script>
 
 <style lang="less" scoped>

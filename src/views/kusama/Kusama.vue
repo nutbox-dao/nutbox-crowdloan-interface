@@ -36,7 +36,6 @@ import CrowdloanCard from "../../components/CrowdloanCard";
 import {
   getFundInfo,
   subBlock,
-  contribute
 } from "../../utils/polkadot";
 import { mapMutations, mapState, mapGetters } from "vuex";
 import { SURPORT_CHAINS, SURPORT_COMMUNITIES } from "../../config";
@@ -73,7 +72,7 @@ export default {
   async mounted() {
     this.communitIds = Object.keys(SURPORT_COMMUNITIES);
     subBlock();
-    const chains = Object.keys(SURPORT_CHAINS);
+    const chains = Object.keys(SURPORT_CHAINS[this.symbol]);
     await getFundInfo(chains);
   },
   created() {

@@ -14,7 +14,7 @@
       <div class="title-text font20 font-bold">
         <span>{{ surportCommunities[communityId] }}</span>
         <img src="~@/static/images/close.svg" alt="" />
-        <span>{{ surportChains[paraId] }}</span>
+        <span>{{ surportChains[symbol][paraId] }}</span>
       </div>
     </div>
     <div class="h-line"></div>
@@ -85,7 +85,7 @@
       hide-footer
       no-close-on-backdrop
     >
-      <TipWithdraw @hideWithdraw="showWithdraw = false" />
+      <TipWithdraw :paraId="paraId" @hideWithdraw="showWithdraw = false" />
     </b-modal>
   </div>
 </template>
