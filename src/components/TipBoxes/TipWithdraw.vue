@@ -66,7 +66,6 @@ export default {
       this.$emit("hideWithdraw");
     },
     async withdrawClick() {
-      console.log(this.contributed);
       if (this.contributed <= 0){
         this.$bvToast.toast('No Need To Withdraw', {
           title: "Info",
