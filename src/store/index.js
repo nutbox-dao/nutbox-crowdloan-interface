@@ -6,34 +6,40 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    api:{},
-    apiState:null,
-    symbol:'',
-    subBlock:{},
-    subBalance:{},
-    subFund:{},
+    api: {},
+    apiState: null,
+    symbol: '',
+    subBlock: {},
+    subBalance: {},
+    subFund: {},
     isConnected: true,
     loadingFunds: true,
     account: Cookie.get('polkadot-account'),
     allAccounts: [],
-    balance:0,
+    balance: 0,
     projectFundInfos: [],
     currentBlockNum: {},
     leasePeriod: {},
-    decimal:{},
+    decimal: {},
   },
   mutations: {
     saveSymbol: (state, symbol) => {
       state.symbol = symbol
     },
     saveSubBlock: (state, subBlock) => {
-      state.subBlock = subBlock
+      state.subBlock[state.symbol] = subBlock
+      state.subBlock = {
+        ...state.subBlock
+      }
     },
     saveSubBalance: (state, subBalance) => {
       state.subBalance = subBalance
     },
     saveSubFund: (state, subFund) => {
-      state.subFund = subFund
+      state.subFund[state.symbol] = subFund
+      state.subFund = {
+        ...state.subFund
+      }
     },
     saveApiState: (state, apiState) => {
       state.apiState = apiState
@@ -49,7 +55,7 @@ export default new Vuex.Store({
     },
     saveAccount: (state, account) => {
       state.account = account,
-      Cookie.set('polkadot-account', account)
+        Cookie.set('polkadot-account', account)
     },
     saveAllAccounts: (state, allAccounts) => {
       state.allAccounts = allAccounts
@@ -58,12 +64,12 @@ export default new Vuex.Store({
       state.balance = balance
     },
     saveProjectFundInfos: (state, funds) => {
-      if (!state.projectFundInfos[state.symbol]){
+      if (!state.projectFundInfos[state.symbol]) {
         state.projectFundInfos[state.symbol] = {}
       }
       state.projectFundInfos[state.symbol] = funds
       let fundInfos = {}
-      for (const key of Object.keys(state.projectFundInfos)){
+      for (const key of Object.keys(state.projectFundInfos)) {
         fundInfos[key] = state.projectFundInfos[key]
       }
       state.projectFundInfos = fundInfos
@@ -71,7 +77,10 @@ export default new Vuex.Store({
     },
     saveCurrentBlockNum: (state, blockNum) => {
       state.currentBlockNum[state.symbol] = blockNum
-      state.currentBlockNum = JSON.parse(JSON.stringify(state.currentBlockNum))
+      // state.currentBlockNum = JSON.parse(JSON.stringify(state.currentBlockNum))
+      state.currentBlockNum = {
+        ...state.currentBlockNum
+      }
     },
     saveLeasePeriod: (state, leasePeriod) => {
       state.leasePeriod[state.symbol] = leasePeriod
@@ -91,10 +100,16 @@ export default new Vuex.Store({
     getFundInfo: state => (paraId) => {
       let funds = state.projectFundInfos[state.symbol]
       funds = funds.filter(fund => fund.paraId === paraId)
-      if (funds.length > 0){
+      if (funds.length > 0) {
         return funds[0]
       }
       return null
+    },
+    getSubFund: state => () => {
+      return state.subFund[state.symbol]
+    },
+    getSubBlock: state => () => {
+      return state.subBlock[state.symbol]
     },
     getFundInfos: state => {
       return state.projectFundInfos[state.symbol]

@@ -77,16 +77,14 @@ function createChildKey(trieIndex) {
   );
 }
 
-export const getFundInfo = async (paraId = [200], needUpdate = true) => {
+export const subscribeFundInfo = async (paraId = [200]) => {
   // cancel last 
-  let unsubFund = store.state.subFund
-  try {
-    unsubFund()
-  } catch (e) {}
+  let unsubFund = store.getters.getSubFund()
+  if (unsubFund) return;
+  store.commit('saveLoadingFunds', true)
   const api = await getApi()
   paraId = paraId.map(p => parseInt(p))
   try {
-    if (needUpdate) store.commit('saveLoadingFunds', true)
     unsubFund = (await api.query.crowdloan.funds.multi(paraId, async (unwrapedFunds) => {
       const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
       const decimal = await getDecimal()
@@ -163,6 +161,7 @@ export const getFundInfo = async (paraId = [200], needUpdate = true) => {
       store.commit('saveProjectFundInfos', funds)
       store.commit('saveLoadingFunds', false)
     }));
+    store.commit('saveSubFund', unsubFund);
   } catch (e) {
     console.error('error', e);
     store.commit('saveLoadingFunds', false)
@@ -192,14 +191,10 @@ export const getDecimal = async () => {
 
 // subscribe new block
 export const subBlock = async () => {
+  if (store.getters.getSubBlock()) return;
   const api = await getApi()
-  let subBlock = store.state.subBlock
-  try {
-    //   cancel last subscribe
-    subBlock()
-  } catch (e) {}
   // console.log('sub block');
-  subBlock = await api.rpc.chain.subscribeNewHeads((header) => {
+  const subBlock = await api.rpc.chain.subscribeNewHeads((header) => {
     try {
       const number = header.number.toNumber()
       console.log('number', number);

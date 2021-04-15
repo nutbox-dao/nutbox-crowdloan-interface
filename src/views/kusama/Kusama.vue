@@ -34,7 +34,7 @@
 <script>
 import CrowdloanCard from "../../components/CrowdloanCard";
 import {
-  getFundInfo,
+  subscribeFundInfo,
   subBlock,
 } from "../../utils/polkadot";
 import { mapMutations, mapState, mapGetters } from "vuex";
@@ -73,7 +73,7 @@ export default {
     this.communitIds = Object.keys(SURPORT_COMMUNITIES);
     subBlock();
     const chains = Object.keys(SURPORT_CHAINS[this.symbol]);
-    await getFundInfo(chains);
+    await subscribeFundInfo(chains);
   },
   created() {
     this.$store.commit("saveSymbol", "ROCOCO");
