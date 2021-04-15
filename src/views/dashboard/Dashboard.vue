@@ -1,68 +1,42 @@
 <template>
-  <div class="contribution-page ">
+  <div class="contribution-page">
     <div class="container">
       <div class="font-bold font32 mt-3 mb-3 text-left">Dashboard</div>
       <div class="c-tabs-box">
-        <div class="tab" v-for="tab of tabList" :key="tab.key"
-             :class="activeTab===tab.key?'active':''" @click="activeTab=tab.key">{{tab.label}}</div>
-      </div>
-      <div class="row">
-        <div class="col-lg-4 col-md-6" v-for="(item, index) of dashboardTabs[activeTab]" :key="index">
-          <div class="c-card">
-            <div class="card-title-box flex-start-center">
-              <div class="icons">
-                <img class="icon2" src="~@/static/images/tron.svg" alt="">
-                <img class="icon1" src="~@/static/images/eth.svg" alt="">
-              </div>
-              <div class="title-text font20 font-bold">
-                <span>BML</span>
-                <img src="~@/static/images/close.svg" alt="">
-                <span>PLASM</span>
-              </div>
-            </div>
-            <div class="h-line"></div>
-            <div class="detail-info-box">
-              <div class="project-info-container">
-                <span class="name"> Contributors </span>
-                <div class="info">test data</div>
-              </div>
-              <div class="project-info-container">
-                <span class="name"> Fund </span>
-                <div class="info">test data</div>
-              </div>
-            </div>
-            <button class="primary-btn">Export</button>
-          </div>
+        <div
+          class="tab"
+          v-for="tab of tabList"
+          :key="tab.key"
+          :class="activeTab === tab.key ? 'active' : ''"
+          @click="activeTab = tab.key"
+        >
+          {{ tab.label }}
         </div>
       </div>
+      <DashboardCard :chain='item.key' v-show="activeTab === item.key" v-for="item of tabList" :key="item.key"/>
     </div>
   </div>
 </template>
 
 <script>
+import DashboardCard from "../../components/DashboardCard.vue";
 export default {
-  name: 'Dashboard',
-  data () {
-    return {
-      activeTab: 'kusuma',
-      tabList: [
-        { key: 'kusuma', label: 'Kusuma' },
-        { key: 'polkadot', label: 'Polkadot' }
-      ],
-      dashboardTabs: {
-        kusuma: [
-          { name: 'BML x PLASM', contributors: '123123', funds: '2,222,000' },
-          { name: 'BML x PLASM', contributors: '123123', funds: '2,222,000' }
-        ],
-        polkadot: [
-          { name: 'BML x PLASM', contributors: '123123', funds: '2,222,000' }
-        ]
-      }
-    }
+  name: "Dashboard",
+  components: {
+    DashboardCard,
   },
-  methods: {
-  }
-}
+  data() {
+    return {
+      activeTab: "KUSAMA",
+      tabList: [
+        { key: "KUSAMA", label: "Kusama" },
+        { key: "POLKADOT", label: "Polkadot" },
+        { key: "ROCOCO", label: "Rococo" },
+      ],
+    };
+  },
+  methods: {},
+};
 </script>
 
 <style scoped lang="less">
@@ -92,7 +66,7 @@ export default {
 }
 .c-tabs-box {
   width: 100%;
-  max-width: 200px;
+  max-width: 300px;
   display: flex;
   align-items: center;
   height: 2.4rem;
