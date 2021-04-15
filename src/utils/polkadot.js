@@ -119,7 +119,6 @@ export const subscribeFundInfo = async (paraId = [200]) => {
         // console.log('contri', contributions);
         const retiringPeriod = [parseInt(end), parseInt(end) + RETIRING_PERIOD[store.state.symbol]]
         const retiring = bestBlockNumber >= retiringPeriod[0] && bestBlockNumber <= retiringPeriod[1]
-        console.log({retiringPeriod, retiring});
         const leasePeriod = await getLeasePeriod()
         const currentPeriod = Math.floor(bestBlockNumber / leasePeriod)
         const leases = (await api.query.slots.leases(pId)).toJSON()
@@ -205,7 +204,6 @@ export const subBlock = async () => {
   })
   store.commit('saveSubBlock', subBlock)
 }
-
 
 export const connect = (callback) => {
   if (store.state.apiState) {

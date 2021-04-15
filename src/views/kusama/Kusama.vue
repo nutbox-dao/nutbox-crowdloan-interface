@@ -15,7 +15,7 @@
           <div class="row">
             <div class="col-lg-4 col-md-6" v-for="para of funds" :key="para.paraId">
               <div
-                v-for="communitId of communitIds"
+                v-for="communitId of communityIds"
                 :key="communitId"
               >
                 <CrowdloanCard
@@ -51,7 +51,7 @@ export default {
   },
   data() {
     return {
-      communitIds: [],
+      communityIds: [],
     };
   },
   computed: {
@@ -70,7 +70,7 @@ export default {
     ]),
   },
   async mounted() {
-    this.communitIds = Object.keys(SURPORT_COMMUNITIES);
+    this.communityIds = Object.keys(SURPORT_COMMUNITIES);
     subBlock();
     const chains = Object.keys(SURPORT_CHAINS[this.symbol]);
     await subscribeFundInfo(chains);

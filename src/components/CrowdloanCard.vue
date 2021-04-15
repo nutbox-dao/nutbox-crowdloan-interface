@@ -30,11 +30,8 @@
       <div class="project-info-container">
         <span class="name"> Fund </span>
         <div class="info">
-          <div>{{ fund || "test data" }}</div>
-          <div>
-            <span>{{ completion }}</span>
-            <span>{{ contributions }} contributors</span>
-          </div>
+          <RaisedLabel :paraId="paraId"/>
+          <ContributorsLabel :paraId="paraId"/>
         </div>
       </div>
     </div>
@@ -95,6 +92,8 @@ import { mapState, mapGetters } from "vuex";
 import ConnectWallet from "./Buttons/ConnectWallet";
 import TipContribute from "./TipBoxes/TipContribute";
 import TipWithdraw from "./TipBoxes/TipWithdraw";
+import ContributorsLabel from './Label/ContributorsLabel'
+import RaisedLabel from './Label/RaisedLabel'
 import { TOKEN_SYMBOL, SURPORT_CHAINS, SURPORT_COMMUNITIES } from "../config";
 import { BLOCK_SECOND, TIME_PERIOD } from "../constant";
 export default {
@@ -119,6 +118,8 @@ export default {
     ConnectWallet,
     TipContribute,
     TipWithdraw,
+    ContributorsLabel,
+    RaisedLabel
   },
   computed: {
     ...mapState([
@@ -180,15 +181,6 @@ export default {
         return "";
       }
     },
-    fund() {
-      try {
-        const raised = this.convertUni(this.fundInfo.raised)
-        const cap = this.convertUni(this.fundInfo.cap)
-        return raised + "/" + cap + this.tokenSymbol[this.symbol];
-      } catch (e) {
-        return "";
-      }
-    },
     completion() {
       try {
         const raised = parseFloat(this.fundInfo.raised);
@@ -216,23 +208,7 @@ export default {
       }
     },
   },
-  methods: {
-    convertUni(uni) {
-      let res = parseFloat(uni).toFixed(4);
-      if (uni >= 1e18) {
-        res = (uni / 1e18).toFixed(4) + "E";
-      } else if (uni >= 1e15) {
-        res = (uni / 1e15).toFixed(4) + "P";
-      } else if (uni >= 1e12) {
-        res = (uni / 1e12).toFixed(4) + "T";
-      } else if (uni >= 1e9) {
-        res = (uni / 1e9).toFixed(4) + "B";
-      } else if (uni >= 1e6) {
-        res = (uni / 1e6).toFixed(4) + "M";
-      }
-      return res;
-    },
-  },
+
 };
 </script>
 
@@ -298,6 +274,7 @@ export default {
     .info {
       flex: 0.6;
       text-align: right;
+      font-weight: 500;
     }
   }
 }
