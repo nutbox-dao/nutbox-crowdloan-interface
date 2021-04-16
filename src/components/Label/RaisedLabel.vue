@@ -20,8 +20,8 @@
 
 <script>
 import { mapGetters, mapState } from "vuex";
-import { TOKEN_SYMBOL } from '../../config'
-import BN from 'bn.js'
+import { TOKEN_SYMBOL } from "../../config";
+import BN from "bn.js";
 export default {
   props: {
     paraId: {
@@ -30,7 +30,7 @@ export default {
     },
   },
   computed: {
-      ...mapState(['symbol']),
+    ...mapState(["symbol"]),
     ...mapGetters(["getFundInfo"]),
     fund() {
       return this.getFundInfo(this.paraId);
@@ -45,14 +45,14 @@ export default {
         raisedStr[1],
         raised[1] + "/" + capStr[0],
         capStr[1],
-        cap[1] + TOKEN_SYMBOL[this.symbol]
+        cap[1] + TOKEN_SYMBOL[this.symbol],
       ];
     },
   },
   methods: {
     convertUni(uni) {
       let unit = " ";
-      if (uni>=1e18) {
+      if (uni >= 1e18) {
         uni = uni.div(new BN(1e18));
         unit = " E";
       } else if (uni >= 1e15) {

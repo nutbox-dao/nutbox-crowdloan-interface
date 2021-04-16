@@ -46,7 +46,7 @@ const POLKADOT_CHAIN_WEB_SOCKET_MAP = {
 
 let _api = {}
 
-async function getApi() {
+export async function getApi() {
   if (_api && _api[store.state.symbol]) {
     return _api[store.state.symbol]
   }

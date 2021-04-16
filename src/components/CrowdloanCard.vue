@@ -30,8 +30,8 @@
       <div class="project-info-container">
         <span class="name"> Fund </span>
         <div class="info">
-          <RaisedLabel :paraId="paraId"/>
-          <ContributorsLabel :paraId="paraId"/>
+          <RaisedLabel :paraId="paraId" />
+          <ContributorsLabel :paraId="paraId" />
         </div>
       </div>
     </div>
@@ -39,14 +39,14 @@
       <button
         class="primary-btn"
         v-show="status === 'Active'"
-        @click="showContribute=true"
+        @click="showContribute = true"
       >
         Contribute
       </button>
       <button
         class="primary-btn"
         v-show="status === 'Retired'"
-        @click="showWithdraw=true"
+        @click="showWithdraw = true"
       >
         Withdraw
       </button>
@@ -72,7 +72,11 @@
       hide-footer
       no-close-on-backdrop
     >
-      <TipContribute :communityId="communityId" :paraId="paraId" @hideContribute="showContribute = false" />
+      <TipContribute
+        :communityId="communityId"
+        :paraId="paraId"
+        @hideContribute="showContribute = false"
+      />
     </b-modal>
     <b-modal
       v-model="showWithdraw"
@@ -92,10 +96,13 @@ import { mapState, mapGetters } from "vuex";
 import ConnectWallet from "./Buttons/ConnectWallet";
 import TipContribute from "./TipBoxes/TipContribute";
 import TipWithdraw from "./TipBoxes/TipWithdraw";
-import ContributorsLabel from './Label/ContributorsLabel'
-import RaisedLabel from './Label/RaisedLabel'
-import { TOKEN_SYMBOL, SURPORT_CHAINS, SURPORT_COMMUNITIES } from "../config";
-import { BLOCK_SECOND, TIME_PERIOD } from "../constant";
+import ContributorsLabel from "./Label/ContributorsLabel";
+import RaisedLabel from "./Label/RaisedLabel";
+import { TOKEN_SYMBOL, SURPORT_CHAINS, SURPORT_COMMUNITIES, PARA_STATUS } from "../config";
+import { BLOCK_SECOND, TIME_PERIOD, RETIRING_PERIOD } from "../constant";
+import { getApi, getLeasePeriod } from "../utils/polkadot";
+import BN from 'bn.js'
+
 export default {
   data() {
     return {
@@ -104,6 +111,7 @@ export default {
       tokenSymbol: TOKEN_SYMBOL,
       surportChains: SURPORT_CHAINS,
       surportCommunities: SURPORT_COMMUNITIES,
+      status: PARA_STATUS.COMPLETED,
     };
   },
   props: {
@@ -119,7 +127,43 @@ export default {
     TipContribute,
     TipWithdraw,
     ContributorsLabel,
-    RaisedLabel
+    RaisedLabel,
+  },
+  watch: {
+    async currentBlockNum(newValue, _) {
+      const fund = this.fundInfo;
+      if (!fund) this.status = PARA_STATUS.COMPLETED;
+      const api = await getApi();
+      const end = fund.end;
+      const raised = fund.raised
+      const cap = fund.cap
+      const firstSlot = fund.firstSlot
+      const leasePeriod = await getLeasePeriod();
+      const retiringPeriod = [
+        parseInt(end),
+        parseInt(end) + RETIRING_PERIOD[this.symbol],
+      ];
+      const bestBlockNumber = newValue;
+      const retiring =
+        bestBlockNumber >= retiringPeriod[0] &&
+        bestBlockNumber <= retiringPeriod[1];
+      const currentPeriod = Math.floor(bestBlockNumber / leasePeriod);
+      const leases = (await api.query.slots.leases(this.paraId)).toJSON();
+      const isWinner = leases.length > 0;
+      const isCapped = new BN(raised).gte(new BN(cap));
+      const isEnded = bestBlockNumber > end;
+       let status = ''
+        if (retiring) {
+          status = PARA_STATUS.RETIRED
+        } else {
+          if (!(isCapped || isEnded || isWinner) && currentPeriod <= firstSlot) {
+            status = PARA_STATUS.ACTIVE
+          } else {
+            status = PARA_STATUS.COMPLETED
+          }
+        }
+      this.status = status
+    },
   },
   computed: {
     ...mapState([
@@ -130,9 +174,6 @@ export default {
       "projectFundInfos",
     ]),
     ...mapGetters(["getProjectStatus", "getFundInfo", "currentBlockNum"]),
-    status() {
-      return this.getProjectStatus(this.paraId);
-    },
     fundInfo() {
       return this.getFundInfo(this.paraId);
     },
@@ -151,7 +192,7 @@ export default {
       try {
         const end = parseInt(this.fundInfo.end);
         const diff = end - parseInt(this.currentBlockNum);
-        const timePeriod = TIME_PERIOD
+        const timePeriod = TIME_PERIOD;
         if (diff > 0) {
           const secs = diff * BLOCK_SECOND;
           const month = Math.floor(secs / timePeriod["MONTH"]);
@@ -177,7 +218,7 @@ export default {
         }
         return "Completed";
       } catch (e) {
-        console.error('err', e);
+        console.error("err", e);
         return "";
       }
     },
@@ -208,7 +249,6 @@ export default {
       }
     },
   },
-
 };
 </script>
 
