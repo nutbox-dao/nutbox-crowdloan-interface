@@ -354,7 +354,7 @@ function decodeMemo(hex) {
 export const withdraw = async (paraId, toast) => {
   return new Promise(async (resolve, reject) => {
     const api = await injectAccount(store.state.account)
-    const from = store.state.account && store.state.account.address
+    const from = store.state.account?.address
     if (!from) {
       reject('no account')
     }

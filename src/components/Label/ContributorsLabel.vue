@@ -1,10 +1,10 @@
 <template>
   <div>
     <span class="text-grey-light">
-      {{ percent + "" }}
+      {{ percent + " " }}
     </span>
     <span>
-      {{ 10 + " " }}
+      {{ " " + fundInfo.funds.length + " " }}
     </span>
     <span class="text-grey-light"> contributors </span>
   </div>
@@ -28,7 +28,7 @@ export default {
     percent() {
       console.log("fundinfo", this.paraId, this.fundInfo);
       return (
-        parseFloat(this.fundInfo.raised.div(this.fundInfo.cap)).toFixed(2) + "%"
+        parseFloat(this.fundInfo.raised.div(this.fundInfo.cap)).toFixed(2) + "% "
       );
     },
   },

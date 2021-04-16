@@ -50,37 +50,35 @@ export default {
     };
   },
   props: {
-      chain: {
-          type: String,
-      },
+    chain: {
+      type: String,
+    },
   },
-  computed: {
-      
-  },
+  computed: {},
   methods: {
     fund(index) {
       return this.items[index].raised;
     },
     downloadCsv() {
-        // 获取详情信息
-
-        // 下载
-        const headr = [
-            "community",
-            "chain",
-            "trieIndex",
-            "date",
-            "amount",
-            "status",
-            "time",
-          ]
-      CsvExportor.downloadCsv(
-        this.items,
-        {
-          header
-        },
-        "contribution.csv"
-      );
+      // 获取详情信息
+      
+      // 下载
+      //   const headr = [
+      //       "community",
+      //       "chain",
+      //       "trieIndex",
+      //       "date",
+      //       "amount",
+      //       "status",
+      //       "time",
+      //     ]
+      // CsvExportor.downloadCsv(
+      //   this.items,
+      //   {
+      //     header
+      //   },
+      //   "contribution.csv"
+      // );
     },
   },
   mounted() {
