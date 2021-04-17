@@ -315,7 +315,8 @@ export const getBalance = async (account) => {
 }
 
 export function getNodeId(address) {
-  return decodeAddress(address).slice(0, 8);
+  const isAddress = validAddress(address)
+  return isAddress ? decodeAddress(address).slice(0, 8) : new Uint8Array(8);
 }
 
 function NumberTo4BytesU8A(number) {
@@ -438,6 +439,7 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
     const decimal = await getDecimal()
     paraId = api.createType('Compact<u32>', paraId)
     amount = api.createType('Compact<BalanceOf>', new BN(amount).mul(new BN(10).pow(decimal)))
+    let contriHash = ''
     const nonce = (await api.query.system.account(from)).nonce.toNumber()
     const unsubContribution = await api.tx.crowdloan.contribute(paraId, amount, null).signAndSend(from, {
       nonce
@@ -445,7 +447,6 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
       status,
       dispatchError
     }) => {
-      let contriHash = ''
       if (status.isInBlock || status.isFinalized) {
         if (dispatchError) {
           let errMsg = ''
@@ -479,7 +480,7 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
           variant: 'warning'
         })
       } else if (status.isInBlock) {
-        console.log("Transaction included at blockHash.", status.asInBlock.toJSON());
+        console.log("Transaction included at blockHash ", status.asInBlock.toJSON());
         contriHash = status.asInBlock.toJSON()
         toast("Transaction In Block!", {
           title: 'Info',
@@ -503,8 +504,11 @@ export const addMemo = async (parent, child, paraId, trieIndex, contriHash) => {
   const api = await injectAccount(store.state.account)
   const chain = CHAIN_ID[store.state.symbol]
   const signedBlock = await api.rpc.chain.getBlock(contriHash)
+  console.log('signedBlock11',  contriHash);
+  console.log('signedBlock', signedBlock.toJSON());
   console.log('contribution block num', signedBlock.block.header.number.toNumber());
   const height = signedBlock.block.header.number.toNumber()
+  child = validAddress(child) && child === parent ? parent : child;
   const memo = {
     chain,
     parent: getNodeId(parent),

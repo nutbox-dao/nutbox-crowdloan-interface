@@ -45,11 +45,11 @@ export default {
     ...mapGetters(["getFundInfo"]),
     contributed() {
       const fund = this.getFundInfo(this.paraId);
-      console.log("fund", fund);
-      console.log(
-        "funded",
-        fund.funds.filter((c) => c.contributor === this.account.address)
-      );
+      // console.log("fund", fund);
+      // console.log(
+      //   "funded",
+      //   fund.funds.filter((c) => c.contributor === this.account.address)
+      // );
 
       const contributions = fund.funds
         .filter((c) => c.contributor === this.account.address)

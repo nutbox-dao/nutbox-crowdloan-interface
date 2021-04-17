@@ -132,7 +132,6 @@ export default {
   watch: {
     async currentBlockNum(newValue, _) {
       const fund = this.fundInfo;
-      this.status = fund?.status ?? PARA_STATUS.COMPLETED;
       const api = await getApi();
       const end = fund.end;
       const raised = fund.raised

@@ -43,10 +43,7 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import {
-  TOKEN_SYMBOL,
-  SURPORT_CHAINS,
-} from "../../config";
+import { TOKEN_SYMBOL, SURPORT_CHAINS } from "../../config";
 import { contribute, validAddress } from "../../utils/polkadot";
 import BN from "bn.js";
 
@@ -55,8 +52,8 @@ export default {
     return {
       inputAmount: "",
       inputNonimator: "",
-      paraName: SURPORT_CHAINS[this.symbol][this.paraId],
-      paraTokenSymbol: TOKEN_SYMBOL[this.symbol],
+      paraName: '',
+      paraTokenSymbol: '',
       isComtribution: false,
     };
   },
@@ -100,8 +97,6 @@ export default {
           variant: "warning", // info success danger
         });
         return false;
-      }else{
-        this.inputNonimator = this.communityId
       }
 
       const amount = parseFloat(this.inputAmount);
@@ -123,7 +118,7 @@ export default {
       const raised = fund.raised;
       const cap = fund.cap;
       const gap = cap.sub(raised);
-      console.log('gao', gap.toNumber(), amount);
+      console.log("gao", gap.toNumber(), amount);
 
       if (gap.lt(new BN(amount))) {
         this.$bvToast.toast("Out of cap", {
@@ -165,13 +160,13 @@ export default {
           console.log("res", res);
           // this.$emit('hideContribute')
           this.$bvToast.toast("Contribution Success!", {
-            title: 'Info',
+            title: "Info",
             autoHideDelay: 5000,
-            variant: 'success'
-          })
+            variant: "success",
+          });
         }
       } catch (e) {
-        console.log('eee', e);
+        console.log("eee", e);
         this.$bvToast.toast(e.message, {
           title: "Error",
           autoHideDelay: 5000,
@@ -181,6 +176,10 @@ export default {
         this.isComtribution = false;
       }
     },
+  },
+  mounted() {
+    this.paraName = SURPORT_CHAINS[this.symbol][this.paraId];
+    this.paraTokenSymbol = TOKEN_SYMBOL[this.symbol];
   },
 };
 </script>
