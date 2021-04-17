@@ -408,7 +408,7 @@ export const withdraw = async (paraId, toast, isInblockCallback) => {
         setTimeout(() => {
           toast("Transaction In Block!", {
             title: 'Info',
-            autoHideDelay: 12000,
+            autoHideDelay: 10000,
             variant: 'warning'
           })
         }, 700);
