@@ -154,6 +154,9 @@ export default {
           trieIndex,
           (info, param) => {
             this.$bvToast.toast(info, param);
+          },
+          () => {
+            this.$emit("hideContribute");
           }
         );
         if (res) {

@@ -77,6 +77,8 @@ export default {
         this.isWithdraw = true
         const res = await withdraw(this.paraId, (info, param) => {
           this.$bvToast.toast(info, param);
+        },()=>{
+          this.$emit("hideWithdraw");
         });
         if (res) {
           this.$bvToast.toast("Withdraw Success!", {

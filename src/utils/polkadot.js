@@ -87,6 +87,8 @@ export const subscribeFundInfo = async (paraId = [200]) => {
   try {
     unsubFund = (await api.query.crowdloan.funds.multi(paraId, async (unwrapedFunds) => {
       const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
+      const bestBlockHash = await api.rpc.chain.getBlockHash();
+      const auctionInfo = (await api.query.auctions.auctionInfo.at(bestBlockHash)).toJSON();
       const decimal = await getDecimal()
       let funds = []
       for (let i = 0; i < unwrapedFunds.length; i++) {
@@ -106,17 +108,6 @@ export const subscribeFundInfo = async (paraId = [200]) => {
           raised,
           trieIndex
         } = unwrapedFund
-        console.log({
-          deposit,
-          cap,
-          depositor,
-          end,
-          firstSlot,
-          lastSlot,
-          raised,
-          trieIndex,
-          trieindexnum: trieIndex.toNumber()
-        });
         const childKey = createChildKey(trieIndex)
         const keys = await api.rpc.childstate.getKeys(childKey, '0x')
         const ss58keys = keys.map(k => encodeAddress(k))
@@ -127,14 +118,14 @@ export const subscribeFundInfo = async (paraId = [200]) => {
           memo: api.createType('(Balance, Vec<u8>)', v.unwrap())[1].toHuman()
         }))
         // console.log('contri', contributions);
-        const retiringPeriod = [parseInt(end), parseInt(end) + RETIRING_PERIOD[store.state.symbol]]
-        const retiring = bestBlockNumber >= retiringPeriod[0] && bestBlockNumber <= retiringPeriod[1]
         const leasePeriod = await getLeasePeriod()
+        const auctionEnd = auctionInfo ? auctionInfo[1] : 0
         const currentPeriod = Math.floor(bestBlockNumber / leasePeriod)
         const leases = (await api.query.slots.leases(pId)).toJSON()
         const isWinner = leases.length > 0
         const isCapped = (new BN(raised)).gte(new BN(cap))
-        const isEnded = bestBlockNumber > end
+        const isEnded = bestBlockNumber > end || bestBlockNumber >= auctionEnd
+        const retiring = (isEnded || currentPeriod >= firstSlot) && bestBlockNumber < auctionEnd
 
         let status = ''
         let statusIndex = 0
@@ -315,6 +306,7 @@ export const getBalance = async (account) => {
 }
 
 export function getNodeId(address) {
+  if (!address) return new Uint8Array(8)
   const isAddress = validAddress(address)
   return isAddress ? decodeAddress(address).slice(0, 8) : new Uint8Array(8);
 }
@@ -362,7 +354,7 @@ function decodeMemo(hex) {
   }
 }
 
-export const withdraw = async (paraId, toast) => {
+export const withdraw = async (paraId, toast, isInblockCallback) => {
   return new Promise(async (resolve, reject) => {
     const api = await injectAccount(store.state.account)
     const from = store.state.account?.address
@@ -412,11 +404,14 @@ export const withdraw = async (paraId, toast) => {
       } else if (status.isInBlock) {
         console.log("Transaction included at blockHash.", status.asInBlock.toJSON());
         contriHash = status.asInBlock.toJSON()
-        toast("Transaction In Block!", {
-          title: 'Info',
-          autoHideDelay: 12000,
-          variant: 'warning'
-        })
+        if (isInblockCallback) isInblockCallback()
+        setTimeout(() => {
+          toast("Transaction In Block!", {
+            title: 'Info',
+            autoHideDelay: 12000,
+            variant: 'warning'
+          })
+        }, 700);
       } else if (status.isFinalized) {
         unsub()
         // 上传daemon
@@ -429,7 +424,7 @@ export const withdraw = async (paraId, toast) => {
 }
 
 
-export const contribute = async (paraId, amount, communityId, childId, trieIndex, toast) => {
+export const contribute = async (paraId, amount, communityId, childId, trieIndex, toast, inBlockCallback) => {
   return new Promise(async (resolve, reject) => {
     const from = store.state.account && store.state.account.address
     if (!from) {
@@ -439,9 +434,20 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
     const decimal = await getDecimal()
     paraId = api.createType('Compact<u32>', paraId)
     amount = api.createType('Compact<BalanceOf>', new BN(amount).mul(new BN(10).pow(decimal)))
-    let contriHash = ''
     const nonce = (await api.query.system.account(from)).nonce.toNumber()
-    const unsubContribution = await api.tx.crowdloan.contribute(paraId, amount, null).signAndSend(from, {
+    const contributeTx = api.tx.crowdloan.contribute(paraId, amount, null)
+    const memo = {
+      chain: CHAIN_ID[store.state.symbol],
+      parent: getNodeId(communityId),
+      child: getNodeId(childId),
+      height: 0,
+      paraId: parseInt(paraId),
+      trieIndex: parseInt(trieIndex)
+    }
+    const encodememo = encodeMemo(memo)
+    const memoTx = api.tx.crowdloan.addMemo(paraId, encodememo)
+    const unsubContribution = await api.tx.utility
+    .batch([contributeTx,memoTx ]).signAndSend(from, {
       nonce
     }, ({
       status,
@@ -481,16 +487,21 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
         })
       } else if (status.isInBlock) {
         console.log("Transaction included at blockHash ", status.asInBlock.toJSON());
-        contriHash = status.asInBlock.toJSON()
-        toast("Transaction In Block!", {
-          title: 'Info',
-          autoHideDelay: 12000,
-          variant: 'warning'
-        })
+        const contriHash = status.asInBlock.toJSON()
+        if (inBlockCallback) inBlockCallback()
+        // upload to daemon
+        setTimeout(() => {
+          toast("Transaction In Block!", {
+            title: 'Info',
+            autoHideDelay: 12000,
+            variant: 'warning'
+          })
+        }, 700);
+        
       } else if (status.isFinalized) {
         unsubContribution()
         // 添加memo
-        addMemo(communityId, childId, paraId, trieIndex, contriHash)
+        // addMemo(communityId, childId, paraId, trieIndex, contriHash)
         resolve(status.isFinalized)
       }
     }).catch(err => {

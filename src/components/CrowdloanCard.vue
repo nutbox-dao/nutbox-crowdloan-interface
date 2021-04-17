@@ -138,19 +138,16 @@ export default {
       const cap = fund.cap
       const firstSlot = fund.firstSlot
       const leasePeriod = await getLeasePeriod();
-      const retiringPeriod = [
-        parseInt(end),
-        parseInt(end) + RETIRING_PERIOD[this.symbol],
-      ];
+      const bestBlockHash = await api.rpc.chain.getBlockHash();
+      const auctionInfo = (await api.query.auctions.auctionInfo.at(bestBlockHash)).toJSON();
+      const auctionEnd = auctionInfo ? auctionInfo[1] : 0
       const bestBlockNumber = newValue;
-      const retiring =
-        bestBlockNumber >= retiringPeriod[0] &&
-        bestBlockNumber <= retiringPeriod[1];
       const currentPeriod = Math.floor(bestBlockNumber / leasePeriod);
       const leases = (await api.query.slots.leases(this.paraId)).toJSON();
       const isWinner = leases.length > 0;
       const isCapped = new BN(raised).gte(new BN(cap));
       const isEnded = bestBlockNumber > end;
+      const retiring = (isEnded || currentPeriod >= firstSlot) && bestBlockNumber < auctionEnd
        let status = ''
         if (retiring) {
           status = PARA_STATUS.RETIRED
