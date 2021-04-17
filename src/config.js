@@ -23,7 +23,7 @@ export const CHAIN_ID = {
 }
 
 export const CHAIN_NAME = {
-  POLKADOT: "Pokaldot",
+  POLKADOT: "Polkadot",
   KUSAMA: "Kusama",
   ROCOCO: "Rococo"
 }
@@ -32,9 +32,18 @@ export const SURPORT_CHAINS = {
   POLKADOT: {},
   KUSAMA: {},
   ROCOCO: {
-    200: 'Phala',
-    300: 'Acala',
+    1001: 'Test 1001',
+    1002: 'Test 1002',
+    1003: 'Test 1003',
+    1004: 'Test 1004',
   }
+  // ROCOCO: {
+  //   1004: '1004',
+  //   1000: '1000',
+  //   3586: '3586',
+  //   18888: '18888',
+  //   15236: '15236'
+  // }
 }
 
 export const SURPORT_COMMUNITIES = {

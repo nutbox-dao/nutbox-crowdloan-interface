@@ -26,9 +26,10 @@ export default {
     },
     
     percent() {
-      console.log("fundinfo", this.paraId, this.fundInfo);
       return (
-        parseFloat(this.fundInfo.raised.div(this.fundInfo.cap)).toFixed(2) + "% "
+        this.fundInfo.cap.isZero()
+        ? "100.00%"
+        : (this.fundInfo.raised.muln(10000).div(this.fundInfo.cap).toNumber() / 100).toFixed(2) + "% "
       );
     },
   },

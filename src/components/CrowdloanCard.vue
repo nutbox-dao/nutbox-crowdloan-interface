@@ -132,7 +132,7 @@ export default {
   watch: {
     async currentBlockNum(newValue, _) {
       const fund = this.fundInfo;
-      if (!fund) this.status = PARA_STATUS.COMPLETED;
+      this.status = fund?.status ?? PARA_STATUS.COMPLETED;
       const api = await getApi();
       const end = fund.end;
       const raised = fund.raised
@@ -179,13 +179,16 @@ export default {
     },
     leasePeriod() {
       try {
+        const first = parseInt(this.fundInfo.firstSlot)
+        const last = parseInt(this.fundInfo.lastSlot)
         return (
+          first === last ? first + '' : 
           parseInt(this.fundInfo.firstSlot) +
           " - " +
           parseInt(this.fundInfo.lastSlot)
         );
       } catch (e) {
-        return "0 - 0";
+        return "0";
       }
     },
     countDown() {
@@ -248,6 +251,9 @@ export default {
           return require("../static/images/card-completed.svg");
       }
     },
+  },
+  mounted () {
+    this.status = this.fundInfo.status;
   },
 };
 </script>

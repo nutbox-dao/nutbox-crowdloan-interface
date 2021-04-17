@@ -7,7 +7,9 @@ import {
   u8aToHex,
   numberToU8a,
   isHex,
-  hexToU8a
+  hexToU8a,
+  formatBalance, 
+  formatNumber,
 } from "@polkadot/util"
 import {
   web3Accounts,
@@ -44,11 +46,9 @@ const POLKADOT_CHAIN_WEB_SOCKET_MAP = {
   'ROCOCO': ROCOCO_WEB_SOCKET
 }
 
-let _api = {}
-
 export async function getApi() {
-  if (_api && _api[store.state.symbol]) {
-    return _api[store.state.symbol]
+  if (store.state.api[store.state.symbol]){
+    return store.state.api[store.state.symbol]
   }
   const wsProvider = new WsProvider(POLKADOT_CHAIN_WEB_SOCKET_MAP[store.state.symbol])
   const api = await ApiPromise.create({
@@ -58,7 +58,7 @@ export async function getApi() {
       PalletId: 'Raw'
     }
   })
-  _api[store.state.symbol] = api
+  store.commit('saveApi', api)
   return api
 }
 
@@ -96,7 +96,6 @@ export const subscribeFundInfo = async (paraId = [200]) => {
           continue
         }
         const unwrapedFund = fund.unwrap()
-        // console.log('unwrapedFund', unwrapedFund);
         const {
           deposit,
           cap,
@@ -107,6 +106,17 @@ export const subscribeFundInfo = async (paraId = [200]) => {
           raised,
           trieIndex
         } = unwrapedFund
+        console.log({
+          deposit,
+          cap,
+          depositor,
+          end,
+          firstSlot,
+          lastSlot,
+          raised,
+          trieIndex,
+          trieindexnum: trieIndex.toNumber()
+        });
         const childKey = createChildKey(trieIndex)
         const keys = await api.rpc.childstate.getKeys(childKey, '0x')
         const ss58keys = keys.map(k => encodeAddress(k))
@@ -151,12 +161,12 @@ export const subscribeFundInfo = async (paraId = [200]) => {
           firstSlot: new BN(firstSlot),
           lastSlot: new BN(lastSlot),
           raised: uni2Token(new BN(raised), decimal),
-          retiring,
           trieIndex,
           funds: contributions
         })
       }
-      funds = funds.sort(f => f.statusIndex)
+      funds = funds.sort((a,b) => a.statusIndex - b.statusIndex)
+      console.log('fund info', funds);
       store.commit('saveProjectFundInfos', funds)
       store.commit('saveLoadingFunds', false)
     }));
