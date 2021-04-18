@@ -147,7 +147,7 @@ export default {
       const isWinner = leases.length > 0;
       const isCapped = new BN(raised).gte(new BN(cap));
       const isEnded = bestBlockNumber > end;
-      const retiring = (isEnded || currentPeriod >= firstSlot) && bestBlockNumber < auctionEnd
+      const retiring = (isEnded || currentPeriod > firstSlot) && bestBlockNumber < auctionEnd
        let status = ''
         if (retiring) {
           status = PARA_STATUS.RETIRED

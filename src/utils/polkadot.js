@@ -125,7 +125,7 @@ export const subscribeFundInfo = async (paraId = [200]) => {
         const isWinner = leases.length > 0
         const isCapped = (new BN(raised)).gte(new BN(cap))
         const isEnded = bestBlockNumber > end || bestBlockNumber >= auctionEnd
-        const retiring = (isEnded || currentPeriod >= firstSlot) && bestBlockNumber < auctionEnd
+        const retiring = (isEnded || currentPeriod > firstSlot) && bestBlockNumber < auctionEnd
 
         let status = ''
         let statusIndex = 0
