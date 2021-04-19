@@ -10,6 +10,12 @@ export const PARA_STATUS = {
   OTHER: "Other"
 }
 
+export const POLKADOT_CHAIN_WEB_SOCKET_MAP = {
+  'POLKADOT': POLKADOT_WEB_SOCKET,
+  'KUSAMA': KUSAMA_WEB_SOCKEY,
+  'ROCOCO': ROCOCO_WEB_SOCKET
+}
+
 export const TOKEN_SYMBOL = {
   "POLKADOT": "DOT",
   "KUSAMA": "KSM",

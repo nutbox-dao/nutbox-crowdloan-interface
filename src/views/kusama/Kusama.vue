@@ -34,9 +34,9 @@
 <script>
 import CrowdloanCard from "../../components/CrowdloanCard";
 import {
-  subscribeFundInfo,
-  subBlock,
-} from "../../utils/polkadot";
+  subscribeFundInfo
+} from "../../utils/crowdloan";
+import { subBlock } from "../../utils/block"
 import { mapMutations, mapState, mapGetters } from "vuex";
 import { SURPORT_CHAINS, SURPORT_COMMUNITIES } from "../../config";
 import TipContribute from "../../components/TipBoxes/TipContribute";

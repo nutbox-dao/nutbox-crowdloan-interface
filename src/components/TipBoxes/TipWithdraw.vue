@@ -26,7 +26,7 @@
 <script>
 import { mapState, mapGetters } from "vuex";
 import { TOKEN_SYMBOL } from "../../config";
-import { withdraw } from "../../utils/polkadot";
+import { withdraw } from "../../utils/crowdloan";
 import BN from "bn.js";
 
 export default {
@@ -80,14 +80,6 @@ export default {
         },()=>{
           this.$emit("hideWithdraw");
         });
-        if (res) {
-          this.$bvToast.toast("Withdraw Success!", {
-            title: "Success",
-            autoHideDelay: 5000,
-            variant: "success",
-          });
-        } else {
-        }
       } catch (e) {
         this.$bvToast.toast(e.message, {
           title: "Error",

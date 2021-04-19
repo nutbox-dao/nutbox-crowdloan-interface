@@ -99,8 +99,8 @@ import TipWithdraw from "./TipBoxes/TipWithdraw";
 import ContributorsLabel from "./Label/ContributorsLabel";
 import RaisedLabel from "./Label/RaisedLabel";
 import { TOKEN_SYMBOL, SURPORT_CHAINS, SURPORT_COMMUNITIES, PARA_STATUS } from "../config";
-import { BLOCK_SECOND, TIME_PERIOD, RETIRING_PERIOD } from "../constant";
-import { calStatus } from "../utils/polkadot";
+import { BLOCK_SECOND, TIME_PERIOD } from "../constant";
+import { calStatus } from "../utils/crowdloan";
 
 export default {
   data() {
@@ -134,7 +134,8 @@ export default {
       const end = fund.end;
       const raised = fund.raised
       const cap = fund.cap
-      const [status] = await calStatus(end, raised, cap, this.paraId, newValue)
+      const firstSlot = fund.firstSlot
+      const [status] = await calStatus(end, firstSlot, raised, cap, this.paraId, newValue)
       this.status = status
     },
   },
@@ -285,7 +286,7 @@ export default {
     align-items: flex-start;
     margin-bottom: 0.6rem;
     .name {
-      flex: 0.4;
+      flex: 1;
       text-align: left;
       color: rgba(189, 191, 194, 1);
       font-weight: bold;
