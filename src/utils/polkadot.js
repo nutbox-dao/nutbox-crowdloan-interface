@@ -174,7 +174,7 @@ export const calStatus = async (end, raised, cap, pId, bestBlockNumber) => {
 }
 
 export const getAuctionEnd = async () => {
-  if (store.state.auctionEnd[store.state.symbol]){
+  if (store.state.auctionEnd[store.state.symbol]) {
     return store.state.auctionEnd[store.state.system]
   }
   const api = await getApi()
@@ -412,22 +412,22 @@ export const withdraw = async (paraId, toast, isInblockCallback) => {
         }
       }
       if (status.isBroadcast) {
-        toast("Transaction Is Broadcasting.", {
-          title: 'Info',
-          autoHideDelay: 8000,
-          variant: 'warning'
-        })
-      } else if (status.isInBlock) {
-        console.log("Transaction included at blockHash.", status.asInBlock.toJSON());
-        contriHash = status.asInBlock.toJSON()
         if (isInblockCallback) isInblockCallback()
         setTimeout(() => {
-          toast("Transaction In Block!", {
+          toast("Transaction Is Broadcasting.", {
             title: 'Info',
-            autoHideDelay: 10000,
+            autoHideDelay: 8000,
             variant: 'warning'
           })
         }, 700);
+      } else if (status.isInBlock) {
+        console.log("Transaction included at blockHash.", status.asInBlock.toJSON());
+        contriHash = status.asInBlock.toJSON()
+        toast("Transaction In Block!", {
+          title: 'Info',
+          autoHideDelay: 10000,
+          variant: 'warning'
+        })
       } else if (status.isFinalized) {
         unsub()
         // 上传daemon
@@ -496,23 +496,24 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
           }
         }
         if (status.isBroadcast) {
-          toast("Transaction Is Broadcasting.", {
-            title: 'Info',
-            autoHideDelay: 8000,
-            variant: 'warning'
-          })
-        } else if (status.isInBlock) {
-          console.log("Transaction included at blockHash ", status.asInBlock.toJSON());
-          const contriHash = status.asInBlock.toJSON()
           if (inBlockCallback) inBlockCallback()
-          // upload to daemon
           setTimeout(() => {
-            toast("Transaction In Block!", {
+            toast("Transaction Is Broadcasting.", {
               title: 'Info',
-              autoHideDelay: 12000,
+              autoHideDelay: 8000,
               variant: 'warning'
             })
           }, 700);
+        } else if (status.isInBlock) {
+          console.log("Transaction included at blockHash ", status.asInBlock.toJSON());
+          const contriHash = status.asInBlock.toJSON()
+
+          // upload to daemon
+          toast("Transaction In Block!", {
+            title: 'Info',
+            autoHideDelay: 12000,
+            variant: 'warning'
+          })
 
         } else if (status.isFinalized) {
           unsubContribution()
@@ -524,40 +525,4 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
         reject(err)
       })
   })
-}
-
-export const addMemo = async (parent, child, paraId, trieIndex, contriHash) => {
-  const from = store.state.account.address
-  const api = await injectAccount(store.state.account)
-  const chain = CHAIN_ID[store.state.symbol]
-  const signedBlock = await api.rpc.chain.getBlock(contriHash)
-  console.log('signedBlock11', contriHash);
-  console.log('signedBlock', signedBlock.toJSON());
-  console.log('contribution block num', signedBlock.block.header.number.toNumber());
-  const height = signedBlock.block.header.number.toNumber()
-  child = validAddress(child) && child === parent ? parent : child;
-  const memo = {
-    chain,
-    parent: getNodeId(parent),
-    child: getNodeId(child),
-    height: parseInt(height),
-    paraId: parseInt(paraId),
-    trieIndex: parseInt(trieIndex)
-  }
-
-  const nonce = (await api.query.system.account(from)).nonce.toNumber()
-  const encodememo = encodeMemo(memo)
-  const unsub = await api.tx.crowdloan.addMemo(paraId, encodememo).signAndSend(from, {
-    nonce
-  }, (res) => {
-    if (res.status.isInBlock) {
-      console.log(
-        'hash', res.status.asInBlock.toJSON()
-      );
-      // upload to daemon
-
-    }
-    if (res.status.isFinalized) unsub()
-  })
-
 }
