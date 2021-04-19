@@ -99,9 +99,8 @@ import TipWithdraw from "./TipBoxes/TipWithdraw";
 import ContributorsLabel from "./Label/ContributorsLabel";
 import RaisedLabel from "./Label/RaisedLabel";
 import { TOKEN_SYMBOL, SURPORT_CHAINS, SURPORT_COMMUNITIES, PARA_STATUS } from "../config";
-import { BLOCK_SECOND, TIME_PERIOD, RETIRING_PERIOD } from "../constant";
-import { getApi, getLeasePeriod } from "../utils/polkadot";
-import BN from 'bn.js'
+import { BLOCK_SECOND, TIME_PERIOD } from "../constant";
+import { calStatus } from "../utils/crowdloan";
 
 export default {
   data() {
@@ -132,32 +131,11 @@ export default {
   watch: {
     async currentBlockNum(newValue, _) {
       const fund = this.fundInfo;
-      const api = await getApi();
       const end = fund.end;
       const raised = fund.raised
       const cap = fund.cap
       const firstSlot = fund.firstSlot
-      const leasePeriod = await getLeasePeriod();
-      const bestBlockHash = await api.rpc.chain.getBlockHash();
-      const auctionInfo = (await api.query.auctions.auctionInfo.at(bestBlockHash)).toJSON();
-      const auctionEnd = auctionInfo ? auctionInfo[1] : 0
-      const bestBlockNumber = newValue;
-      const currentPeriod = Math.floor(bestBlockNumber / leasePeriod);
-      const leases = (await api.query.slots.leases(this.paraId)).toJSON();
-      const isWinner = leases.length > 0;
-      const isCapped = new BN(raised).gte(new BN(cap));
-      const isEnded = bestBlockNumber > end;
-      const retiring = (isEnded || currentPeriod > firstSlot) && bestBlockNumber < auctionEnd
-       let status = ''
-        if (retiring) {
-          status = PARA_STATUS.RETIRED
-        } else {
-          if (!(isCapped || isEnded || isWinner) && currentPeriod <= firstSlot) {
-            status = PARA_STATUS.ACTIVE
-          } else {
-            status = PARA_STATUS.COMPLETED
-          }
-        }
+      const [status] = await calStatus(end, firstSlot, raised, cap, this.paraId, newValue)
       this.status = status
     },
   },
@@ -308,13 +286,13 @@ export default {
     align-items: flex-start;
     margin-bottom: 0.6rem;
     .name {
-      flex: 0.4;
+      flex: 1;
       text-align: left;
       color: rgba(189, 191, 194, 1);
       font-weight: bold;
     }
     .info {
-      flex: 0.6;
+      // flex: 0.8;
       text-align: right;
       font-weight: 500;
     }

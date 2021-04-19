@@ -100,7 +100,7 @@
 import { mapState, mapMutations } from 'vuex'
 import ConnectWallet from './components/Buttons/ConnectWallet'
 import Identicon from '@polkadot/vue-identicon'
-import { getBalance, loadAccounts } from './utils/polkadot'
+import { getBalance, loadAccounts } from './utils/account'
 
 export default {
   name: 'App',

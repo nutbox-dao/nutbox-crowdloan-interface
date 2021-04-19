@@ -44,7 +44,8 @@
 <script>
 import { mapState, mapGetters } from "vuex";
 import { TOKEN_SYMBOL, SURPORT_CHAINS } from "../../config";
-import { contribute, validAddress } from "../../utils/polkadot";
+import { validAddress } from "../../utils/polkadot";
+import { contribute } from "../../utils/crowdloan"
 import BN from "bn.js";
 
 export default {
@@ -159,15 +160,6 @@ export default {
             this.$emit("hideContribute");
           }
         );
-        if (res) {
-          console.log("res", res);
-          // this.$emit('hideContribute')
-          this.$bvToast.toast("Contribution Success!", {
-            title: "Info",
-            autoHideDelay: 5000,
-            variant: "success",
-          });
-        }
       } catch (e) {
         console.log("eee", e);
         this.$bvToast.toast(e.message, {
