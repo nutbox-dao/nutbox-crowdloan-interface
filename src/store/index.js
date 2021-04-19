@@ -12,6 +12,7 @@ export default new Vuex.Store({
     subBlock: {},
     subBalance: {},
     subFund: {},
+    auctionEnd: {},
     isConnected: true,
     loadingFunds: true,
     account: Cookie.get('polkadot-account'),
@@ -40,6 +41,10 @@ export default new Vuex.Store({
       state.subFund = {
         ...state.subFund
       }
+    },
+    saveAuctionEnd: (state, auctionEnd) => {
+      state.auctionEnd[state.symbol] = auctionEnd
+      state.auctionEnd = {...state.auctionEnd}
     },
     saveApiState: (state, apiState) => {
       state.apiState = apiState

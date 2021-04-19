@@ -8,7 +8,7 @@ import {
   numberToU8a,
   isHex,
   hexToU8a,
-  formatBalance, 
+  formatBalance,
   formatNumber,
 } from "@polkadot/util"
 import {
@@ -47,7 +47,7 @@ const POLKADOT_CHAIN_WEB_SOCKET_MAP = {
 }
 
 export async function getApi() {
-  if (store.state.api[store.state.symbol]){
+  if (store.state.api[store.state.symbol]) {
     return store.state.api[store.state.symbol]
   }
   const wsProvider = new WsProvider(POLKADOT_CHAIN_WEB_SOCKET_MAP[store.state.symbol])
@@ -87,8 +87,6 @@ export const subscribeFundInfo = async (paraId = [200]) => {
   try {
     unsubFund = (await api.query.crowdloan.funds.multi(paraId, async (unwrapedFunds) => {
       const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
-      const bestBlockHash = await api.rpc.chain.getBlockHash();
-      const auctionInfo = (await api.query.auctions.auctionInfo.at(bestBlockHash)).toJSON();
       const decimal = await getDecimal()
       let funds = []
       for (let i = 0; i < unwrapedFunds.length; i++) {
@@ -118,29 +116,7 @@ export const subscribeFundInfo = async (paraId = [200]) => {
           memo: api.createType('(Balance, Vec<u8>)', v.unwrap())[1].toHuman()
         }))
         // console.log('contri', contributions);
-        const leasePeriod = await getLeasePeriod()
-        const auctionEnd = auctionInfo ? auctionInfo[1] : 0
-        const currentPeriod = Math.floor(bestBlockNumber / leasePeriod)
-        const leases = (await api.query.slots.leases(pId)).toJSON()
-        const isWinner = leases.length > 0
-        const isCapped = (new BN(raised)).gte(new BN(cap))
-        const isEnded = bestBlockNumber > end || bestBlockNumber >= auctionEnd
-        const retiring = (isEnded || currentPeriod > firstSlot) && bestBlockNumber < auctionEnd
-
-        let status = ''
-        let statusIndex = 0
-        if (retiring) {
-          status = PARA_STATUS.RETIRED
-          statusIndex = 1
-        } else {
-          if (!(isCapped || isEnded || isWinner) && currentPeriod <= firstSlot) {
-            status = PARA_STATUS.ACTIVE
-            statusIndex = 0
-          } else {
-            status = PARA_STATUS.COMPLETED
-            statusIndex = 2
-          }
-        }
+        const [status, statusIndex] = await calStatus(end, raised, cap, pId, bestBlockNumber)
         funds.push({
           paraId: pId,
           status,
@@ -156,7 +132,7 @@ export const subscribeFundInfo = async (paraId = [200]) => {
           funds: contributions
         })
       }
-      funds = funds.sort((a,b) => a.statusIndex - b.statusIndex)
+      funds = funds.sort((a, b) => a.statusIndex - b.statusIndex)
       console.log('fund info', funds);
       store.commit('saveProjectFundInfos', funds)
       store.commit('saveLoadingFunds', false)
@@ -166,6 +142,47 @@ export const subscribeFundInfo = async (paraId = [200]) => {
     console.error('error', e);
     store.commit('saveLoadingFunds', false)
   }
+}
+
+// 获取当前的status
+export const calStatus = async (end, raised, cap, pId, bestBlockNumber) => {
+  const api = await getApi()
+  const auctionEnd = await getAuctionEnd()
+  const leasePeriod = await getLeasePeriod()
+  const currentPeriod = Math.floor(bestBlockNumber / leasePeriod)
+  const leases = (await api.query.slots.leases(pId)).toJSON()
+  const isWinner = leases.length > 0
+  const isCapped = (new BN(raised)).gte(new BN(cap))
+  const isEnded = bestBlockNumber > end || bestBlockNumber >= auctionEnd
+  const retiring = (isEnded || currentPeriod > firstSlot) && bestBlockNumber < auctionEnd
+
+  let status = ''
+  let statusIndex = 0
+  if (retiring) {
+    status = PARA_STATUS.RETIRED
+    statusIndex = 1
+  } else {
+    if (!(isCapped || isEnded || isWinner) && currentPeriod <= firstSlot) {
+      status = PARA_STATUS.ACTIVE
+      statusIndex = 0
+    } else {
+      status = PARA_STATUS.COMPLETED
+      statusIndex = 2
+    }
+  }
+  return [status, statusIndex]
+}
+
+export const getAuctionEnd = async () => {
+  if (store.state.auctionEnd[store.state.symbol]){
+    return store.state.auctionEnd[store.state.system]
+  }
+  const api = await getApi()
+  const bestBlockHash = await api.rpc.chain.getBlockHash();
+  const auctionInfo = (await api.query.auctions.auctionInfo.at(bestBlockHash)).toJSON();
+  const auctionEnd = auctionInfo ? auctionInfo[1] : 0
+  store.commit('saveAuctionEnd', auctionEnd)
+  return auctionEnd
 }
 
 //  一个租赁周期
@@ -197,7 +214,6 @@ export const subBlock = async () => {
   const subBlock = await api.rpc.chain.subscribeNewHeads((header) => {
     try {
       const number = header.number.toNumber()
-      console.log('number', number);
       store.commit('saveCurrentBlockNum', number)
     } catch (e) {
 
@@ -447,66 +463,66 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
     const encodememo = encodeMemo(memo)
     const memoTx = api.tx.crowdloan.addMemo(paraId, encodememo)
     const unsubContribution = await api.tx.utility
-    .batch([contributeTx,memoTx ]).signAndSend(from, {
-      nonce
-    }, ({
-      status,
-      dispatchError
-    }) => {
-      if (status.isInBlock || status.isFinalized) {
-        if (dispatchError) {
-          let errMsg = ''
-          if (dispatchError.isModule) {
-            // for module errors, we have the section indexed, lookup
-            const decoded = api.registry.findMetaError(dispatchError.asModule);
-            const {
-              documentation,
-              name,
-              section
-            } = decoded;
-            errMsg = `${section}.${name}: ${documentation.join(' ')}`
-            console.log(`${section}.${name}: ${documentation.join(' ')}`);
-          } else {
-            // Other, CannotLookup, BadOrigin, no extra info
-            console.log(dispatchError.toString());
-            errMsg = dispatchError.toString()
+      .batch([contributeTx, memoTx]).signAndSend(from, {
+        nonce
+      }, ({
+        status,
+        dispatchError
+      }) => {
+        if (status.isInBlock || status.isFinalized) {
+          if (dispatchError) {
+            let errMsg = ''
+            if (dispatchError.isModule) {
+              // for module errors, we have the section indexed, lookup
+              const decoded = api.registry.findMetaError(dispatchError.asModule);
+              const {
+                documentation,
+                name,
+                section
+              } = decoded;
+              errMsg = `${section}.${name}: ${documentation.join(' ')}`
+              console.log(`${section}.${name}: ${documentation.join(' ')}`);
+            } else {
+              // Other, CannotLookup, BadOrigin, no extra info
+              console.log(dispatchError.toString());
+              errMsg = dispatchError.toString()
+            }
+            toast(errMsg, {
+              title: 'Error',
+              variant: 'danger'
+            })
+            unsubContribution()
+            resolve(false)
           }
-          toast(errMsg, {
-            title: 'Error',
-            variant: 'danger'
-          })
-          unsubContribution()
-          resolve(false)
         }
-      }
-      if (status.isBroadcast) {
-        toast("Transaction Is Broadcasting.", {
-          title: 'Info',
-          autoHideDelay: 8000,
-          variant: 'warning'
-        })
-      } else if (status.isInBlock) {
-        console.log("Transaction included at blockHash ", status.asInBlock.toJSON());
-        const contriHash = status.asInBlock.toJSON()
-        if (inBlockCallback) inBlockCallback()
-        // upload to daemon
-        setTimeout(() => {
-          toast("Transaction In Block!", {
+        if (status.isBroadcast) {
+          toast("Transaction Is Broadcasting.", {
             title: 'Info',
-            autoHideDelay: 12000,
+            autoHideDelay: 8000,
             variant: 'warning'
           })
-        }, 700);
-        
-      } else if (status.isFinalized) {
-        unsubContribution()
-        // 添加memo
-        // addMemo(communityId, childId, paraId, trieIndex, contriHash)
-        resolve(status.isFinalized)
-      }
-    }).catch(err => {
-      reject(err)
-    })
+        } else if (status.isInBlock) {
+          console.log("Transaction included at blockHash ", status.asInBlock.toJSON());
+          const contriHash = status.asInBlock.toJSON()
+          if (inBlockCallback) inBlockCallback()
+          // upload to daemon
+          setTimeout(() => {
+            toast("Transaction In Block!", {
+              title: 'Info',
+              autoHideDelay: 12000,
+              variant: 'warning'
+            })
+          }, 700);
+
+        } else if (status.isFinalized) {
+          unsubContribution()
+          // 添加memo
+          // addMemo(communityId, childId, paraId, trieIndex, contriHash)
+          resolve(status.isFinalized)
+        }
+      }).catch(err => {
+        reject(err)
+      })
   })
 }
 
@@ -515,7 +531,7 @@ export const addMemo = async (parent, child, paraId, trieIndex, contriHash) => {
   const api = await injectAccount(store.state.account)
   const chain = CHAIN_ID[store.state.symbol]
   const signedBlock = await api.rpc.chain.getBlock(contriHash)
-  console.log('signedBlock11',  contriHash);
+  console.log('signedBlock11', contriHash);
   console.log('signedBlock', signedBlock.toJSON());
   console.log('contribution block num', signedBlock.block.header.number.toNumber());
   const height = signedBlock.block.header.number.toNumber()
