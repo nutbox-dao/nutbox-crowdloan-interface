@@ -107,7 +107,6 @@ export const calStatus = async (end, firstSlot, raised, cap, pId, bestBlockNumbe
   const isCapped = (new BN(raised)).gte(new BN(cap))
   const isEnded = bestBlockNumber > end || bestBlockNumber >= auctionEnd
   const retiring = (isEnded || currentPeriod > firstSlot) && bestBlockNumber < auctionEnd
-  console.log({isEnded, currentPeriod, firstSlot, bestBlockNumber, auctionEnd});
   let status = ''
   let statusIndex = 0
   if (retiring) {
@@ -132,7 +131,6 @@ export const getAuctionEnd = async () => {
   const api = await getApi()
   const bestBlockHash = await api.rpc.chain.getBlockHash();
   const auctionInfo = (await api.query.auctions.auctionInfo.at(bestBlockHash)).toJSON();
-  console.log('auction', auctionInfo);
   const auctionEnd = auctionInfo ? auctionInfo[1] : 0
   store.commit('saveAuctionEnd', auctionEnd)
   return auctionEnd
@@ -220,7 +218,7 @@ export const withdraw = async (paraId, toast, isInblockCallback) => {
         }, 700);
       } else if (status.isInBlock) {
         console.log("Transaction included at blockHash.", status.asInBlock.toJSON());
-        contriHash = status.asInBlock.toJSON()
+        const contriHash = status.asInBlock.toJSON()
         toast("Transaction In Block!", {
           title: 'Info',
           autoHideDelay: 10000,

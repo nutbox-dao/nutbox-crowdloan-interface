@@ -13,7 +13,6 @@ import {
 import jsonrpc from '@polkadot/types/interfaces/jsonrpc';
 import BN from "bn.js"
 import {
-  CHAIN_ID,
   POLKADOT_CHAIN_WEB_SOCKET_MAP
 } from "../config"
 import store from "../store"
