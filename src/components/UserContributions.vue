@@ -8,8 +8,6 @@
         :items="items"
         :fields="fields"
         thead-tr-class="th-cell"
-        :current-page="currentPage"
-        :per-page="perPage"
         table-class="c-table"
         hover
         tbody-tr-class="c-tr"
@@ -35,9 +33,9 @@
 </template>
 
 <script>
-import CsvExportor from 'csv-exportor'
-import { getUserContributions } from '../apis/api'
-import { mapState } from 'vuex'
+import { mapState } from "vuex";
+import { API_URL } from "../config";
+import axios from "axios";
 
 export default {
   name: "UserContributions",
@@ -47,10 +45,11 @@ export default {
     },
   },
   computed: {
-    ...mapState(['symbol'])
+    ...mapState(["account"]),
   },
   data() {
     return {
+      cancelToken: null,
       fields: [
         { key: "community", label: "Community", class: "text-left" },
         { key: "chain", label: "Chain", class: "text-left" },
@@ -62,29 +61,147 @@ export default {
         { key: "operate", label: "", class: "text-left" },
       ],
       items: [
-        { community: 'BML', chain: 'Plasm', trieIndex:2, date: '1-4', amount: '2,222,000', status: 0, time: '1 Days 22hours' },
-        { community: 'BML', chain: 'Plasm', trieIndex:2, date: '1-4', amount: '2,222,000', status: 0, time: '1 Days 22hours' },
-        { community: 'BML', chain: 'Plasm', trieIndex:1, date: '1-4', amount: '2,222,000', status: 0, time: '1 Days 22hours' },
-        { community: 'BML', chain: 'Plasm', trieIndex:1, date: '1-4', amount: '2,222,000', status: 1, time: '1 Days 22hours' },
-        { community: 'BML', chain: 'Plasm', trieIndex:0, date: '1-4', amount: '2,222,000', status: 1, time: '1 Days 22hours' },
-        { community: 'BML', chain: 'Plasm', trieIndex:0, date: '1-4', amount: '2,222,000', status: 1, time: '1 Days 22hours' },
-        { community: 'BML', chain: 'Plasm', trieIndex:0, date: '1-4', amount: '5,222,000', status: 2, time: '1 Days 22hours' },
-        { community: 'BML', chain: 'Plasm', trieIndex:0, date: '1-4', amount: '4,222,000', status: 2, time: '1 Days 22hours' },
-        { community: 'BML', chain: 'Plasm', trieIndex:0, date: '1-4', amount: '3,222,000', status: 1, time: '1 Days 22hours' },
-        { community: 'BML', chain: 'Plasm', trieIndex:0, date: '1-4', amount: '2,000', status: 1, time: '1 Days 22hours' },
-        { community: 'BML', chain: 'Plasm', trieIndex:0, date: '1-4', amount: '2,000', status: 1, time: '1 Days 22hours' },
-        { community: 'BML', chain: 'Plasm', trieIndex:0, date: '1-4', amount: '2,000', status: 2, time: '1 Days 22hours' }
+        {
+          community: "BML",
+          chain: "Plasm",
+          trieIndex: 2,
+          date: "1-4",
+          amount: "2,222,000",
+          status: 0,
+          time: "1 Days 22hours",
+        },
+        {
+          community: "BML",
+          chain: "Plasm",
+          trieIndex: 2,
+          date: "1-4",
+          amount: "2,222,000",
+          status: 0,
+          time: "1 Days 22hours",
+        },
+        {
+          community: "BML",
+          chain: "Plasm",
+          trieIndex: 1,
+          date: "1-4",
+          amount: "2,222,000",
+          status: 0,
+          time: "1 Days 22hours",
+        },
+        {
+          community: "BML",
+          chain: "Plasm",
+          trieIndex: 1,
+          date: "1-4",
+          amount: "2,222,000",
+          status: 1,
+          time: "1 Days 22hours",
+        },
+        {
+          community: "BML",
+          chain: "Plasm",
+          trieIndex: 0,
+          date: "1-4",
+          amount: "2,222,000",
+          status: 1,
+          time: "1 Days 22hours",
+        },
+        {
+          community: "BML",
+          chain: "Plasm",
+          trieIndex: 0,
+          date: "1-4",
+          amount: "2,222,000",
+          status: 1,
+          time: "1 Days 22hours",
+        },
+        {
+          community: "BML",
+          chain: "Plasm",
+          trieIndex: 0,
+          date: "1-4",
+          amount: "5,222,000",
+          status: 2,
+          time: "1 Days 22hours",
+        },
+        {
+          community: "BML",
+          chain: "Plasm",
+          trieIndex: 0,
+          date: "1-4",
+          amount: "4,222,000",
+          status: 2,
+          time: "1 Days 22hours",
+        },
+        {
+          community: "BML",
+          chain: "Plasm",
+          trieIndex: 0,
+          date: "1-4",
+          amount: "3,222,000",
+          status: 1,
+          time: "1 Days 22hours",
+        },
+        {
+          community: "BML",
+          chain: "Plasm",
+          trieIndex: 0,
+          date: "1-4",
+          amount: "2,000",
+          status: 1,
+          time: "1 Days 22hours",
+        },
+        {
+          community: "BML",
+          chain: "Plasm",
+          trieIndex: 0,
+          date: "1-4",
+          amount: "2,000",
+          status: 1,
+          time: "1 Days 22hours",
+        },
+        {
+          community: "BML",
+          chain: "Plasm",
+          trieIndex: 0,
+          date: "1-4",
+          amount: "2,000",
+          status: 2,
+          time: "1 Days 22hours",
+        },
       ],
       currentPage: 1,
       totalRows: 12,
       perPage: 7,
     };
   },
-  async created () {
-    const res = await getUserContributions({relaychain:this.symbol.toLowerCase()});
-
+  watch: {
+    async currentPage(newValue, oldValue) {
+      if (newValue == oldValue) return
+      this.requstData(newValue - 1, this.perPage);
+    },
   },
-
+  methods: {
+    async requstData(offset, limit) {
+      this.cancelToken && this.cancelToken();
+      this.cancelToken = axios.CancelToken;
+      const res = await axios
+        .post(API_URL + "/contrib/find/contributor", {
+          relaychain: this.chain.toLowerCase(),
+          contributor: this.account.address,
+          offset,
+          limit,
+        })
+        .then((res) => {
+          this.totalRows = res && res.count;
+          console.log({ chain: this.chain, res: res.data });
+        })
+        .catch((err) => {});
+    },
+  },
+  async created() {
+    this.requstData();
+  },
 };
 </script>
 
