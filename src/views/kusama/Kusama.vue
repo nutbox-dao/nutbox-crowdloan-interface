@@ -41,6 +41,7 @@ import { mapMutations, mapState, mapGetters } from "vuex";
 import { SURPORT_CHAINS, SURPORT_COMMUNITIES } from "../../config";
 import TipContribute from "../../components/TipBoxes/TipContribute";
 import TipWithdraw from "../../components/TipBoxes/TipWithdraw";
+import { getOnshowingCrowdloanCard } from "../../apis/api"
 
 export default {
   name: "Kusama",
@@ -75,8 +76,11 @@ export default {
     const chains = Object.keys(SURPORT_CHAINS[this.symbol]);
     await subscribeFundInfo(chains);
   },
-  created() {
+  async created() {
     this.$store.commit("saveSymbol", "ROCOCO");
+    console.log('sym', this.symbol);
+    const res = await getOnshowingCrowdloanCard(this.symbol)
+    console.log('res',res);
   },
 };
 </script>
