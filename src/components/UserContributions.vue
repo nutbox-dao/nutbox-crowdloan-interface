@@ -36,6 +36,8 @@
 
 <script>
 import CsvExportor from 'csv-exportor'
+import { getUserContributions } from '../apis/api'
+import { mapState } from 'vuex'
 
 export default {
   name: "UserContributions",
@@ -44,9 +46,11 @@ export default {
       type: String,
     },
   },
+  computed: {
+    ...mapState(['symbol'])
+  },
   data() {
     return {
-      statusLabel: { 0: "Active", 1: "Retired", 2: "Completed" },
       fields: [
         { key: "community", label: "Community", class: "text-left" },
         { key: "chain", label: "Chain", class: "text-left" },
@@ -75,6 +79,10 @@ export default {
       totalRows: 12,
       perPage: 7,
     };
+  },
+  async created () {
+    const res = await getUserContributions({relaychain:this.symbol.toLowerCase()});
+
   },
 
 };

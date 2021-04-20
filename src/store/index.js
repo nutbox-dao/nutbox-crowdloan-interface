@@ -13,6 +13,7 @@ export default new Vuex.Store({
     subBalance: {},
     subFund: {},
     auctionEnd: {},
+    showingCrowdloan: {},
     isConnected: true,
     loadingFunds: true,
     account: Cookie.get('polkadot-account'),
@@ -45,6 +46,10 @@ export default new Vuex.Store({
     saveAuctionEnd: (state, auctionEnd) => {
       state.auctionEnd[state.symbol] = auctionEnd
       state.auctionEnd = {...state.auctionEnd}
+    },
+    saveShowingCrowdloan: (state, crowdloans) => {
+      state.showingCrowdloan[state.symbol] = crowdloans
+      state.showingCrowdloan = { ...state.showingCrowdloan }
     },
     saveApiState: (state, apiState) => {
       state.apiState = apiState
@@ -101,6 +106,21 @@ export default new Vuex.Store({
       const currentBlock = state.currentBlockNum[state.symbol]
       const lease = state.leasePeriod[state.symbol]
       return currentBlock.mod(lease);
+    },
+    showingCard: state => {
+      return state.showingCrowdloan[state.symbol]
+    },
+    getCardInfo: state => (paraId, communityId) => {
+      let card = state.showingCrowdloan[state.symbol]
+      card = card.filter(c => parseInt(c.para.paraId) == parseInt(paraId) && c.community.communityId == communityId)
+      if (card.length > 0){
+        return card[0]
+      }
+      return null
+    },
+    paraIds: state => {
+      console.log('get showingcard', state.showingCrowdloan);
+      return state.showingCrowdloan[state.symbol]?.map(c => c.para?.paraId)
     },
     getFundInfo: state => (paraId) => {
       let funds = state.projectFundInfos[state.symbol]

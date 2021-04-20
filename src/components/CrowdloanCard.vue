@@ -12,9 +12,9 @@
         <img class="icon1" src="~@/static/images/eth.svg" alt="" />
       </div>
       <div class="title-text font20 font-bold">
-        <span>{{ surportCommunities[communityId] }}</span>
+        <span>{{ cardInfo && cardInfo.community.communityName }}</span>
         <img src="~@/static/images/close.svg" alt="" />
-        <span>{{ surportChains[symbol][paraId] }}</span>
+        <span>{{ cardInfo && cardInfo.para.paraName }}</span>
       </div>
     </div>
     <div class="h-line"></div>
@@ -75,6 +75,7 @@
       <TipContribute
         :communityId="communityId"
         :paraId="paraId"
+        :paraName="cardInfo && cardInfo.para.paraName"
         @hideContribute="showContribute = false"
       />
     </b-modal>
@@ -98,7 +99,7 @@ import TipContribute from "./TipBoxes/TipContribute";
 import TipWithdraw from "./TipBoxes/TipWithdraw";
 import ContributorsLabel from "./Label/ContributorsLabel";
 import RaisedLabel from "./Label/RaisedLabel";
-import { TOKEN_SYMBOL, SURPORT_CHAINS, SURPORT_COMMUNITIES, PARA_STATUS } from "../config";
+import { TOKEN_SYMBOL, PARA_STATUS } from "../config";
 import { BLOCK_SECOND, TIME_PERIOD } from "../constant";
 import { calStatus } from "../utils/crowdloan";
 
@@ -108,8 +109,6 @@ export default {
       showContribute: false,
       showWithdraw: false,
       tokenSymbol: TOKEN_SYMBOL,
-      surportChains: SURPORT_CHAINS,
-      surportCommunities: SURPORT_COMMUNITIES,
       status: PARA_STATUS.COMPLETED,
     };
   },
@@ -141,15 +140,17 @@ export default {
   },
   computed: {
     ...mapState([
-      "projectName",
-      "communityName",
       "isConnected",
       "symbol",
       "projectFundInfos",
     ]),
-    ...mapGetters(["getProjectStatus", "getFundInfo", "currentBlockNum"]),
+    ...mapGetters(["getProjectStatus", "getFundInfo", "currentBlockNum", "getCardInfo"]),
     fundInfo() {
       return this.getFundInfo(this.paraId);
+    },
+    cardInfo() {
+      const card = this.getCardInfo(this.paraId, this.communityId)
+      return card
     },
     leasePeriod() {
       try {

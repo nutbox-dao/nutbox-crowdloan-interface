@@ -9,13 +9,13 @@ import { API_URL } from '../config'
  * communityId:'',
  * nominatorId:'',
 */
-export const postContribution = async (params) => post(API_URL + '/contrib/submit', params)
+export const postContribution = async (params) => post(API_URL+'/contrib/submit', params)
 
 /**
  * 获取要展示的卡片信息
  * relaychain： ‘rococo'
 */
-export const getOnshowingCrowdloanCard = async (params) => post(API_URL + '/crowdloan/live', params)
+export const getOnshowingCrowdloanCard = async (params) => post(API_URL+'/crowdloan/live', params)
 
 /**
  * 获取个人界面的contribution记录
@@ -24,7 +24,7 @@ export const getOnshowingCrowdloanCard = async (params) => post(API_URL + '/crow
  * offset:0
  * limit:7
 */
-export const getUserContributions = async (params) => post(API_URL + '/contrib/find/contributor', params)
+export const getUserContributions = async (params) => post(API_URL+'/contrib/find/contributor', params)
 
 /**
  * 获取社区的某个众贷导出数据
@@ -35,10 +35,10 @@ export const getUserContributions = async (params) => post(API_URL + '/contrib/f
  * offset: null,
  * 
 */
-export const getExportContributionInfo = async (params) => post('/contrib/find/crowdloan', params)
+export const getExportContributionInfo = async (params) => post(API_URL+'/contrib/find/crowdloan', params)
 
 /**
  * 获取dashboard需要显示的数据
  * relaychain: 'rococo'
 */
-export const getDashboardSummary = async (params) => post('/crowdloan/summary', params)
+export const getDashboardSummary = async (params) => post(API_URL+'crowdloan/summary', params)

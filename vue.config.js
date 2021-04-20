@@ -2,13 +2,13 @@ module.exports = {
   lintOnSave: false,
   devServer: {
     proxy: {
-      '/nps': {
+      '/api': {
         // target: 'http://1.15.101.110:3000/nps',
         target: 'https://api.crowdloan-test.nutbox.io',
         changeOrigin: true,
         ws: true,
         pathRewrite: {
-          '^/contrib': ''
+          '^/api': ''
         }
       }
     }

@@ -35,25 +35,3 @@ export const CHAIN_NAME = {
   KUSAMA: "Kusama",
   ROCOCO: "Rococo"
 }
-
-export const SURPORT_CHAINS = {
-  POLKADOT: {},
-  KUSAMA: {},
-  ROCOCO: {
-    1001: 'Test 1001',
-    1002: 'Test 1002',
-    1003: 'Test 1003',
-    1004: 'Test 1004',
-  }
-  // ROCOCO: {
-  //   1004: '1004',
-  //   1000: '1000',
-  //   3586: '3586',
-  //   18888: '18888',
-  //   15236: '15236'
-  // }
-}
-
-export const SURPORT_COMMUNITIES = {
-  '5Cz8tB89Fa3yKM1iqrBp3iBByQXXa4EeqZaL3FdmPauY8e2H': 'BML'
-}

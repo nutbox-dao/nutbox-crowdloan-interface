@@ -43,7 +43,7 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import { TOKEN_SYMBOL, SURPORT_CHAINS } from "../../config";
+import { TOKEN_SYMBOL } from "../../config";
 import { validAddress } from "../../utils/polkadot";
 import { contribute } from "../../utils/crowdloan"
 import BN from "bn.js";
@@ -53,7 +53,6 @@ export default {
     return {
       inputAmount: "",
       inputNonimator: "",
-      paraName: '',
       paraTokenSymbol: '',
       isComtribution: false,
     };
@@ -65,6 +64,9 @@ export default {
     paraId: {
       type: Number,
     },
+    paraName:{
+      type: String,
+    }
   },
   computed: {
     ...mapState(["symbol", "balance"]),
@@ -173,7 +175,6 @@ export default {
     },
   },
   mounted() {
-    this.paraName = SURPORT_CHAINS[this.symbol][this.paraId];
     this.paraTokenSymbol = TOKEN_SYMBOL[this.symbol];
   },
 };

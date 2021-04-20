@@ -67,6 +67,9 @@ export default {
       } else if (uni >= 1e6) {
         uni = uni.div(new BN(1e6));
         unit = " M";
+      } else if (uni >= 1e3) {
+        uni = uni.div(new BN(1e3))
+        unit = " K"
       }
       return [uni, unit];
     },

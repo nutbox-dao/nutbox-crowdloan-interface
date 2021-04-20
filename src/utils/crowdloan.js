@@ -1,23 +1,35 @@
+import {
+  u8aConcat,
+  u8aToHex,
+} from "@polkadot/util"
+import {
+  blake2AsU8a,
+  encodeAddress,
+} from "@polkadot/util-crypto"
+import BN from "bn.js"
+import {
+  PARA_STATUS,
+  CHAIN_ID,
+} from "../config"
+import store from "../store"
 
-  import {
-    u8aConcat,
-    u8aToHex,
-  } from "@polkadot/util"
-  import {
-    blake2AsU8a,
-    encodeAddress,
-  } from "@polkadot/util-crypto"
-  import BN from "bn.js"
-  import {
-    PARA_STATUS,
-    CHAIN_ID,
-  } from "../config"
-  import store from "../store"
+import {
+  getApi,
+  uni2Token,
+  getDecimal,
+  getNodeId
+} from './polkadot'
+import {
+  injectAccount
+} from './account'
+import {
+  NumberTo4BytesU8A
+} from './utils'
 
-  import { getApi, uni2Token, getDecimal, getNodeId } from './polkadot'
-  import { injectAccount } from './account'
-  import { NumberTo4BytesU8A } from './utils'
-  
+import {
+  postContribution
+} from '../apis/api'
+
 function createChildKey(trieIndex) {
   return u8aToHex(
     u8aConcat(
@@ -29,13 +41,13 @@ function createChildKey(trieIndex) {
   );
 }
 
-export const subscribeFundInfo = async (paraId = [200]) => {
+export const subscribeFundInfo = async (crowdloanCard) => {
   // cancel last 
   let unsubFund = store.getters.getSubFund()
   if (unsubFund) return;
   store.commit('saveLoadingFunds', true)
+  const paraId = crowdloanCard.map(c => parseInt(c.para.paraId))
   const api = await getApi()
-  paraId = paraId.map(p => parseInt(p))
   try {
     unsubFund = (await api.query.crowdloan.funds.multi(paraId, async (unwrapedFunds) => {
       const bestBlockNumber = (await api.derive.chain.bestNumber()).toNumber()
@@ -85,8 +97,11 @@ export const subscribeFundInfo = async (paraId = [200]) => {
         })
       }
       funds = funds.sort((a, b) => a.statusIndex - b.statusIndex)
-      console.log('fund info', funds);
+      const idsSort = funds.map(f => f.paraId)
+      crowdloanCard = crowdloanCard.sort((a,b) => idsSort.indexOf(parseInt(a.para.paraId)) - idsSort.indexOf(parseInt(b.para.paraId)))
+      console.log('fund info', crowdloanCard);
       store.commit('saveProjectFundInfos', funds)
+      store.commit('saveShowingCrowdloan', crowdloanCard)
       store.commit('saveLoadingFunds', false)
     }));
     store.commit('saveSubFund', unsubFund);
@@ -105,7 +120,7 @@ export const calStatus = async (end, firstSlot, raised, cap, pId, bestBlockNumbe
   const leases = (await api.query.slots.leases(pId)).toJSON()
   const isWinner = leases.length > 0
   const isCapped = (new BN(raised)).gte(new BN(cap))
-  const isEnded = bestBlockNumber > end || bestBlockNumber >= auctionEnd
+  const isEnded = bestBlockNumber >= end || bestBlockNumber >= auctionEnd
   const retiring = (isEnded || currentPeriod > firstSlot) && bestBlockNumber < auctionEnd
   let status = ''
   let statusIndex = 0
@@ -218,7 +233,6 @@ export const withdraw = async (paraId, toast, isInblockCallback) => {
         }, 700);
       } else if (status.isInBlock) {
         console.log("Transaction included at blockHash.", status.asInBlock.toJSON());
-        const contriHash = status.asInBlock.toJSON()
         toast("Transaction In Block!", {
           title: 'Info',
           autoHideDelay: 10000,
@@ -227,10 +241,10 @@ export const withdraw = async (paraId, toast, isInblockCallback) => {
       } else if (status.isFinalized) {
         unsub()
         toast("Withdraw Success!", {
-            title: "Success",
-            autoHideDelay: 5000,
-            variant: "success",
-          });
+          title: "Success",
+          autoHideDelay: 5000,
+          variant: "success",
+        });
         // 上传daemon
         resolve(status.asFinalized)
       }
@@ -308,7 +322,12 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
         } else if (status.isInBlock) {
           console.log("Transaction included at blockHash ", status.asInBlock.toJSON());
           const contriHash = status.asInBlock.toJSON()
-
+          postContribution({
+            relaychain: store.system.toLowerCase(),
+            blockHash: contriHash,
+            communityId: communityId,
+            nominatorId: childId
+          })
           // upload to daemon
           toast("Transaction In Block!", {
             title: 'Info',

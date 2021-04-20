@@ -13,16 +13,11 @@
       <div class="cards-container">
         <div class="container">
           <div class="row">
-            <div class="col-lg-4 col-md-6" v-for="para of funds" :key="para.paraId">
-              <div
-                v-for="communitId of communityIds"
-                :key="communitId"
-              >
+            <div class="col-lg-4 col-md-6" v-for="card, idx of showingCard()" :key="idx">
                 <CrowdloanCard
-                  :paraId="para.paraId"
-                  :communityId="communitId"
+                  :paraId="parseInt(card.para.paraId)"
+                  :communityId="card.community.communityId"
                 />
-              </div>
             </div>
           </div>
         </div>
@@ -38,7 +33,6 @@ import {
 } from "../../utils/crowdloan";
 import { subBlock } from "../../utils/block"
 import { mapMutations, mapState, mapGetters } from "vuex";
-import { SURPORT_CHAINS, SURPORT_COMMUNITIES } from "../../config";
 import TipContribute from "../../components/TipBoxes/TipContribute";
 import TipWithdraw from "../../components/TipBoxes/TipWithdraw";
 import { getOnshowingCrowdloanCard } from "../../apis/api"
@@ -50,11 +44,6 @@ export default {
     TipContribute,
     TipWithdraw,
   },
-  data() {
-    return {
-      communityIds: [],
-    };
-  },
   computed: {
     ...mapState(["projectFundInfos", "symbol", "loadingFunds", 'balance']),
     funds() {
@@ -63,24 +52,18 @@ export default {
     },
   },
   methods: {
-    ...mapGetters(["getFundInfos"]),
+    ...mapGetters(["getFundInfos", "paraIds", "showingCard"]),
     ...mapMutations([
       "saveProjectStatus",
       "saveProjectName",
       "saveCommunityName",
     ]),
   },
-  async mounted() {
-    this.communityIds = Object.keys(SURPORT_COMMUNITIES);
-    subBlock();
-    const chains = Object.keys(SURPORT_CHAINS[this.symbol]);
-    await subscribeFundInfo(chains);
-  },
   async created() {
     this.$store.commit("saveSymbol", "ROCOCO");
-    console.log('sym', this.symbol);
-    const res = await getOnshowingCrowdloanCard(this.symbol)
-    console.log('res',res);
+    const res = await getOnshowingCrowdloanCard({relaychain:this.symbol.toLowerCase()})
+    subBlock();
+    await subscribeFundInfo(res);
   },
 };
 </script>
