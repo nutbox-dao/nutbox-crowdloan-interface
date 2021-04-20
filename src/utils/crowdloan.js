@@ -323,7 +323,7 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
           console.log("Transaction included at blockHash ", status.asInBlock.toJSON());
           const contriHash = status.asInBlock.toJSON()
           postContribution({
-            relaychain: store.system.toLowerCase(),
+            relaychain: store.state.symbol.toLowerCase(),
             blockHash: contriHash,
             communityId: communityId,
             nominatorId: childId

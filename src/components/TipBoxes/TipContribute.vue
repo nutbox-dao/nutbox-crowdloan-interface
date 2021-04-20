@@ -121,8 +121,6 @@ export default {
       const raised = fund.raised;
       const cap = fund.cap;
       const gap = cap.sub(raised);
-      console.log("gao", gap.toNumber(), amount);
-
       if (gap.lt(new BN(amount))) {
         this.$bvToast.toast("Out of cap", {
           title: "Tips",
