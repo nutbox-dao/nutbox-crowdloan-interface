@@ -74,7 +74,7 @@
                         </div>
                       </b-dropdown-item>
                       <b-dropdown-item>
-                        <div class="flex-start-center" @click="selectMenu('dashboard', '/dashboard')">
+                        <div class="flex-start-center" @click="selectMenu('dashboard', '/dashboard')" v-if="commnunityIds.indexOf(account && account.address) !== -1">
                           <!-- <b-avatar square size="sm" class="mr-2" style="opacity: .2">·</b-avatar> -->
                           <img class="menu-icon" :src="dashboardIcon" alt="">
                           <span class="menu-text">Dashboard</span>
@@ -101,6 +101,7 @@ import { mapState, mapMutations } from 'vuex'
 import ConnectWallet from './components/Buttons/ConnectWallet'
 import Identicon from '@polkadot/vue-identicon'
 import { getBalance, loadAccounts } from './utils/account'
+import { getCommnunitys } from './apis/api'
 
 export default {
   name: 'App',
@@ -112,7 +113,8 @@ export default {
     ...mapState([
       'isConnected',
       'allAccounts',
-      'account'
+      'account',
+      'communitys'
     ]),
     hMenuOptions () {
       return this.menuOptions.filter(item => {
@@ -129,6 +131,9 @@ export default {
     },
     dashboardIcon (){
       return this.activeNav === 'dashboard' ? require('./static/images/dashboard_selected.png') : require('./static/images/dashboard.png')
+    },
+    commnunityIds () {
+      return this.communitys.map(c => c.communityId)
     }
   },
   data () {
@@ -151,6 +156,10 @@ export default {
     }
   },
   mounted () {
+    getCommnunitys().then(res => {
+      console.log('commnituy', res);
+      this.$store.commit('saveCommunitys', res)
+    })
     this.setActiveMenu()
     loadAccounts()
   },
@@ -163,7 +172,7 @@ export default {
     this.timer = null
   },
   methods: {
-    ...mapMutations(['saveAccount']),
+    ...mapMutations(['saveAccount', 'saveCommunitys']),
     setActiveMenu () {
       for (let index = 0; index < this.menuOptions.length; index++) {
         if (this.menuOptions[index].url === this.$route.path) {

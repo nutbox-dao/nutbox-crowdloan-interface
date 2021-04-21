@@ -14,6 +14,7 @@ export default new Vuex.Store({
     subFund: {},
     auctionEnd: {},
     showingCrowdloan: {},
+    communitys: [],
     isConnected: true,
     loadingFunds: true,
     account: Cookie.get('polkadot-account'),
@@ -33,6 +34,9 @@ export default new Vuex.Store({
       state.subBlock = {
         ...state.subBlock
       }
+    },
+    saveCommunitys: (state, communitys) => {
+      state.communitys = communitys
     },
     saveSubBalance: (state, subBalance) => {
       state.subBalance = subBalance

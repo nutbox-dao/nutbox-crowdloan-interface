@@ -1,6 +1,9 @@
 import { get, post } from './axios'
 import { API_URL } from '../config'
 
+// 获取所有注册的社区信息
+export const getCommnunitys = async () => post(API_URL + '/community/all')
+
 /**
  * 上传contribution数据
  * params：
