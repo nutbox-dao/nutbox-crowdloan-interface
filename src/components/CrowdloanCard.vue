@@ -168,6 +168,7 @@ export default {
     },
     countDown() {
       try {
+        if(!this.fundInfo) return
         const end = parseInt(this.fundInfo.end);
         const diff = end - parseInt(this.currentBlockNum);
         const timePeriod = TIME_PERIOD;

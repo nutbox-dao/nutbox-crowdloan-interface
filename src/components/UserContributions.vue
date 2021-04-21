@@ -36,6 +36,9 @@
 import { mapState } from "vuex";
 import { API_URL } from "../config";
 import axios from "axios";
+import { uni2Token, getDecimal } from "../utils/polkadot"
+import BN from 'bn.js'
+import { formatDate } from "../utils/utils"
 
 export default {
   name: "UserContributions",
@@ -60,116 +63,7 @@ export default {
         { key: "time", label: "Staking time" },
         { key: "operate", label: "", class: "text-left" },
       ],
-      items: [
-        {
-          community: "BML",
-          chain: "Plasm",
-          trieIndex: 2,
-          date: "1-4",
-          amount: "2,222,000",
-          status: 0,
-          time: "1 Days 22hours",
-        },
-        {
-          community: "BML",
-          chain: "Plasm",
-          trieIndex: 2,
-          date: "1-4",
-          amount: "2,222,000",
-          status: 0,
-          time: "1 Days 22hours",
-        },
-        {
-          community: "BML",
-          chain: "Plasm",
-          trieIndex: 1,
-          date: "1-4",
-          amount: "2,222,000",
-          status: 0,
-          time: "1 Days 22hours",
-        },
-        {
-          community: "BML",
-          chain: "Plasm",
-          trieIndex: 1,
-          date: "1-4",
-          amount: "2,222,000",
-          status: 1,
-          time: "1 Days 22hours",
-        },
-        {
-          community: "BML",
-          chain: "Plasm",
-          trieIndex: 0,
-          date: "1-4",
-          amount: "2,222,000",
-          status: 1,
-          time: "1 Days 22hours",
-        },
-        {
-          community: "BML",
-          chain: "Plasm",
-          trieIndex: 0,
-          date: "1-4",
-          amount: "2,222,000",
-          status: 1,
-          time: "1 Days 22hours",
-        },
-        {
-          community: "BML",
-          chain: "Plasm",
-          trieIndex: 0,
-          date: "1-4",
-          amount: "5,222,000",
-          status: 2,
-          time: "1 Days 22hours",
-        },
-        {
-          community: "BML",
-          chain: "Plasm",
-          trieIndex: 0,
-          date: "1-4",
-          amount: "4,222,000",
-          status: 2,
-          time: "1 Days 22hours",
-        },
-        {
-          community: "BML",
-          chain: "Plasm",
-          trieIndex: 0,
-          date: "1-4",
-          amount: "3,222,000",
-          status: 1,
-          time: "1 Days 22hours",
-        },
-        {
-          community: "BML",
-          chain: "Plasm",
-          trieIndex: 0,
-          date: "1-4",
-          amount: "2,000",
-          status: 1,
-          time: "1 Days 22hours",
-        },
-        {
-          community: "BML",
-          chain: "Plasm",
-          trieIndex: 0,
-          date: "1-4",
-          amount: "2,000",
-          status: 1,
-          time: "1 Days 22hours",
-        },
-        {
-          community: "BML",
-          chain: "Plasm",
-          trieIndex: 0,
-          date: "1-4",
-          amount: "2,000",
-          status: 2,
-          time: "1 Days 22hours",
-        },
-      ],
+      items: [],
       currentPage: 1,
       totalRows: 12,
       perPage: 7,
@@ -177,7 +71,7 @@ export default {
   },
   watch: {
     async currentPage(newValue, oldValue) {
-      if (newValue == oldValue) return
+      if (newValue == oldValue) return;
       this.requstData(newValue - 1, this.perPage);
     },
   },
@@ -185,15 +79,24 @@ export default {
     async requstData(offset, limit) {
       this.cancelToken && this.cancelToken();
       this.cancelToken = axios.CancelToken;
-      const res = await axios
-        .post(API_URL + "/contrib/find/contributor", {
+      const decimal = await getDecimal()
+      axios.post(API_URL + "/contrib/find/contributor", {
           relaychain: this.chain.toLowerCase(),
           contributor: this.account.address,
           offset,
           limit,
         })
         .then((res) => {
-          this.totalRows = res && res.count;
+          console.log(14213412,res.data);
+          this.totalRows = res && res.data && res.data.count;
+          this.items = res && res.data && res.data.data.map((c) => ({
+            community: c.communityName,
+            chain: c.paraName,
+            trieIndex: c.trieIndex,
+            date: c.firstSlot + "-" + c.lastSlot,
+            amount: parseFloat(uni2Token(new BN(c.amount), decimal)).toFixed(4),
+            time: formatDate(c.createdAt),
+          }));
           console.log({ chain: this.chain, res: res.data });
         })
         .catch((err) => {});

@@ -1,19 +1,19 @@
 <template>
   <div>
     <span>
-      {{ items[0] }}
+      {{ items && items[0] }}
     </span>
     <span class="text-grey-light">
-      {{ items[1] }}
+      {{ items && items[1] }}
     </span>
     <span>
-      {{ items[2] }}
+      {{ items && items[2] }}
     </span>
     <span class="text-grey-light">
-      {{ items[3] }}
+      {{ items && items[3] }}
     </span>
     <span>
-      {{ items[4] }}
+      {{ items && items[4] }}
     </span>
   </div>
 </template>
@@ -36,6 +36,7 @@ export default {
       return this.getFundInfo(this.paraId);
     },
     items() {
+      if (!this.fund) return;
       const raised = this.convertUni(this.fund.raised);
       const cap = this.convertUni(this.fund.cap);
       const raisedStr = this.formatBanlance(raised[0]);

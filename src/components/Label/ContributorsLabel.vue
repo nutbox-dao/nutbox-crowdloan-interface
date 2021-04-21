@@ -4,7 +4,7 @@
       {{ percent + " " }}
     </span>
     <span>
-      {{ " " + fundInfo.funds.length + " " }}
+      {{ " " + fundInfo && fundInfo.funds.length + " " }}
     </span>
     <span class="text-grey-light"> contributors </span>
   </div>
@@ -26,6 +26,7 @@ export default {
     },
     
     percent() {
+      if (!this.fundInfo) return;
       return (
         this.fundInfo.cap.isZero()
         ? "100.00%"

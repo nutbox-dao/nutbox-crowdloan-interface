@@ -70,6 +70,7 @@ export const subscribeFundInfo = async (crowdloanCard) => {
           raised,
           trieIndex
         } = unwrapedFund
+        console.log('index', trieIndex.toNumber());
         const childKey = createChildKey(trieIndex)
         const keys = await api.rpc.childstate.getKeys(childKey, '0x')
         const ss58keys = keys.map(k => encodeAddress(k))
@@ -99,7 +100,7 @@ export const subscribeFundInfo = async (crowdloanCard) => {
       funds = funds.sort((a, b) => a.statusIndex - b.statusIndex)
       const idsSort = funds.map(f => f.paraId)
       crowdloanCard = crowdloanCard.sort((a,b) => idsSort.indexOf(parseInt(a.para.paraId)) - idsSort.indexOf(parseInt(b.para.paraId)))
-      console.log('fund info', crowdloanCard);
+      console.log('fund info', funds);
       store.commit('saveProjectFundInfos', funds)
       store.commit('saveShowingCrowdloan', crowdloanCard)
       store.commit('saveLoadingFunds', false)
@@ -322,13 +323,19 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
         } else if (status.isInBlock) {
           console.log("Transaction included at blockHash ", status.asInBlock.toJSON());
           const contriHash = status.asInBlock.toJSON()
+          console.log({
+            relaychain: store.state.symbol.toLowerCase(),
+            blockHash: contriHash,
+            communityId: communityId,
+            nominatorId: childId
+          });
+          // upload to daemon
           postContribution({
             relaychain: store.state.symbol.toLowerCase(),
             blockHash: contriHash,
             communityId: communityId,
             nominatorId: childId
           })
-          // upload to daemon
           toast("Transaction In Block!", {
             title: 'Info',
             autoHideDelay: 10000,
