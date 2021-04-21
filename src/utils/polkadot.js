@@ -47,6 +47,12 @@ export const getDecimal = async () => {
   return decimal
 }
 
+export const formatBalance = async (b) => {
+  const decimal = await getDecimal()
+  const uni = uni2Token(new BN(b), decimal)
+  return parseFloat(uni).toFixed(4)
+}
+
 export const validAddress = (address) => {
   try {
     encodeAddress(

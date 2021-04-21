@@ -8,7 +8,6 @@
           v-for="tab of tabList"
           :key="tab.key"
           :class="activeTab === tab.key ? 'active' : ''"
-          @click="activeTab = tab.key"
         >
           {{ tab.label }}
         </div>
@@ -20,6 +19,7 @@
 
 <script>
 import DashboardCard from "../../components/DashboardCard.vue";
+
 export default {
   name: "Dashboard",
   components: {
@@ -27,15 +27,15 @@ export default {
   },
   data() {
     return {
-      activeTab: "KUSAMA",
+      activeTab: "ROCOCO",
       tabList: [
         { key: "KUSAMA", label: "Kusama" },
         { key: "POLKADOT", label: "Polkadot" },
         { key: "ROCOCO", label: "Rococo" },
       ],
+      cards:[]
     };
   },
-  methods: {},
 };
 </script>
 

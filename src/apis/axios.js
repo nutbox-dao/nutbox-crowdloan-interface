@@ -12,7 +12,7 @@ export function get (url, params) {
     }).then(res => {
       resolve(res.data)
     }).catch(err => {
-      reject(err.data)
+      reject(err)
     })
   })
 }
@@ -23,7 +23,7 @@ export function post (url, params) {
       axios.post(url, params).then(res => {
         resolve(res.data)
       }).catch(err => {
-        reject(err.data)
+        reject(err)
       })
     })
   }

@@ -8,23 +8,23 @@
             <img class="icon1" src="~@/static/images/eth.svg" alt="" />
           </div>
           <div class="title-text font20 font-bold">
-            <span>BML</span>
+            <span>{{ item.community.communityName }}</span>
             <img src="~@/static/images/close.svg" alt="" />
-            <span>PLASM</span>
+            <span>{{ item.para.paraName }}</span>
           </div>
         </div>
         <div class="h-line"></div>
         <div class="detail-info-box">
           <div class="project-info-container">
             <span class="name"> Contributors </span>
-            <div class="info">{{ item.contributors }}</div>
+            <div class="info">{{ item.contributorCount }}</div>
           </div>
           <div class="project-info-container">
             <span class="name"> Fund </span>
-            <div class="info">{{ fund(index) }}</div>
+            <div class="info">{{ item.raised }}</div>
           </div>
         </div>
-        <button class="primary-btn" @click="downloadCsv">Export</button>
+        <button class="primary-btn" @click="downloadCsv(index)">Export</button>
       </div>
     </div>
   </div>
@@ -32,20 +32,24 @@
 
 <script>
 import CsvExportor from "csv-exportor";
+import { getDashboardSummary, getExportContributionInfo } from "../apis/api";
+import { formatBalance } from "../utils/polkadot";
+import { formatDate } from "../utils/utils";
+
 export default {
   data() {
     return {
-      items: [
-        {
-          paraId: 200,
-          contributors: 18,
-          raised: 2398234,
-        },
-        {
-          paraId: 300,
-          contributors: 8,
-          raised: 9088723,
-        },
+      items: [],
+      csvHeader: [
+        "communityName",
+        "paraName",
+        "trieIndex",
+        "firstSlot",
+        "lastSlot",
+        "contributor",
+        "nominatorId",
+        "amount",
+        "contributeTime",
       ],
     };
   },
@@ -54,35 +58,75 @@ export default {
       type: String,
     },
   },
-  computed: {},
   methods: {
-    fund(index) {
-      return this.items[index].raised;
+    async getRaised(raise) {
+      const raised = await formatBalance(raise);
+      return raised;
     },
-    downloadCsv() {
-      // 获取详情信息
-      
-      // 下载
-      //   const headr = [
-      //       "community",
-      //       "chain",
-      //       "trieIndex",
-      //       "date",
-      //       "amount",
-      //       "status",
-      //       "time",
-      //     ]
-      // CsvExportor.downloadCsv(
-      //   this.items,
-      //   {
-      //     header
-      //   },
-      //   "contribution.csv"
-      // );
+    downloadCsv(index) {
+      const card = this.items[index];
+      const paraId = card.para.paraId;
+      const trieIndex = card.trieIndex;
+      getExportContributionInfo({
+        relaychain: this.chain.toLowerCase(),
+        communityId: this.$store.state.account.address,
+        paraId,
+        trieIndex,
+        offset: null,
+        limit: null,
+      })
+        .then(async (res) => {
+          let csv = res.data;
+          let result = [];
+          console.log('csv1', csv);
+          for (let r of csv) {
+            const amount = await formatBalance(r.amount);
+            result.push({
+              communityName: card.community.communityName,
+              paraName: card.para.paraName,
+              trieIndex,
+              firstSlot: card.firstSlot,
+              lastSlot: card.lastSlot,
+              contributor: r.contributor,
+              nominatorId: r.nominatorId,
+              amount,
+              contributeTime: formatDate(r.createdAt),
+            });
+          }
+          console.log("csv", result);
+          CsvExportor.downloadCsv(
+            result,
+            { header: this.csvHeader },
+            card.community.communityName +
+              "-" +
+              card.para.paraName +
+              "-" +
+              card.trieIndex + '.csv'
+          );
+        })
+        .catch((err) => {
+          console.error("down load crowdloan info fail", err);
+        });
     },
   },
-  mounted() {
-    // 请求数据
+  created() {
+    getDashboardSummary({
+      relaychain: this.chain.toLowerCase(),
+      communityId: this.$store.state.account.address,
+    })
+      .then(async (res) => {
+        console.log("dashboard", res);
+        let cards = [];
+        for (let card of res) {
+          const raised = await this.getRaised(card.raisedAmount);
+          card.raised = raised;
+          cards.push(card);
+        }
+        this.items = cards;
+      })
+      .catch((err) => {
+        console.error("request dashboard fail", err);
+      });
   },
 };
 </script>

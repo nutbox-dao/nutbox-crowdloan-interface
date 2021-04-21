@@ -44,4 +44,4 @@ export const getExportContributionInfo = async (params) => post(API_URL+'/contri
  * 获取dashboard需要显示的数据
  * relaychain: 'rococo'
 */
-export const getDashboardSummary = async (params) => post(API_URL+'crowdloan/summary', params)
+export const getDashboardSummary = async (params) => post(API_URL+'/crowdloan/summary', params)
