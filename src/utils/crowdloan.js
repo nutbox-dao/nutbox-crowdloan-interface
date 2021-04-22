@@ -70,7 +70,7 @@ export const subscribeFundInfo = async (crowdloanCard) => {
           raised,
           trieIndex
         } = unwrapedFund
-        console.log('index',paraId, trieIndex.toNumber());
+        console.log('index', paraId, trieIndex.toNumber());
         const childKey = createChildKey(trieIndex)
         const keys = await api.rpc.childstate.getKeys(childKey, '0x')
         const ss58keys = keys.map(k => encodeAddress(k))
@@ -99,10 +99,14 @@ export const subscribeFundInfo = async (crowdloanCard) => {
       }
       funds = funds.sort((a, b) => a.statusIndex - b.statusIndex)
       const idsSort = funds.map(f => f.paraId)
-      crowdloanCard = crowdloanCard.sort((a,b) => idsSort.indexOf(parseInt(a.para.paraId)) - idsSort.indexOf(parseInt(b.para.paraId)))
-      console.log('fund info', funds);
-      store.commit('saveProjectFundInfos', funds)
-      store.commit('saveShowingCrowdloan', crowdloanCard)
+      if (funds.length > 0) {
+        const  showingcrowdloanCard = crowdloanCard.filter(c => idsSort.indexOf(parseInt(c.para.paraId)) !== -1).sort((a, b) => idsSort.indexOf(parseInt(a.para.paraId)) - idsSort.indexOf(parseInt(b.para.paraId)))
+        console.log('fund info', funds);
+        store.commit('saveProjectFundInfos', funds)
+        store.commit('saveShowingCrowdloan', showingcrowdloanCard)
+      } else {
+        store.commit('saveSubFund', null);
+      }
       store.commit('saveLoadingFunds', false)
     }));
     store.commit('saveSubFund', unsubFund);
