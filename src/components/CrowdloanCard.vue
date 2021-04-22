@@ -8,8 +8,12 @@
     </div>
     <div class="card-title-box flex-start-center">
       <div class="icons">
-        <img class="icon2" src="~@/static/images/tron.svg" alt="" />
-        <img class="icon1" src="~@/static/images/eth.svg" alt="" />
+        <img class="icon2" :src="cardInfo && cardInfo.para.iconUrl" alt="" />
+        <img
+          class="icon1"
+          :src="cardInfo && cardInfo.community.iconUrl"
+          alt=""
+        />
       </div>
       <div class="title-text font20 font-bold">
         <span>{{ cardInfo && cardInfo.community.communityName }}</span>
@@ -131,44 +135,51 @@ export default {
     async currentBlockNum(newValue, _) {
       const fund = this.fundInfo;
       const end = fund.end;
-      const raised = fund.raised
-      const cap = fund.cap
-      const firstSlot = fund.firstSlot
-      const [status] = await calStatus(end, firstSlot, raised, cap, this.paraId, newValue)
-      this.status = status
+      const raised = fund.raised;
+      const cap = fund.cap;
+      const firstSlot = fund.firstSlot;
+      const [status] = await calStatus(
+        end,
+        firstSlot,
+        raised,
+        cap,
+        this.paraId,
+        newValue
+      );
+      this.status = status;
     },
   },
   computed: {
-    ...mapState([
-      "isConnected",
-      "symbol",
-      "projectFundInfos",
+    ...mapState(["isConnected", "symbol", "projectFundInfos"]),
+    ...mapGetters([
+      "getProjectStatus",
+      "getFundInfo",
+      "currentBlockNum",
+      "getCardInfo",
     ]),
-    ...mapGetters(["getProjectStatus", "getFundInfo", "currentBlockNum", "getCardInfo"]),
     fundInfo() {
       return this.getFundInfo(this.paraId);
     },
     cardInfo() {
-      const card = this.getCardInfo(this.paraId, this.communityId)
-      return card
+      const card = this.getCardInfo(this.paraId, this.communityId);
+      return card;
     },
     leasePeriod() {
       try {
-        const first = parseInt(this.fundInfo.firstSlot)
-        const last = parseInt(this.fundInfo.lastSlot)
-        return (
-          first === last ? first + '' : 
-          parseInt(this.fundInfo.firstSlot) +
-          " - " +
-          parseInt(this.fundInfo.lastSlot)
-        );
+        const first = parseInt(this.fundInfo.firstSlot);
+        const last = parseInt(this.fundInfo.lastSlot);
+        return first === last
+          ? first + ""
+          : parseInt(this.fundInfo.firstSlot) +
+              " - " +
+              parseInt(this.fundInfo.lastSlot);
       } catch (e) {
         return "0";
       }
     },
     countDown() {
       try {
-        if(!this.fundInfo) return
+        if (!this.fundInfo) return;
         const end = parseInt(this.fundInfo.end);
         const diff = end - parseInt(this.currentBlockNum);
         const timePeriod = TIME_PERIOD;
@@ -228,7 +239,7 @@ export default {
       }
     },
   },
-  mounted () {
+  mounted() {
     this.status = this.fundInfo.status;
   },
 };
@@ -264,10 +275,15 @@ export default {
       .icon2 {
         position: absolute;
         left: 1.8rem;
+        border: 1px solid #e3e5e8;
+        border-radius: 1rem;
       }
       .icon1 {
         position: relative;
         left: 0;
+        border: 1px solid #e3e5e8;
+        box-shadow: 0px 4px 12px 4px rgba(0, 0, 0, 0.05);
+        border-radius: 1rem;
       }
     }
   }

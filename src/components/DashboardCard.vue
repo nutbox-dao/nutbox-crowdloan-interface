@@ -4,8 +4,8 @@
       <div class="c-card">
         <div class="card-title-box flex-start-center">
           <div class="icons">
-            <img class="icon2" src="~@/static/images/tron.svg" alt="" />
-            <img class="icon1" src="~@/static/images/eth.svg" alt="" />
+            <img class="icon2" :src="item.para.iconUrl" alt="" />
+            <img class="icon1" :src="item.community.iconUrl" alt="" />
           </div>
           <div class="title-text font20 font-bold">
             <span>{{ item.community.communityName }}</span>

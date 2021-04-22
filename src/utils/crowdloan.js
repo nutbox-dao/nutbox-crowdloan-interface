@@ -70,7 +70,7 @@ export const subscribeFundInfo = async (crowdloanCard) => {
           raised,
           trieIndex
         } = unwrapedFund
-        console.log('index', trieIndex.toNumber());
+        console.log('index',paraId, trieIndex.toNumber());
         const childKey = createChildKey(trieIndex)
         const keys = await api.rpc.childstate.getKeys(childKey, '0x')
         const ss58keys = keys.map(k => encodeAddress(k))
