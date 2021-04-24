@@ -22,9 +22,6 @@ export const loadAccounts = async () => {
       isDevelopment: true
     }, allAccounts)
     console.log('accs:', allAccounts);
-    account = allAccounts.map(a => ({
-      ...a
-    }))
     store.commit('saveAllAccounts', allAccounts)
     let account = store.state.account || allAccounts[0]
     store.commit('saveAccount', account)

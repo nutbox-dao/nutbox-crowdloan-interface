@@ -138,6 +138,7 @@ export default {
     width: 3.2rem;
     border-radius: 3.2rem;
     margin: 0 auto;
+    border: 1px solid #E3E5E8;
   }
 }
 .crowd-select:hover{

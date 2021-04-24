@@ -103,7 +103,7 @@ import TipContribute from "./TipBoxes/TipContribute";
 import TipWithdraw from "./TipBoxes/TipWithdraw";
 import ContributorsLabel from "./Label/ContributorsLabel";
 import RaisedLabel from "./Label/RaisedLabel";
-import { TOKEN_SYMBOL, PARA_STATUS } from "../config";
+import { TOKEN_SYMBOL, PARA_STATUS, LOCALE_KEY } from "../config";
 import { BLOCK_SECOND, TIME_PERIOD } from "../constant";
 import { calStatus } from "../utils/crowdloan";
 
@@ -229,13 +229,15 @@ export default {
       }
     },
     statusIcon() {
+      const lang = localStorage.getItem(LOCALE_KEY) ?? 'en';
+      
       switch (this.status) {
         case "Active":
-          return require("../static/images/card-active.svg");
+          return lang === 'en' ? require("../static/images/card-active.svg") : require("../static/images/card-active-cn.png");
         case "Retired":
-          return require("../static/images/card-retired.svg");
+          return lang === 'en' ? require("../static/images/card-retired.svg") : require('../static/images/card-retired-cn.png');
         default:
-          return require("../static/images/card-completed.svg");
+          return lang === 'en' ? require("../static/images/card-completed.svg") : require('../static/images/card-completed-cn.png');
       }
     },
   },
@@ -271,6 +273,7 @@ export default {
       margin-right: 2.4rem;
       img {
         width: 2rem;
+        height:2rem;
       }
       .icon2 {
         position: absolute;
@@ -286,6 +289,12 @@ export default {
         border-radius: 1rem;
       }
     }
+    .title-text{
+      display: flex;
+      justify-items: center;
+      align-items: center;
+    }
+
   }
   .h-line {
     width: 1.6rem;

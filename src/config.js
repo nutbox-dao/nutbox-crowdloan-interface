@@ -5,6 +5,8 @@ export const ROCOCO_WEB_SOCKET = "wss://crowdloan-test.nutbox.io/relaychain/ws"
 
 export const API_URL = "https://api.crowdloan-test.nutbox.io"
 
+export const LOCALE_KEY = 'local_lang'
+
 export const PARA_STATUS = {
   ACTIVE: "Active",
   RETIRED: "Retired",
