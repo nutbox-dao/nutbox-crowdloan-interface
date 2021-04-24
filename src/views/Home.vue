@@ -43,15 +43,15 @@
         <div class="col-md-6">
           <div class='crowd-select card-1' @click="goto('/kusama')">
             <img src="~@/static/images/kusama-logo.png" alt="">
-            <div class="font28 font-bold mt-2 mb-4">Kusuma Crowdloan</div>
-            <button class="primary-btn">Enter</button>
+            <div class="font28 font-bold mt-2 mb-4">{{ 'Kusuma ' + $t('homePage.crowdloan') }}</div>
+            <button class="primary-btn">{{ $t('homePage.enter') }}</button>
           </div>
         </div>
         <div class="col-md-6">
           <div class="crowd-select card-2">
             <img src="~@/static/images/polkadot-logo.png" alt="">
-            <div class="font28 font-bold mt-2 mb-4">Polkadot Crowdloan</div>
-            <button class="primary-btn">Enter</button>
+            <div class="font28 font-bold mt-2 mb-4">{{ 'Polkadot ' + $t('homePage.crowdloan') }}</div>
+            <button class="primary-btn">{{ $t('homePage.enter') }}</button>
           </div>
         </div>
       </div>

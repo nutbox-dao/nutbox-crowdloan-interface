@@ -12,30 +12,29 @@
         fund in<span class="big"> {{ symbol }} </span>network
       </div>
       <div class="input-group-box">
-        <div class="label">Amount</div>
+        <div class="label">{{ $t('crowdloan.amount')}}</div>
         <div class="flex-between-center">
           <input
             type="number"
             v-model="inputAmount"
-            placeholder="Staking amount"
+            :placeholder="$t('crowdloan.inputAmount')"
           />
           <span>{{ paraTokenSymbol }}</span>
         </div>
       </div>
       <div class="input-group-box">
-        <div class="label">Nominator</div>
+        <div class="label">{{ $t('crowdloan.nominator')}}</div>
         <div class="flex-between-center">
           <input
             type="text"
             v-model="inputNonimator"
-            placeholder="Your nominator's address"
+            :placeholder="$t('crowdloan.inputNominator')"
           />
-          <span class="text-grey" style="opacity: 0.4">(optional)</span>
+          <span class="text-grey" style="opacity: 0.4">{{ $t('crowdloan.option') }}</span>
         </div>
       </div>
       <button class="primary-btn" @click="confirm" :disabled="isComtribution">
-        <b-spinner small type="grow" v-show="isComtribution"></b-spinner>Confirm
-        & Sign
+        <b-spinner small type="grow" v-show="isComtribution"></b-spinner>{{ $t('crowdloan.confirm') }}
       </button>
     </div>
   </div>

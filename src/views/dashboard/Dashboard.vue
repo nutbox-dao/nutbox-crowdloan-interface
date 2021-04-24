@@ -1,7 +1,7 @@
 <template>
   <div class="contribution-page">
     <div class="container">
-      <div class="font-bold font32 mt-3 mb-3 text-left">Dashboard</div>
+      <div class="font-bold font32 mt-3 mb-3 text-left">{{ $t('account.dashboard') }}</div>
       <div class="c-tabs-box">
         <div
           class="tab"

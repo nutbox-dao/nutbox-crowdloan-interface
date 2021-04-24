@@ -24,7 +24,7 @@
             <div class="info">{{ item.raised }}</div>
           </div>
         </div>
-        <button class="primary-btn" @click="downloadCsv(index)">Export</button>
+        <button class="primary-btn" @click="downloadCsv(index)">{{ $t('dashboard.export') }}</button>
       </div>
     </div>
   </div>

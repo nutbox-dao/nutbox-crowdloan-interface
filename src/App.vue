@@ -70,14 +70,29 @@
                         <div class="flex-start-center" @click="selectMenu('contributions', '/contributions')">
                           <!-- <b-avatar square size="sm" class="mr-2" style="opacity: .2">·</b-avatar> -->
                           <img class="menu-icon" :src="contributionsIcon" alt="">
-                          <span class="menu-text">Contributions</span>
+                          <span class="menu-text">{{$t('account.contributions')}}</span>
                         </div>
                       </b-dropdown-item>
                       <b-dropdown-item>
                         <div class="flex-start-center" @click="selectMenu('dashboard', '/dashboard')" v-if="commnunityIds.indexOf(account && account.address) !== -1">
                           <!-- <b-avatar square size="sm" class="mr-2" style="opacity: .2">·</b-avatar> -->
                           <img class="menu-icon" :src="dashboardIcon" alt="">
-                          <span class="menu-text">Dashboard</span>
+                          <span class="menu-text">{{ $t('account.dashboard') }}</span>
+                        </div>
+                      </b-dropdown-item>
+                      <b-dropdown-divider></b-dropdown-divider>
+                      <b-dropdown-item>
+                        <div class="flex-start-center" @click="selectMenu('lang', 'en')">
+                          <!-- <b-avatar square size="sm" class="mr-2" style="opacity: .2">·</b-avatar> -->
+                          <img class="menu-icon" :src="dashboardIcon" alt="">
+                          <span class="menu-text">En</span>
+                        </div>
+                      </b-dropdown-item>
+                      <b-dropdown-item>
+                        <div class="flex-start-center" @click="selectMenu('lang', 'zh-CN')">
+                          <!-- <b-avatar square size="sm" class="mr-2" style="opacity: .2">·</b-avatar> -->
+                          <img class="menu-icon" :src="dashboardIcon" alt="">
+                          <span class="menu-text">中文</span>
                         </div>
                       </b-dropdown-item>
                     </b-dropdown>
@@ -102,6 +117,7 @@ import ConnectWallet from './components/Buttons/ConnectWallet'
 import Identicon from '@polkadot/vue-identicon'
 import { getBalance, loadAccounts } from './utils/account'
 import { getCommnunitys } from './apis/api'
+import { LOCALE_KEY } from './config'
 
 export default {
   name: 'App',
@@ -117,14 +133,29 @@ export default {
       'communitys'
     ]),
     hMenuOptions () {
+      if (this.lang == 'en'){
+        console.log('en');
+      }
       return this.menuOptions.filter(item => {
         return item.h
       })
     },
     vMenuOptions () {
+      if (this.lang == 'en'){
+        console.log('en');
+      }
       return this.menuOptions.filter(item => {
         return item.v
       })
+    },
+    menuOptions () {
+      return [
+        { id: 'home', url: '/', label: this.$t('homePage.home'), h: true, v: false },
+        { id: 'kusama', url: '/kusama', label: 'Kusuma ' + this.$t('homePage.crowdloan'), h: true, v: true },
+        { id: 'polkadot', url: '/polkadot', label: 'Polkadot ' + this.$t('homePage.crowdloan'), h: true, v: true },
+        { id: 'contributions', url: '/contributions', label: this.$t('account.contributions'), h: false, v: true },
+        { id: 'dashboard', url: '/dashboard', label: this.$t('account.dashboard'), h: false, v: true }
+      ];
     },
     contributionsIcon () {
       return this.activeNav === 'contributions' ? require('./static/images/contributions_selected.png') : require('./static/images/contributions.png')
@@ -138,16 +169,10 @@ export default {
   },
   data () {
     return {
-      menuOptions: [
-        { id: 'home', url: '/', label: 'Home', h: true, v: false },
-        { id: 'kusama', url: '/kusama', label: 'Kusuma Crowdloan', h: true, v: true },
-        { id: 'polkadot', url: '/polkadot', label: 'Polkadot Crowdloan', h: true, v: true },
-        { id: 'contributions', url: '/contributions', label: 'Contributions', h: false, v: true },
-        { id: 'dashboard', url: '/dashboard', label: 'Dashboard', h: false, v: true }
-      ],
       accountsPop: false,
       activeNav: 'home',
-      menuIsExpand: false
+      menuIsExpand: false,
+      lang: 'en'
     }
   },
   watch: {
@@ -156,6 +181,7 @@ export default {
     }
   },
   mounted () {
+    this.lang = localStorage.getItem(LOCALE_KEY) ?? 'en'
     getCommnunitys().then(res => {
       console.log('commnituy', res);
       this.$store.commit('saveCommunitys', res)
@@ -182,6 +208,12 @@ export default {
       }
     },
     selectMenu (id, url) {
+      if (id == 'lang'){
+        this.lang = url;
+        localStorage.setItem(LOCALE_KEY, this.lang);
+        this.$i18n.locale = url;
+        return
+      }
       if (id === this.activeNav || id === 'polkadot') {
         this.$refs.sidebar.hide()
         return
@@ -345,6 +377,7 @@ body {
     .menu-text {
       padding: .4rem 0;
       display: inline-block;
+      font-size: .7rem;
       font-weight: bold;
     }
   }

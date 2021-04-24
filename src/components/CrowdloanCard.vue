@@ -45,21 +45,21 @@
         v-show="status === 'Active'"
         @click="showContribute = true"
       >
-        Contribute
+        {{ $t('crowdloan.contribute') }}
       </button>
       <button
         class="primary-btn"
         v-show="status === 'Retired'"
         @click="showWithdraw = true"
       >
-        Withdraw
+        {{ $t('crowdloan.withdraw') }}
       </button>
       <button
         class="action-btn primary-btn"
         disabled
         v-show="status === 'Completed'"
       >
-        Completed
+        {{ $t('crowdloan.completed') }}
       </button>
     </div>
     <ConnectWallet v-else />

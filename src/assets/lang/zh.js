@@ -6,7 +6,7 @@ module.exports = {
         enter:"进入"
     },
     account: {
-        dashborad: "仪表盘",
+        dashboard: "仪表盘",
         contributions:"我的投票",
         zh: "中文",
         en: "English"
@@ -20,9 +20,9 @@ module.exports = {
         inputAmount: "请输入投票数量",
         nominator: "推荐人",
         inputNominator: "请输入推荐人地址",
-        optional: "可选"
+        optional: "(可选)"
     },
-    dashborad: {
+    dashboard: {
         export: "导出"
     }
 }

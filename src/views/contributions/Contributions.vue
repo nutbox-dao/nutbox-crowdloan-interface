@@ -1,6 +1,6 @@
 <template>
   <div class="contribution-page ">
-      <div class="font-bold font32 mt-3 mb-3 text-left">Cotributions</div>
+      <div class="font-bold font32 mt-3 mb-3 text-left">{{ $t('account.contributions') }}</div>
     <div class="container" v-for="chain in chainName" :key="chain">
       <UserContributions :chain="chain"/>
       <br/>

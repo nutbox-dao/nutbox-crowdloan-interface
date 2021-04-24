@@ -6,7 +6,7 @@ module.exports = {
         enter:"Enter"
     },
     account: {
-        dashborad: "Dashboard",
+        dashboard: "Dashboard",
         contributions:"Contributions",
         zh: "中文",
         en: "English"
@@ -20,7 +20,7 @@ module.exports = {
         inputAmount: "Staking amount",
         nominator: "Nominator",
         inputNominator: "Your Nominator's address",
-        optional: "optional"
+        optional: "(optional)"
     },
     dashborad: {
         export: "Export"
