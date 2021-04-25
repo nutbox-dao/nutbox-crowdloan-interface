@@ -23,7 +23,7 @@
                     <img src="~@/static/images/logo.png" alt="" class="logo-brand"
                          @click="selectMenu(0, '/')">
                   </div>
-                  <div class="v-menu-item flex-start-center" v-for="item of vMenuOptions" :key="item.id"
+                  <div class="v-menu-item flex-start-center" v-for="item,idx of vMenuOptions" :key="idx"
                        @click="selectMenu(item.id, item.url)">
                     <div class="v-menu-line" :class="item.id === activeNav?'active':''"></div>
                     <span class="font-bold">{{item.label}}</span>
@@ -82,14 +82,14 @@
                       </b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item>
-                        <div class="flex-start-center" @click="selectMenu('lang', 'en')">
+                        <div class="flex-start-center" @click="selectMenu('en', 'en')">
                           <!-- <b-avatar square size="sm" class="mr-2" style="opacity: .2">·</b-avatar> -->
                           <img class="menu-icon" :src="dashboardIcon" alt="">
-                          <span class="menu-text">En</span>
+                          <span class="menu-text">English</span>
                         </div>
                       </b-dropdown-item>
                       <b-dropdown-item>
-                        <div class="flex-start-center" @click="selectMenu('lang', 'zh-CN')">
+                        <div class="flex-start-center" @click="selectMenu('zh', 'zh-CN')">
                           <!-- <b-avatar square size="sm" class="mr-2" style="opacity: .2">·</b-avatar> -->
                           <img class="menu-icon" :src="dashboardIcon" alt="">
                           <span class="menu-text">中文</span>
@@ -133,17 +133,11 @@ export default {
       'communitys'
     ]),
     hMenuOptions () {
-      if (this.lang == 'en'){
-        console.log('en');
-      }
       return this.menuOptions.filter(item => {
         return item.h
       })
     },
     vMenuOptions () {
-      if (this.lang == 'en'){
-        console.log('en');
-      }
       return this.menuOptions.filter(item => {
         return item.v
       })
@@ -154,7 +148,9 @@ export default {
         { id: 'kusama', url: '/kusama', label: 'Kusuma ' + this.$t('homePage.crowdloan'), h: true, v: true },
         { id: 'polkadot', url: '/polkadot', label: 'Polkadot ' + this.$t('homePage.crowdloan'), h: true, v: true },
         { id: 'contributions', url: '/contributions', label: this.$t('account.contributions'), h: false, v: true },
-        { id: 'dashboard', url: '/dashboard', label: this.$t('account.dashboard'), h: false, v: true }
+        { id: 'dashboard', url: '/dashboard', label: this.$t('account.dashboard'), h: false, v: true },
+        { id: 'en', url: 'en', label: "English", h: false, v: true },
+        { id: 'zh', url: 'zh-CN', label: "中文", h: false, v: true }
       ];
     },
     contributionsIcon () {
@@ -208,7 +204,7 @@ export default {
       }
     },
     selectMenu (id, url) {
-      if (id == 'lang'){
+      if (id == 'zh' || id == 'en'){
         this.lang = url;
         localStorage.setItem(LOCALE_KEY, this.lang);
         this.$i18n.locale = url;
