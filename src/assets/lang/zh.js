@@ -15,7 +15,7 @@ module.exports = {
         contribute: "投票",
         withdraw: "赎回",
         youWillWithdraw: "你可以赎回",
-        comfirm: "确认",
+        confirm: "确认",
         amount: "数量",
         inputAmount: "请输入投票数量",
         nominator: "推荐人",

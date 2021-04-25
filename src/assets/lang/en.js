@@ -15,7 +15,7 @@ module.exports = {
         contribute: "Contribute",
         withdraw: "Withdraw",
         youWillWithdraw: "You Would Withdraw",
-        comfirm: "Comfirm & sign",
+        confirm: "Comfirm & sign",
         amount: "Amount",
         inputAmount: "Staking amount",
         nominator: "Nominator",

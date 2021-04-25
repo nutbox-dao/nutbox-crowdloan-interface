@@ -30,7 +30,7 @@
             v-model="inputNonimator"
             :placeholder="$t('crowdloan.inputNominator')"
           />
-          <span class="text-grey" style="opacity: 0.4">{{ $t('crowdloan.option') }}</span>
+          <span class="text-grey" style="opacity: 0.4">{{ $t('crowdloan.optional') }}</span>
         </div>
       </div>
       <button class="primary-btn" @click="confirm" :disabled="isComtribution">

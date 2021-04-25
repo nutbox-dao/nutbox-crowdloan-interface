@@ -17,7 +17,7 @@
         :disabled="isWithdraw"
       >
       <b-spinner small type="grow" v-show="isWithdraw"></b-spinner>
-        {{ $t('crowdloan.confirm')}}
+        {{ $t('crowdloan.confirm') }}
       </button>
     </div>
   </div>
