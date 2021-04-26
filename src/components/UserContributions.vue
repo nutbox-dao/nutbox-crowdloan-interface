@@ -14,11 +14,11 @@
         thead-class="c-th"
       >
         <template #cell(community)="row">
-          <b-avatar size="sm" class="mr-2">C</b-avatar>
+          <!-- <b-avatar size="sm" class="mr-2">C</b-avatar> -->
           <span>{{ row.item.community }}</span>
         </template>
         <template #cell(chain)="row">
-          <b-avatar size="sm" class="mr-2">C</b-avatar>
+          <!-- <b-avatar size="sm" class="mr-2">C</b-avatar> -->
           <span>{{ row.item.chain }}</span>
         </template>
       </b-table>
@@ -36,7 +36,7 @@
 import { mapState } from "vuex";
 import { API_URL } from "../config";
 import axios from "axios";
-import { uni2Token, getDecimal } from "../utils/polkadot"
+import { getDecimal } from "../utils/polkadot"
 import BN from 'bn.js'
 import { formatDate } from "../utils/utils"
 
@@ -59,13 +59,12 @@ export default {
         { key: "trieIndex", label: "TrieIndex", class: "text-right" },
         { key: "date", label: "Lease period", class: "text-right" },
         { key: "amount", label: "Staking amount", class: "text-right" },
-        { key: "status", label: "Status", class: "text-right" },
         { key: "time", label: "Staking time" },
         { key: "operate", label: "", class: "text-left" },
       ],
       items: [],
       currentPage: 1,
-      totalRows: 12,
+      totalRows: 0,
       perPage: 7,
     };
   },
