@@ -7,9 +7,13 @@
       @click="hide"
     />
     <div class="tip-contribute">
-      <div class="text-center mb-4 font20">
+      <div class="text-center mb-4 font20" v-if="lang==='en'">
         Contribute to<span class="big"> {{ paraName }} </span>crowdloan <br />
         fund in<span class="big"> {{ symbol }} </span>network
+      </div>
+      <div class="text-center mb-4 font20" v-else>
+        在<span class="big"> {{ symbol }} </span>网络中<br />
+        为<span class="big"> {{ paraName }} </span>众贷项目投票
       </div>
       <div class="input-group-box">
         <div class="label">{{ $t('crowdloan.amount')}}</div>
@@ -68,7 +72,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(["symbol", "balance"]),
+    ...mapState(["symbol", "balance", "lang"]),
     ...mapGetters(["getFundInfo"]),
   },
   methods: {
