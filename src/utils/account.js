@@ -44,7 +44,6 @@ export const getBalance = async (account) => {
   const api = await getApi()
   // cancel last
   let subBalance = store.state.subBalance
-  const decimal = await getDecimal()
   try {
     subBalance()
   } catch (e) {}
@@ -55,7 +54,7 @@ export const getBalance = async (account) => {
     },
     nonce: currentNonce
   }) => {
-    store.commit('saveBalance', uni2Token(new BN(currentFree), decimal))
+    store.commit('saveBalance', new BN(currentFree))
   })
   store.commit('saveSubBalance', subBalance)
 }

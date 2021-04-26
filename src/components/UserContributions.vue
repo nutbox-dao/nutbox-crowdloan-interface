@@ -77,7 +77,9 @@ export default {
   },
   methods: {
     async requstData(offset, limit) {
-      this.cancelToken && this.cancelToken();
+      this.cancelToken && this.cancelToken(cancel => {
+        cancel()
+      });
       this.cancelToken = axios.CancelToken;
       const decimal = await getDecimal()
       axios.post(API_URL + "/contrib/find/contributor", {
@@ -94,7 +96,7 @@ export default {
             chain: c.paraName,
             trieIndex: c.trieIndex,
             date: c.firstSlot + "-" + c.lastSlot,
-            amount: parseFloat(uni2Token(new BN(c.amount), decimal)).toFixed(4),
+            amount: ((new BN(c.amount).div(new BN(10).pow(decimal.sub(new BN(4))))).toNumber()/1e4).toFixed(4),
             time: formatDate(c.createdAt),
           }));
           console.log({ chain: this.chain, res: res.data });

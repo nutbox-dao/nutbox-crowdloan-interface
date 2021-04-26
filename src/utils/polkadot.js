@@ -49,8 +49,8 @@ export const getDecimal = async () => {
 
 export const formatBalance = async (b) => {
   const decimal = await getDecimal()
-  const uni = uni2Token(new BN(b), decimal)
-  return parseFloat(uni).toFixed(4)
+  const uni = new BN(b).div(new BN(10).pow(decimal.sub(new BN(4))))
+  return (parseFloat(uni)/1e4).toFixed(4)
 }
 
 export const validAddress = (address) => {

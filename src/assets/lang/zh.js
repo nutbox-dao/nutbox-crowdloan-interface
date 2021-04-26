@@ -20,13 +20,15 @@ module.exports = {
         inputAmount: "请输入投票数量",
         nominator: "推荐人",
         inputNominator: "请输入推荐人地址",
-        optional: "(可选)"
+        optional: "(可选)",
+        completed: "已完成"
     },
     dashboard: {
         export: "导出"
     },
     tip: {
         loading: "加载中，请稍等",
-        noAuction : "没有进行中的众贷"
+        noAuction : "没有进行中的众贷",
+        tokenSafeTip: "您的资产将被锁定到 {symbol} 的官方众贷合约内，而不是Nutbox的账户内。"
     }
 }

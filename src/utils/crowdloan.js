@@ -78,7 +78,7 @@ export const subscribeFundInfo = async (crowdloanCard) => {
         const values = await Promise.all(keys.map(k => api.rpc.childstate.getStorage(childKey, k)))
         const contributions = values.map((v, idx) => ({
           contributor: ss58keys[idx],
-          amount: uni2Token(new BN(api.createType('(Balance, Vec<u8>)', v.unwrap())[0]), decimal),
+          amount: BN(api.createType('(Balance, Vec<u8>)', v.unwrap())[0]),
           memo: api.createType('(Balance, Vec<u8>)', v.unwrap())[1].toHuman()
         }))
         // console.log('contri', contributions);
@@ -88,12 +88,12 @@ export const subscribeFundInfo = async (crowdloanCard) => {
           status,
           statusIndex,
           deposit: uni2Token(new BN(deposit), decimal),
-          cap: uni2Token(new BN(cap), decimal),
+          cap: new BN(cap),
           depositor,
           end: new BN(end),
           firstSlot: new BN(firstSlot),
           lastSlot: new BN(lastSlot),
-          raised: uni2Token(new BN(raised), decimal),
+          raised: new BN(raised),
           trieIndex,
           funds: contributions
         })
@@ -272,7 +272,7 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
     const api = await injectAccount(store.state.account)
     const decimal = await getDecimal()
     paraId = api.createType('Compact<u32>', paraId)
-    amount = api.createType('Compact<BalanceOf>', new BN(amount).mul(new BN(10).pow(decimal)))
+    amount = api.createType('Compact<BalanceOf>', new BN(amount * 1e4).mul(new BN(10).pow(decimal.sub(new BN(4)))))
     const nonce = (await api.query.system.account(from)).nonce.toNumber()
     const contributeTx = api.tx.crowdloan.contribute(paraId, amount, null)
     const memo = {

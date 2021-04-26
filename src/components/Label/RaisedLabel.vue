@@ -28,17 +28,36 @@ export default {
       type: Number,
       default: 0,
     },
+    isBalance: {
+      type: Boolean,
+      default: false
+    }
   },
   computed: {
-    ...mapState(["symbol"]),
-    ...mapGetters(["getFundInfo"]),
+    ...mapState(["symbol", "account", "balance"]),
+    ...mapGetters(["getFundInfo", "decimal"]),
     fund() {
       return this.getFundInfo(this.paraId);
     },
     items() {
       if (!this.fund) return;
-      const raised = this.convertUni(this.fund.raised);
-      const cap = this.convertUni(this.fund.cap);
+      let raised;
+      let cap;
+      if (this.isBalance){
+        const myData = this.fund.funds.filter(c=>c.contributor == this.account.address)
+        if (myData.length === 0){
+          raised = new BN(0);
+        }else{
+        console.log('mydata', myData[0].amount.toString());
+          raised = myData[0].amount
+        }
+        cap = this.balance
+        raised = this.convertUni(raised)
+        cap = this.convertUni(cap)
+      }else{
+        raised = this.convertUni(this.fund.raised);
+        cap = this.convertUni(this.fund.cap);
+      }
       const raisedStr = this.formatBanlance(raised[0]);
       const capStr = this.formatBanlance(cap[0]);
       return [
@@ -53,22 +72,23 @@ export default {
   methods: {
     convertUni(uni) {
       let unit = " ";
-      if (uni >= 1e18) {
+      uni = uni.div(new BN(10).pow(this.decimal.sub(new BN(4))))
+      if (uni >= 1e22) {
         uni = uni.div(new BN(1e18));
         unit = " E";
-      } else if (uni >= 1e15) {
+      } else if (uni >= 1e19) {
         uni = uni.div(new BN(1e15));
         unit = " P";
-      } else if (uni >= 1e12) {
+      } else if (uni >= 1e16) {
         uni = uni.div(new BN(1e12));
         unit = " T";
-      } else if (uni >= 1e9) {
+      } else if (uni >= 1e12) {
         uni = uni.div(new BN(1e9));
         unit = " B";
-      } else if (uni >= 1e6) {
+      } else if (uni >= 1e10) {
         uni = uni.div(new BN(1e6));
         unit = " M";
-      } else if (uni >= 1e3) {
+      } else if (uni >= 1e7) {
         uni = uni.div(new BN(1e3))
         unit = " K"
       }
@@ -77,7 +97,7 @@ export default {
 
     formatBanlance(value) {
       if (!value) return ["0.", "0000"];
-      const str = parseFloat(value).toFixed(4).toString();
+      const str = parseFloat(value / 1e4).toFixed(4).toString();
       const integer = str.split(".")[0];
       const fraction = str.split(".")[1];
       return [integer.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ".", fraction];

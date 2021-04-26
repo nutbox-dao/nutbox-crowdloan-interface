@@ -38,6 +38,12 @@
           <ContributorsLabel :paraId="paraId" />
         </div>
       </div>
+      <div class="project-info-container">
+        <span class="name"> My Data </span>
+        <div class="info">
+          <RaisedLabel :isBalance="true" :paraId="paraId" />
+        </div>
+      </div>
     </div>
     <div v-if="isConnected">
       <button

@@ -104,11 +104,11 @@ export default new Vuex.Store({
     },
     saveLeasePeriod: (state, leasePeriod) => {
       state.leasePeriod[state.symbol] = leasePeriod
-      state.leasePeriod = JSON.parse(JSON.stringify(state.leasePeriod))
+      state.leasePeriod = {...state.leasePeriod}
     },
     saveDecimal: (state, decimal) => {
       state.decimal[state.symbol] = decimal
-      state.decimal = JSON.parse(JSON.stringify(state.decimal))
+      state.decimal = {...state.decimal}
     }
   },
   getters: {

@@ -15,6 +15,9 @@
         在<span class="big"> {{ symbol }} </span>网络中<br />
         为<span class="big"> {{ paraName }} </span>众贷项目投票
       </div>
+      <div class="text-center mb-4 font14" style="color: red;">
+        {{ $t('tip.tokenSafeTip', {symbol}) }}
+      </div>
       <div class="input-group-box">
         <div class="label">{{ $t('crowdloan.amount')}}</div>
         <div class="flex-between-center">
