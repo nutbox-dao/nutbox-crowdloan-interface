@@ -150,7 +150,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(["isConnected", "symbol", "projectFundInfos"]),
+    ...mapState(["isConnected", "symbol", "projectFundInfos", "lang"]),
     ...mapGetters([
       "getProjectStatus",
       "getFundInfo",
@@ -229,15 +229,13 @@ export default {
       }
     },
     statusIcon() {
-      const lang = localStorage.getItem(LOCALE_KEY) ?? 'en';
-      
       switch (this.status) {
         case "Active":
-          return lang === 'en' ? require("../static/images/card-active.svg") : require("../static/images/card-active-cn.png");
+          return this.lang === 'en' ? require("../static/images/card-active.svg") : require("../static/images/card-active-cn.png");
         case "Retired":
-          return lang === 'en' ? require("../static/images/card-retired.svg") : require('../static/images/card-retired-cn.png');
+          return this.lang === 'en' ? require("../static/images/card-retired.svg") : require('../static/images/card-retired-cn.png');
         default:
-          return lang === 'en' ? require("../static/images/card-completed.svg") : require('../static/images/card-completed-cn.png');
+          return this.lang === 'en' ? require("../static/images/card-completed.svg") : require('../static/images/card-completed-cn.png');
       }
     },
   },

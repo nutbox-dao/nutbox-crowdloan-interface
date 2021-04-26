@@ -2,13 +2,13 @@
   <div class="k-page crowdloan-page">
     <div class="loading-bg" v-if="loadingFunds">
       <img src="~@/static/images/loading.gif" alt="" />
-      <p class="font16">Loading, please wait</p>
+      <p class="font16">{{ $t('tip.loading') }}</p>
     </div>
     <template v-else>
       <div class="bg" v-if="funds.length > 0"></div>
       <div class="empty-bg" v-else>
         <img src="~@/static/images/empty-data.png" alt="" />
-        <p>No ongoing auction</p>
+        <p> {{ $t('tip.noAuction') }} </p>
       </div>
       <div class="cards-container">
         <div class="container">

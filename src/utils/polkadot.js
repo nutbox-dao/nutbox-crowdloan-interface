@@ -66,6 +66,20 @@ export const validAddress = (address) => {
   }
 }
 
+// 将地址统一成substrate的格式
+export const stanfiAddress = (address) => {
+  try {
+    return encodeAddress(
+      isHex(address) ?
+      hexToU8a(address) :
+      decodeAddress(address),
+      42
+    );
+  } catch (e) {
+    return false
+  }
+}
+
 export function getNodeId(address) {
   if (!address) return new Uint8Array(8)
   const isAddress = validAddress(address)

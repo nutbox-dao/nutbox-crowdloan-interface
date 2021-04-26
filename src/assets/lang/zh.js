@@ -24,5 +24,9 @@ module.exports = {
     },
     dashboard: {
         export: "导出"
+    },
+    tip: {
+        loading: "加载中，请稍等",
+        noAuction : "没有进行中的众贷"
     }
 }

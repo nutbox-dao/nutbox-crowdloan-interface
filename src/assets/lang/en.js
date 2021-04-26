@@ -24,5 +24,9 @@ module.exports = {
     },
     dashborad: {
         export: "Export"
+    },
+    tip: {
+        loading: "Loading, please wait",
+        noAuction : "No ongoing auction"
     }
 }

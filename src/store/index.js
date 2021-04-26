@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import Cookie from "vue-cookies"
+import { LOCALE_KEY } from '../config'
 
 Vue.use(Vuex)
 
@@ -9,6 +10,7 @@ export default new Vuex.Store({
     api: {},
     apiState: null,
     symbol: '',
+    lang: Cookie.get(LOCALE_KEY),
     subBlock: {},
     subBalance: {},
     subFund: {},
@@ -41,6 +43,10 @@ export default new Vuex.Store({
     saveSubBalance: (state, subBalance) => {
       state.subBalance = subBalance
     },
+    saveLang: (state, lang) => {
+      state.lang = lang;
+      Cookie.set(LOCALE_KEY, lang, '30d')
+    },
     saveSubFund: (state, subFund) => {
       state.subFund[state.symbol] = subFund
       state.subFund = {
@@ -69,7 +75,7 @@ export default new Vuex.Store({
     },
     saveAccount: (state, account) => {
       state.account = account,
-        Cookie.set('polkadot-account', account)
+      Cookie.set('polkadot-account', account, '30d')
     },
     saveAllAccounts: (state, allAccounts) => {
       state.allAccounts = allAccounts

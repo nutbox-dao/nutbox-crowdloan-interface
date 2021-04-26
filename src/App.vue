@@ -84,14 +84,14 @@
                       <b-dropdown-item>
                         <div class="flex-start-center" @click="selectMenu('en', 'en')">
                           <!-- <b-avatar square size="sm" class="mr-2" style="opacity: .2">·</b-avatar> -->
-                          <img class="menu-icon" :src="dashboardIcon" alt="">
+                          <img class="menu-icon" :src="enIcon" alt="">
                           <span class="menu-text">English</span>
                         </div>
                       </b-dropdown-item>
                       <b-dropdown-item>
                         <div class="flex-start-center" @click="selectMenu('zh', 'zh-CN')">
                           <!-- <b-avatar square size="sm" class="mr-2" style="opacity: .2">·</b-avatar> -->
-                          <img class="menu-icon" :src="dashboardIcon" alt="">
+                          <img class="menu-icon" :src="cnIcon" alt="">
                           <span class="menu-text">中文</span>
                         </div>
                       </b-dropdown-item>
@@ -117,7 +117,6 @@ import ConnectWallet from './components/Buttons/ConnectWallet'
 import Identicon from '@polkadot/vue-identicon'
 import { getBalance, loadAccounts } from './utils/account'
 import { getCommnunitys } from './apis/api'
-import { LOCALE_KEY } from './config'
 
 export default {
   name: 'App',
@@ -130,7 +129,8 @@ export default {
       'isConnected',
       'allAccounts',
       'account',
-      'communitys'
+      'communitys',
+      'lang'
     ]),
     hMenuOptions () {
       return this.menuOptions.filter(item => {
@@ -159,6 +159,12 @@ export default {
     dashboardIcon (){
       return this.activeNav === 'dashboard' ? require('./static/images/dashboard_selected.png') : require('./static/images/dashboard.png')
     },
+    enIcon (){
+      return this.lang === 'en' ? require('./static/images/selected.png') : require('./static/images/selected-gray.png')
+    },
+    cnIcon (){
+      return this.lang === 'zh-CN' ? require('./static/images/selected.png') : require('./static/images/selected-gray.png')
+    },
     commnunityIds () {
       return this.communitys.map(c => c.communityId)
     }
@@ -168,7 +174,6 @@ export default {
       accountsPop: false,
       activeNav: 'home',
       menuIsExpand: false,
-      lang: 'en'
     }
   },
   watch: {
@@ -177,7 +182,7 @@ export default {
     }
   },
   mounted () {
-    this.lang = localStorage.getItem(LOCALE_KEY) ?? 'en'
+    this.$i18n.locale = this.lang;
     getCommnunitys().then(res => {
       console.log('commnituy', res);
       this.$store.commit('saveCommunitys', res)
@@ -205,8 +210,7 @@ export default {
     },
     selectMenu (id, url) {
       if (id == 'zh' || id == 'en'){
-        this.lang = url;
-        localStorage.setItem(LOCALE_KEY, this.lang);
+        this.$store.commit('saveLang', url);
         this.$i18n.locale = url;
         return
       }

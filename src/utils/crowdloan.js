@@ -17,7 +17,8 @@ import {
   getApi,
   uni2Token,
   getDecimal,
-  getNodeId
+  getNodeId,
+  stanfiAddress
 } from './polkadot'
 import {
   injectAccount
@@ -263,6 +264,8 @@ export const withdraw = async (paraId, toast, isInblockCallback) => {
 export const contribute = async (paraId, amount, communityId, childId, trieIndex, toast, inBlockCallback) => {
   return new Promise(async (resolve, reject) => {
     const from = store.state.account && store.state.account.address
+    communityId = stanfiAddress(communityId)
+    childId = stanfiAddress(childId)
     if (!from) {
       reject('no account')
     }
