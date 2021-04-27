@@ -1,31 +1,33 @@
 <template>
-  <div class="contribution-page ">
-      <div class="font-bold font32 mt-3 mb-3 text-left">{{ $t('account.contributions') }}</div>
-    <div class="container" v-for="chain in chainName" :key="chain">
-      <UserContributions :chain="chain"/>
-      <br/>
+  <div class="contribution-page">
+    <div class="container">
+      <div class="font-bold font32 mt-3 mb-3 text-left">
+        {{ $t("account.contributions") }}
+      </div>
+      <div class="container" v-for="chain in chainName" :key="chain">
+        <UserContributions :chain="chain" />
+        <br />
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-
-import { CHAIN_NAME } from '../../config'
-import UserContributions from '../../components/UserContributions.vue'
+import { CHAIN_NAME } from "../../config";
+import UserContributions from "../../components/UserContributions.vue";
 
 export default {
-  name: 'Contributions',
+  name: "Contributions",
   components: {
     UserContributions,
   },
-  data () {
+  data() {
     return {
       chainName: Object.values(CHAIN_NAME),
-    }
+    };
   },
-  methods: {
-  }
-}
+  methods: {},
+};
 </script>
 
 <style scoped lang="less">
@@ -36,5 +38,4 @@ export default {
   position: relative;
   padding-top: 4.6rem;
 }
-
 </style>

@@ -69,9 +69,9 @@ export default {
     };
   },
   watch: {
-    async currentPage(newValue, oldValue) {
+    currentPage(newValue, oldValue) {
       if (newValue == oldValue) return;
-      this.requstData(newValue - 1, this.perPage);
+      this.requstData((newValue - 1)*this.perPage, this.perPage);
     },
   },
   methods: {
@@ -103,8 +103,8 @@ export default {
         .catch((err) => {});
     },
   },
-  async created() {
-    this.requstData();
+  async mounted() {
+    this.requstData(0, this.perPage);
   },
 };
 </script>

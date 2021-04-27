@@ -12,8 +12,8 @@
         fund in<span class="big"> {{ symbol }} </span>network
       </div>
       <div class="text-center mb-4 font20" v-else>
-        在<span class="big"> {{ symbol }} </span>网络中<br />
-        为<span class="big"> {{ paraName }} </span>众贷项目投票
+        为<span class="big"> {{ paraName }} </span>项目<br/>
+        在<span class="big"> {{ symbol }} </span>网络中的平行链竞拍投票
       </div>
       <div class="text-center mb-4 font14" style="color: red;">
         {{ $t('tip.tokenSafeTip', {symbol}) }}
