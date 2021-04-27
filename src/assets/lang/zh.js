@@ -29,6 +29,21 @@ module.exports = {
     tip: {
         loading: "加载中，请稍等",
         noAuction : "没有进行中的众贷",
-        tokenSafeTip: "您的资产将被锁定到 {symbol} 的官方众贷合约内，而不是Nutbox的账户内。"
+        tokenSafeTip: "您的资产将被锁定到 {symbol} 的官方众贷合约内，而不是Nutbox的账户内。",
+        belowMinContribution: "投票数小于最小投票数1.0000个。",
+        wrongNominatorAddress: "推荐人地址格式错误",
+        insufficientBalance: "余额不足",
+        outOfCap: "超过最大需求数",
+        tips:"提示信息",
+        error: "错误！",
+        success: "成功！",
+        warning: "警告！",
+        noNeedWithdraw: '没有可赎回投票'
+    },
+    transaction: {
+        broadcasting: "正在广播交易",
+        inBlock: "交易已上链",
+        contributeOk: "投票成功",
+        withdrawOk: "赎回成功"
     }
 }

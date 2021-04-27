@@ -28,6 +28,7 @@ import { mapState, mapGetters } from "vuex";
 import { TOKEN_SYMBOL } from "../../config";
 import { withdraw } from "../../utils/crowdloan";
 import BN from "bn.js";
+import { formatBalance } from "../../utils/polkadot"
 
 export default {
   props: {
@@ -37,28 +38,23 @@ export default {
   },
   data() {
     return {
-      isWithdraw: false
+      isWithdraw: false,
+      contributed:0.0000
     };
   },
   computed: {
     ...mapState(["symbol", "balance", "account"]),
-    ...mapGetters(["getFundInfo"]),
-    contributed() {
-      const fund = this.getFundInfo(this.paraId);
-      // console.log("fund", fund);
-      // console.log(
-      //   "funded",
-      //   fund.funds.filter((c) => c.contributor === this.account.address)
-      // );
-
-      const contributions = fund.funds
-        .filter((c) => c.contributor === this.account.address)
-        .reduce((total, c) => total.add(c.amount), new BN(0));
-      return parseFloat(contributions.toNumber()).toFixed(4);
-    },
+    ...mapGetters(["getFundInfo", "decimal"]),
     tokenSymbol() {
       return TOKEN_SYMBOL[this.symbol];
     },
+  },
+  async mounted () {
+    const fund = this.getFundInfo(this.paraId);
+      const contributions = fund.funds
+        .filter((c) => c.contributor === this.account.address)
+        .reduce((total, c) => total.add(c.amount), new BN(0));
+        this.contributed = await formatBalance(contributions)
   },
   methods: {
     hide() {
@@ -67,8 +63,8 @@ export default {
     },
     async withdrawClick() {
       if (this.contributed <= 0){
-        this.$bvToast.toast('No Need To Withdraw', {
-          title: "Info",
+        this.$bvToast.toast(this.$t('tip.noNeedWithdraw'), {
+          title: this.$t('tip.tips'),
           variant: 'info'
         })
         return
@@ -82,7 +78,7 @@ export default {
         });
       } catch (e) {
         this.$bvToast.toast(e.message, {
-          title: "Error",
+          title: this.$t('tip.error'),
           variant: "danger",
         });
       } finally{

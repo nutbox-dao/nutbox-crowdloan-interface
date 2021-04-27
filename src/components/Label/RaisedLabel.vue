@@ -48,7 +48,6 @@ export default {
         if (myData.length === 0){
           raised = new BN(0);
         }else{
-        console.log('mydata', myData[0].amount.toString());
           raised = myData[0].amount
         }
         cap = this.balance

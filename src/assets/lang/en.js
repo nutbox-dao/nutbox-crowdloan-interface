@@ -29,6 +29,21 @@ module.exports = {
     tip: {
         loading: "Loading, please wait",
         noAuction : "No ongoing auction",
-        tokenSafeTip: "Your asset would be locked into {symbol} official crowdloan pallet directly, not any accounts of Nutobx."
+        tokenSafeTip: "Your asset would be locked into {symbol} official crowdloan pallet directly, not any accounts of Nutobx.",
+        belowMinContribution:"Input is less than the minimum allowed contribution of 1.0000",
+        wrongNominatorAddress: "Wrong Nominator Address",
+        insufficientBalance:"Insufficient Balance",
+        outOfCap: "Out of cap",
+        tips:"Tips",
+        error: "Error!",
+        success: "Success!",
+        warning: "Warning!",
+        noNeedWithdraw: 'No Need To Withdraw'
+    },
+    transaction: {
+        broadcasting: "Transaction Is Broadcasting.",
+        inBlock: "Transaction included at blockHash.",
+        contributeOk: "Contribution Success!",
+        withdrawOk: "Withdraw Success!"
     }
 }

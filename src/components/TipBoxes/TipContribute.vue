@@ -76,7 +76,7 @@ export default {
   },
   computed: {
     ...mapState(["symbol", "balance", "lang"]),
-    ...mapGetters(["getFundInfo"]),
+    ...mapGetters(["getFundInfo", "decimal"]),
   },
   methods: {
     hide() {
@@ -88,20 +88,20 @@ export default {
       const res = reg.test(this.inputAmount);
       if (!res) {
         this.$bvToast.toast("Input error!", {
-          title: "Tips",
+          title: this.$t('tip.tips'),
           autoHideDelay: 5000,
           variant: "warning", // info success danger
         });
         return false;
       }
-
+      this.inputNonimator = this.inputNonimator?.trim()
       if (
         this.inputNonimator &&
         this.inputNonimator.length > 0 &&
         !validAddress(this.inputNonimator)
       ) {
-        this.$bvToast.toast("Wrong Nominator Address", {
-          title: "Tips",
+        this.$bvToast.toast(this.$t('tip.wrongNominatorAddress'), {
+          title: this.$t('tip.tips'),
           autoHideDelay: 5000,
           variant: "warning", // info success danger
         });
@@ -112,9 +112,9 @@ export default {
 
       if (amount < 1) {
         this.$bvToast.toast(
-          "Input is less than the minimum allowed contribution of 1.0000",
+          this.$t('tip.belowMinContribution'),
           {
-            title: "Tips",
+            title: this.$t('tip.tips'),
             autoHideDelay: 5000,
             variant: "warning",
           }
@@ -128,17 +128,16 @@ export default {
       const cap = fund.cap;
       const gap = cap.sub(raised);
       if (gap.lt(new BN(amount))) {
-        this.$bvToast.toast("Out of cap", {
-          title: "Tips",
+        this.$bvToast.toast(this.$t(tip.outOfCap), {
+          title: this.$t('tip.tips'),
           autoHideDelay: 5000,
           variant: "warning", // info success danger
         });
         return false;
       }
-
-      if (this.balance.lte(new BN(amount))) {
-        this.$bvToast.toast("Insufficient Balance", {
-          title: "Tips",
+      if (this.balance.lte(new BN(amount).mul(new BN(10).pow(this.decimal)))) {
+        this.$bvToast.toast(this.$t('tip.insufficientBalance'), {
+          title: this.$t('tip.tips'),
           autoHideDelay: 5000,
           variant: "warning", // info success danger
         });
@@ -169,7 +168,7 @@ export default {
       } catch (e) {
         console.log("eee", e);
         this.$bvToast.toast(e.message, {
-          title: "Error",
+          title: this.$t('tip.error'),
           autoHideDelay: 5000,
           variant: "danger",
         });
@@ -227,5 +226,8 @@ export default {
     display: inline-block;
     min-width: 5rem;
   }
+}
+.label{
+  text-align: left;
 }
 </style>

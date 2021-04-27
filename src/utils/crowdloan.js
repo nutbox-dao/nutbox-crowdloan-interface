@@ -13,6 +13,8 @@ import {
 } from "../config"
 import store from "../store"
 
+import { $t } from '../i18n'
+
 import {
   getApi,
   uni2Token,
@@ -221,7 +223,7 @@ export const withdraw = async (paraId, toast, isInblockCallback) => {
             errMsg = dispatchError.toString()
           }
           toast(errMsg, {
-            title: 'Error',
+            title: $t('tip.error'),
             variant: 'danger'
           })
           unsub()
@@ -231,23 +233,23 @@ export const withdraw = async (paraId, toast, isInblockCallback) => {
       if (status.isBroadcast) {
         if (isInblockCallback) isInblockCallback()
         setTimeout(() => {
-          toast("Transaction Is Broadcasting.", {
-            title: 'Info',
-            autoHideDelay: 8000,
+          toast($t('transaction.broadcasting'), {
+            title: $t('tip.tips'),
+            autoHideDelay: 5000,
             variant: 'warning'
           })
         }, 700);
       } else if (status.isInBlock) {
         console.log("Transaction included at blockHash.", status.asInBlock.toJSON());
-        toast("Transaction In Block!", {
-          title: 'Info',
-          autoHideDelay: 10000,
+        toast($t('transaction.inBlock'), {
+          title: $t('tip.tips'),
+          autoHideDelay: 6000,
           variant: 'warning'
         })
       } else if (status.isFinalized) {
         unsub()
-        toast("Withdraw Success!", {
-          title: "Success",
+        toast($t('transaction.withdrawOk'), {
+          title: $t('tip.success'),
           autoHideDelay: 5000,
           variant: "success",
         });
@@ -272,7 +274,7 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
     const api = await injectAccount(store.state.account)
     const decimal = await getDecimal()
     paraId = api.createType('Compact<u32>', paraId)
-    amount = api.createType('Compact<BalanceOf>', new BN(amount * 1e4).mul(new BN(10).pow(decimal.sub(new BN(4)))))
+    amount = api.createType('Compact<BalanceOf>', new BN(amount * 1e6).mul(new BN(10).pow(decimal.sub(new BN(6)))))
     const nonce = (await api.query.system.account(from)).nonce.toNumber()
     const contributeTx = api.tx.crowdloan.contribute(paraId, amount, null)
     const memo = {
@@ -311,7 +313,7 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
               errMsg = dispatchError.toString()
             }
             toast(errMsg, {
-              title: 'Error',
+              title: $t('tip.error'),
               variant: 'danger'
             })
             unsubContribution()
@@ -321,9 +323,9 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
         if (status.isBroadcast) {
           if (inBlockCallback) inBlockCallback()
           setTimeout(() => {
-            toast("Transaction Is Broadcasting.", {
-              title: 'Info',
-              autoHideDelay: 8000,
+            toast($t('transaction.broadcasting'), {
+              title: $t('tip.tips'),
+              autoHideDelay: 5000,
               variant: 'warning'
             })
           }, 700);
@@ -337,22 +339,25 @@ export const contribute = async (paraId, amount, communityId, childId, trieIndex
             nominatorId: childId
           });
           // upload to daemon
-          postContribution({
-            relaychain: store.state.symbol.toLowerCase(),
-            blockHash: contriHash,
-            communityId: communityId,
-            nominatorId: childId
-          })
-          toast("Transaction In Block!", {
-            title: 'Info',
-            autoHideDelay: 10000,
+          try{
+            postContribution({
+              relaychain: store.state.symbol.toLowerCase(),
+              blockHash: contriHash,
+              communityId: communityId,
+              nominatorId: childId
+            })
+          }catch(e){
+            console.error('Upload to daemon fail', e);
+          }
+          toast($t('transaction.inBlock'), {
+            title: $t('tip.tips'),
+            autoHideDelay: 6000,
             variant: 'warning'
           })
-
         } else if (status.isFinalized) {
           unsubContribution()
-          toast("Contribution Success!", {
-            title: "Info",
+          toast($t('transaction.contributeOk'), {
+            title: $t('tip.tips'),
             autoHideDelay: 5000,
             variant: "success",
           });
