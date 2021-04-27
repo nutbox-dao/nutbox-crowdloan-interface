@@ -81,7 +81,7 @@ export default {
       } else if (uni >= 1e16) {
         uni = uni.div(new BN(1e12));
         unit = " T";
-      } else if (uni >= 1e12) {
+      } else if (uni >= 1e13) {
         uni = uni.div(new BN(1e9));
         unit = " B";
       } else if (uni >= 1e10) {
