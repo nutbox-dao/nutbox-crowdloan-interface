@@ -23,6 +23,18 @@
                     <img src="~@/static/images/logo.png" alt="" class="logo-brand"
                          @click="selectMenu(0, '/')">
                   </div>
+                  <div class="v-menu-item flex-start-center" v-for="(item,index) of (allAccounts ? allAccounts : [])" :key="index+1000" @click="changeAccount(item)">
+                    <template>
+                          <div class="flex-between-center">
+                            <Identicon class="ident-icon" :size='26' theme='polkadot' :value="item.address"/>
+                            <div class="account-info">
+                              <div class="font-bold" style="text-align:left">{{ item.meta?item.meta.name:'' }}</div>
+                              <div>{{ formatUserAddress(item.address, false) }}</div>
+                            </div>
+                            <img class="ml-3" v-if="item.address===(account && account.address)" src="~@/static/images/selected.png" alt="">
+                          </div>
+                        </template>
+                  </div>
                   <div class="v-menu-item flex-start-center" v-for="item,idx of vMenuOptions" :key="idx"
                        @click="selectMenu(item.id, item.url)">
                     <div class="v-menu-line" :class="item.id === activeNav?'active':''"></div>
@@ -74,7 +86,7 @@
                         </div>
                       </b-dropdown-item>
                       <b-dropdown-item>
-                        <div class="flex-start-center" @click="selectMenu('dashboard', '/dashboard')" v-if="commnunityIds.indexOf(account && account.address) !== -1">
+                        <div class="flex-start-center" @click="selectMenu('dashboard', '/dashboard')" v-if="isCommunityAdmin">
                           <!-- <b-avatar square size="sm" class="mr-2" style="opacity: .2">·</b-avatar> -->
                           <img class="menu-icon" :src="dashboardIcon" alt="">
                           <span class="menu-text">{{ $t('account.dashboard') }}</span>
@@ -142,13 +154,24 @@ export default {
         return item.v
       })
     },
+    isCommunityAdmin () {
+      return this.commnunityIds.indexOf(this.account && this.account.address) !== -1
+    },
     menuOptions () {
-      return [
+      return this.isCommunityAdmin ? [
         { id: 'home', url: '/', label: this.$t('homePage.home'), h: true, v: false },
         { id: 'kusama', url: '/kusama', label: 'Kusuma ' + this.$t('homePage.crowdloan'), h: true, v: true },
         { id: 'polkadot', url: '/polkadot', label: 'Polkadot ' + this.$t('homePage.crowdloan'), h: true, v: true },
         { id: 'contributions', url: '/contributions', label: this.$t('account.contributions'), h: false, v: true },
         { id: 'dashboard', url: '/dashboard', label: this.$t('account.dashboard'), h: false, v: true },
+        { id: 'en', url: 'en', label: "English", h: false, v: true },
+        { id: 'zh', url: 'zh-CN', label: "中文", h: false, v: true }
+      ] : [
+        { id: 'home', url: '/', label: this.$t('homePage.home'), h: true, v: false },
+        { id: 'kusama', url: '/kusama', label: 'Kusuma ' + this.$t('homePage.crowdloan'), h: true, v: true },
+        { id: 'polkadot', url: '/polkadot', label: 'Polkadot ' + this.$t('homePage.crowdloan'), h: true, v: true },
+        { id: 'contributions', url: '/contributions', label: this.$t('account.contributions'), h: false, v: true },
+        // { id: 'dashboard', url: '/dashboard', label: this.$t('account.dashboard'), h: false, v: true },
         { id: 'en', url: 'en', label: "English", h: false, v: true },
         { id: 'zh', url: 'zh-CN', label: "中文", h: false, v: true }
       ];
@@ -221,12 +244,18 @@ export default {
       this.activeNav = id
       this.$router.push(url)
     },
-    formatUserAddress (address) {
+    formatUserAddress (address, long=true) {
       if (!address) return 'Loading Account'
-      if (address.length < 16) return address
-      const start = address.slice(0, 28)
-      const end = address.slice(-5)
-      return `${start}...`
+      if (long){
+        if (address.length < 16) return address
+        const start = address.slice(0, 28)
+        const end = address.slice(-5)
+        return `${start}...`
+      }else{
+        const start = address.slice(0, 6)
+        const end = address.slice(-6)
+        return `${start}...${end}`
+      }
     },
     showError (err) {
       this.$bvToast.toast(err, {
