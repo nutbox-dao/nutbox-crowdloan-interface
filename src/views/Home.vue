@@ -29,10 +29,8 @@
             <template>
               <div class="row">
                 <div class="col-md-7">
-                  <div class="font40 font-bold text-black" style="line-height: 2.2rem">The Scalable, Multichain <br>
-                    Network for Radical Innovation.</div>
-                  <p class="text-grey font14">Unprecedented interoperability and scalability for blockchain developers
-                    who want to quickly push the limits of what’s possible.</p>
+                  <div class="font40 font-bold text-black" style="line-height: 2.2rem">A decentralized platform to help people contribute the projects' crowdloan.</div>
+                  <p class="text-grey font14">Of the crowd, by the crowd, for the crowd.</p>
                 </div>
               </div>
             </template>
@@ -51,7 +49,7 @@
           <div class="crowd-select card-2">
             <img src="~@/static/images/polkadot-logo.png" alt="">
             <div class="font28 font-bold mt-2 mb-4">{{ 'Polkadot ' + $t('homePage.crowdloan') }}</div>
-            <button class="primary-btn">{{ $t('homePage.enter') }}</button>
+            <button :disabled="true" class="primary-btn">{{ $t('homePage.Pending') }}</button>
           </div>
         </div>
       </div>

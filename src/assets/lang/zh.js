@@ -3,7 +3,8 @@ module.exports = {
     homePage: {
         home: "主页",
         crowdloan:"众贷",
-        enter:"进入"
+        enter:"进入",
+        Pending: "敬请期待"
     },
     account: {
         dashboard: "仪表盘",

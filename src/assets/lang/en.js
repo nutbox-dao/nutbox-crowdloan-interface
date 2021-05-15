@@ -3,7 +3,8 @@ module.exports = {
     homePage: {
         home: "Home",
         crowdloan:"Crowdloan",
-        enter:"Enter"
+        enter:"Enter",
+        Pending: "Coming Soon"
     },
     account: {
         dashboard: "Dashboard",
