@@ -160,7 +160,7 @@ export default {
     menuOptions () {
       return this.isCommunityAdmin ? [
         { id: 'home', url: '/', label: this.$t('homePage.home'), h: true, v: false },
-        { id: 'kusama', url: '/kusama', label: 'Kusuma ' + this.$t('homePage.crowdloan'), h: true, v: true },
+        { id: 'kusama', url: '/kusama', label: 'Kusama ' + this.$t('homePage.crowdloan'), h: true, v: true },
         { id: 'polkadot', url: '/polkadot', label: 'Polkadot ' + this.$t('homePage.crowdloan'), h: true, v: true },
         { id: 'contributions', url: '/contributions', label: this.$t('account.contributions'), h: false, v: true },
         { id: 'dashboard', url: '/dashboard', label: this.$t('account.dashboard'), h: false, v: true },
@@ -168,7 +168,7 @@ export default {
         { id: 'zh', url: 'zh-CN', label: "中文", h: false, v: true }
       ] : [
         { id: 'home', url: '/', label: this.$t('homePage.home'), h: true, v: false },
-        { id: 'kusama', url: '/kusama', label: 'Kusuma ' + this.$t('homePage.crowdloan'), h: true, v: true },
+        { id: 'kusama', url: '/kusama', label: 'Kusama ' + this.$t('homePage.crowdloan'), h: true, v: true },
         { id: 'polkadot', url: '/polkadot', label: 'Polkadot ' + this.$t('homePage.crowdloan'), h: true, v: true },
         { id: 'contributions', url: '/contributions', label: this.$t('account.contributions'), h: false, v: true },
         // { id: 'dashboard', url: '/dashboard', label: this.$t('account.dashboard'), h: false, v: true },
