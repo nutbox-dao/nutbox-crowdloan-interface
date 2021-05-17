@@ -49,7 +49,8 @@ export const subscribeFundInfo = async (crowdloanCard) => {
   let unsubFund = store.getters.getSubFund()
   if (unsubFund) return;
   store.commit('saveLoadingFunds', true)
-  const paraId = crowdloanCard.map(c => parseInt(c.para.paraId))
+  let paraId = crowdloanCard.map(c => parseInt(c.para.paraId))
+  paraId = [...new Set(paraId)] 
   const api = await getApi()
   try {
     unsubFund = (await api.query.crowdloan.funds.multi(paraId, async (unwrapedFunds) => {
@@ -62,6 +63,7 @@ export const subscribeFundInfo = async (crowdloanCard) => {
         if (!fund.toJSON()) {
           continue
         }
+        console.log('fund',fund.toJSON());
         const unwrapedFund = fund.unwrap()
         const {
           deposit,
