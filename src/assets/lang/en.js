@@ -24,7 +24,7 @@ module.exports = {
         optional: "(optional)",
         completed: "Completed"
     },
-    dashborad: {
+    dashboard: {
         export: "Export"
     },
     tip: {

@@ -32,7 +32,7 @@ import {
   subscribeFundInfo
 } from "../../utils/crowdloan";
 import { subBlock } from "../../utils/block"
-import { mapMutations, mapState, mapGetters } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import TipContribute from "../../components/TipBoxes/TipContribute";
 import TipWithdraw from "../../components/TipBoxes/TipWithdraw";
 import { getOnshowingCrowdloanCard } from "../../apis/api"
@@ -45,7 +45,7 @@ export default {
     TipWithdraw,
   },
   computed: {
-    ...mapState(["projectFundInfos", "symbol", "loadingFunds", 'balance']),
+    ...mapState(["projectFundInfos", "symbol", "loadingFunds"]),
     funds() {
       const fundInfos = this.getFundInfos();
       return fundInfos || [];
@@ -53,11 +53,6 @@ export default {
   },
   methods: {
     ...mapGetters(["getFundInfos", "paraIds", "showingCard"]),
-    ...mapMutations([
-      "saveProjectStatus",
-      "saveProjectName",
-      "saveCommunityName",
-    ]),
   },
   async created() {
     this.$store.commit("saveSymbol", "ROCOCO");
